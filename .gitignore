@@ -1,14 +1,38 @@
-# Environment variables & Secret Keys (PENTING: Jangan sampai ter-commit)
+# Environment variables & Secret Keys
 .env
 *.env
 .env.local
 .env.*.local
 
-# Temporary OCR pages
+# Temporary OCR & Raw Booklet PDF
+*.pdf
+[AIC]*
 page_*.png
 ocr_temp/
+ocr.ps1
+*ocr*.txt
+*booklet*.txt
+pdf_extracted.txt
 
-# Python
+# Scratch conversion & generation scripts
+convert_*.py
+create_docx.py
+generate_*.py
+update_*.py
+scratch_diagrams/
+~$*.docx
+*.tmp
+*.bak
+
+# Other competition ideation drafts (non-EchoFactory)
+SAVED_IDEA_*
+PITCHDECK_AIC_*
+IDEATION_GUIDE_*
+Ideation Pitchdeck*
+EchoFactory_Diagrams_Backup.docx
+EchoFactory_System_Architecture_and_Workflow_V2.docx
+
+# Python & Jupyter
 __pycache__/
 *.py[cod]
 *$py.class
@@ -17,31 +41,8 @@ __pycache__/
 env/
 venv/
 .venv/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Jupyter Notebook checkpoints
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
-
-# Temporary files & Word temporary lock files
-~$*.docx
-*.tmp
-*.bak
-scratch_diagrams/
 
 # IDE & OS
 .vscode/
