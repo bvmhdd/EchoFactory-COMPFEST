@@ -1,0 +1,137 @@
+7.6s	1	0.00s - Debugger warning: It seems that frozen modules are being used, which may
+7.6s	2	0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+7.6s	3	0.00s - to python to disable frozen modules.
+7.6s	4	0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+8.3s	5	0.00s - Debugger warning: It seems that frozen modules are being used, which may
+8.3s	6	0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+8.3s	7	0.00s - to python to disable frozen modules.
+8.3s	8	0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+17.6s	9	Device: cuda
+17.6s	10	Model: /kaggle/input/notebooks/muhammadmuhibin/echofac7/stgram_mfn_fan_v3.pt | Exists: True
+17.6s	11	Features DIR: /kaggle/input/notebooks/muhammadmuhibin/echofac6/features_v3
+17.6s	12	Normal exists: True
+17.6s	13	Abnormal exists: True
+17.6s	14	Model classes defined (inference mode)
+17.6s	15	Utility functions defined
+17.8s	16	Model loaded | n_classes=4, embed_dim=128
+17.8s	17	Best training loss: 0.0000
+18.3s	18	Model loaded successfully
+18.3s	19	
+18.3s	20	Extracting embeddings...
+27.7s	21	Normal embs:   (4075, 128) | Labels: [0 1 2 3]
+27.7s	22	Abnormal embs: (1475, 128)
+27.7s	23	y_true: 4075 normal + 1475 abnormal
+27.9s	24	=== KNN Optimal K Search (k=1..50) ===
+195.7s	25	Best KNN: k=1 | AUC=1.0000
+195.7s	26	Top 5 k values:
+195.7s	27	  k= 1: AUC=1.0000
+195.7s	28	  k= 2: AUC=0.9703
+195.7s	29	  k= 3: AUC=0.9494
+195.7s	30	  k= 4: AUC=0.9366
+195.7s	31	  k= 5: AUC=0.9280
+195.9s	32	=== OCSVM Optimal Nu Search ===
+198.5s	33	  nu=0.005: AUC=0.8682
+200.9s	34	  nu=0.010: AUC=0.8683
+203.6s	35	  nu=0.020: AUC=0.8689
+205.9s	36	  nu=0.050: AUC=0.8596
+208.6s	37	  nu=0.080: AUC=0.8574
+211.1s	38	  nu=0.100: AUC=0.8566
+213.8s	39	  nu=0.150: AUC=0.8555
+216.4s	40	  nu=0.200: AUC=0.8531
+216.4s	41	Best OCSVM: nu=0.02 | AUC=0.8689
+216.6s	42	=== LOF Scoring ===
+224.5s	43	  LOF k=5: AUC=0.8951
+232.4s	44	  LOF k=10: AUC=0.8802
+240.3s	45	  LOF k=15: AUC=0.8715
+248.3s	46	  LOF k=20: AUC=0.8651
+256.1s	47	  LOF k=30: AUC=0.8561
+256.1s	48	Best LOF AUC=0.8951
+256.1s	49	=== Ensemble Scoring ===
+256.1s	50	  KNN-k1              : AUC=1.0000
+256.1s	51	  OCSVM-nu0.02        : AUC=0.8689
+256.1s	52	  LOF-best            : AUC=0.8951
+256.1s	53	
+256.1s	54	[ENSEMBLE]  AUC=0.9614 | pAUC=0.9068
+256.1s	55	
+256.1s	56	=== HASIL TERBAIK: [KNN-k1] ===
+256.1s	57	  AUC  = 1.0000
+256.1s	58	  pAUC = 1.0000
+257.1s	59	
+257.1s	60	=======================================================
+257.1s	61	FINAL RESULT — FAN v3 (KNN-k1)
+257.1s	62	=======================================================
+257.1s	63	  AUC          : 1.0000
+257.1s	64	  pAUC (FPR<10%): 1.0000
+257.1s	65	  Threshold    : 0.0000
+257.1s	66	  Normal score : mean=0.0000, std=0.0000
+257.1s	67	  Anomaly score: mean=0.3038, std=0.4848
+257.1s	68	  Separability : 0.627
+257.1s	69	=======================================================
+260.3s	70	[?25l   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/722.0 kB[0m [31m?[0m eta [36m-:--:--[0m
+[2K   [91m━━━━━━━━━━━━━━━[0m[91m╸[0m[90m━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m286.7/722.0 kB[0m [31m8.9 MB/s[0m eta [36m0:00:01[0m
+[2K   [91m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m[91m╸[0m [32m716.8/722.0 kB[0m [31m14.0 MB/s[0m eta [36m0:00:01[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m722.0/722.0 kB[0m [31m9.9 MB/s[0m eta [36m0:00:00[0m
+260.3s	71	[?25h[?25l   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m0.0/185.8 kB[0m [31m?[0m eta [36m-:--:--[0m
+[2K   [90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m [32m185.8/185.8 kB[0m [31m13.4 MB/s[0m eta [36m0:00:00[0m
+267.0s	72	W0812 18:27:56.165000 22 torch/onnx/_internal/exporter/_compat.py:125] Setting ONNX exporter to use operator set version 18 because the requested opset_version 17 is a lower version than we have implementations for. Automatic version conversion will be performed, which may not be successful at converting to the requested version. If version conversion is unsuccessful, the opset version of the exported model will be kept at 18. Please consider setting opset_version >=18 to leverage latest ONNX features
+267.0s	73	
+267.0s	74	W0812 18:27:56.165000 22 torch/onnx/_internal/exporter/_compat.py:125] Setting ONNX exporter to use operator set version 18 because the requested opset_version 17 is a lower version than we have implementations for. Automatic version conversion will be performed, which may not be successful at converting to the requested version. If version conversion is unsuccessful, the opset version of the exported model will be kept at 18. Please consider setting opset_version >=18 to leverage latest ONNX features
+268.0s	75	[?25h[torch.onnx] Obtain model graph for `STgramMFN([...]` with `torch.export.export(..., strict=False)`...
+273.0s	76	[torch.onnx] Obtain model graph for `STgramMFN([...]` with `torch.export.export(..., strict=False)`... ✅
+273.0s	77	[torch.onnx] Run decomposition...
+274.2s	78	/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+274.2s	79	  return cls.__new__(cls, *args)
+274.2s	80	
+274.2s	81	/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+274.2s	82	  return cls.__new__(cls, *args)
+274.3s	83	The model version conversion is not supported by the onnxscript version converter and fallback is enabled. The model will be converted using the onnx C API (target version: 17).
+274.3s	84	
+274.3s	85	The model version conversion is not supported by the onnxscript version converter and fallback is enabled. The model will be converted using the onnx C API (target version: 17).
+274.3s	86	Failed to convert the model to the target version 17 using the ONNX C API. The model was not modified
+274.3s	87	Traceback (most recent call last):
+274.3s	88	  File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/__init__.py", line 137, in call
+274.3s	89	    converted_proto = _c_api_utils.call_onnx_api(
+274.3s	90	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+274.3s	91	  File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/_c_api_utils.py", line 65, in call_onnx_api
+274.3s	92	    result = func(proto)
+274.3s	93	             ^^^^^^^^^^^
+274.3s	94	  File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/__init__.py", line 132, in _partial_convert_version
+274.3s	95	    return onnx.version_converter.convert_version(
+274.3s	96	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+274.3s	97	  File "/usr/local/lib/python3.12/dist-packages/onnx/version_converter.py", line 39, in convert_version
+274.3s	98	    converted_model_str = C.convert_version(model_str, target_version)
+274.3s	99	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+274.3s	100	RuntimeError: /project/onnx/version_converter/adapters/axes_input_to_attribute.h:56: adapt: Assertion `node->hasAttribute(kaxes)` failed: No initializer or constant input to node found
+274.3s	101	
+274.3s	102	Failed to convert the model to the target version 17 using the ONNX C API. The model was not modified
+274.3s	103	Traceback (most recent call last):
+274.3s	104	  File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/__init__.py", line 137, in call
+274.3s	105	    converted_proto = _c_api_utils.call_onnx_api(
+274.3s	106	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+274.3s	107	  File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/_c_api_utils.py", line 65, in call_onnx_api
+274.3s	108	    result = func(proto)
+274.3s	109	             ^^^^^^^^^^^
+274.3s	110	  File "/usr/local/lib/python3.12/dist-packages/onnxscript/version_converter/__init__.py", line 132, in _partial_convert_version
+274.3s	111	    return onnx.version_converter.convert_version(
+274.3s	112	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+274.3s	113	  File "/usr/local/lib/python3.12/dist-packages/onnx/version_converter.py", line 39, in convert_version
+274.3s	114	    converted_model_str = C.convert_version(model_str, target_version)
+274.3s	115	                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+274.3s	116	RuntimeError: /project/onnx/version_converter/adapters/axes_input_to_attribute.h:56: adapt: Assertion `node->hasAttribute(kaxes)` failed: No initializer or constant input to node found
+274.4s	117	[torch.onnx] Run decomposition... ✅
+274.4s	118	[torch.onnx] Translate the graph into ONNX...
+274.4s	119	[torch.onnx] Translate the graph into ONNX... ✅
+274.8s	120	ONNX exported: /kaggle/working/stgram_mfn_fan_v3.onnx
+274.8s	121	Inference config saved.
+274.8s	122	
+274.8s	123	🎯 FINAL: FAN AUC = 1.0000 | pAUC = 1.0000
+280.2s	124	/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\|'
+280.2s	125	  cells[i][c] = re.sub('\\\\\|', '|', cell)
+280.4s	126	/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\_'
+280.4s	127	  text = re.sub(r'_', '\_', text) # Escape underscores in display text
+281.0s	128	[NbConvertApp] Converting notebook __notebook__.ipynb to notebook
+281.4s	129	[NbConvertApp] Writing 107862 bytes to __notebook__.ipynb
+283.8s	130	[NbConvertApp] Converting notebook __notebook__.ipynb to html
+284.8s	131	[NbConvertApp] Support files will be in __results___files/
+284.8s	132	[NbConvertApp] Making directory __results___files
+284.8s	133	[NbConvertApp] Writing 381328 bytes to __results__.html

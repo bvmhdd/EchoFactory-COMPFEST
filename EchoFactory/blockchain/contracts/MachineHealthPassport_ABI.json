@@ -1,0 +1,138 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "string", "name": "machineId", "type": "string" },
+      { "indexed": false, "internalType": "bytes32", "name": "baselineHash", "type": "bytes32" },
+      { "indexed": true, "internalType": "address", "name": "owner", "type": "address" }
+    ],
+    "name": "MachineRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "string", "name": "machineId", "type": "string" },
+      { "indexed": true, "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "anomalyScore", "type": "uint256" },
+      { "indexed": false, "internalType": "string", "name": "status", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "defectType", "type": "string" },
+      { "indexed": false, "internalType": "bytes32", "name": "dataHash", "type": "bytes32" },
+      { "indexed": true, "internalType": "address", "name": "inspector", "type": "address" }
+    ],
+    "name": "InspectionLogged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "claimId", "type": "uint256" },
+      { "indexed": true, "internalType": "string", "name": "machineId", "type": "string" },
+      { "indexed": false, "internalType": "bool", "name": "isApproved", "type": "bool" },
+      { "indexed": false, "internalType": "string", "name": "note", "type": "string" }
+    ],
+    "name": "WarrantyClaimFiled",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_machineId", "type": "string" },
+      { "internalType": "string", "name": "_modelType", "type": "string" },
+      { "internalType": "uint256", "name": "_ratedRPM", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_baselineHash", "type": "bytes32" }
+    ],
+    "name": "registerMachine",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_machineId", "type": "string" },
+      { "internalType": "uint256", "name": "_anomalyScore", "type": "uint256" },
+      { "internalType": "string", "name": "_status", "type": "string" },
+      { "internalType": "string", "name": "_defectType", "type": "string" },
+      { "internalType": "string", "name": "_ipfsMetadata", "type": "string" },
+      { "internalType": "bytes32", "name": "_dataHash", "type": "bytes32" }
+    ],
+    "name": "recordInspection",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_machineId", "type": "string" },
+      { "internalType": "string", "name": "_defectDescription", "type": "string" }
+    ],
+    "name": "fileWarrantyClaim",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" },
+      { "internalType": "bool", "name": "", "type": "bool" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "_machineId", "type": "string" }],
+    "name": "getMachineHistory",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+          { "internalType": "uint256", "name": "anomalyScore", "type": "uint256" },
+          { "internalType": "string", "name": "status", "type": "string" },
+          { "internalType": "string", "name": "defectType", "type": "string" },
+          { "internalType": "string", "name": "ipfsMetadata", "type": "string" },
+          { "internalType": "bytes32", "name": "dataHash", "type": "bytes32" },
+          { "internalType": "address", "name": "inspector", "type": "address" }
+        ],
+        "internalType": "struct MachineHealthPassport.InspectionRecord[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "_machineId", "type": "string" }],
+    "name": "getLatestRecord",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+          { "internalType": "uint256", "name": "anomalyScore", "type": "uint256" },
+          { "internalType": "string", "name": "status", "type": "string" },
+          { "internalType": "string", "name": "defectType", "type": "string" },
+          { "internalType": "string", "name": "ipfsMetadata", "type": "string" },
+          { "internalType": "bytes32", "name": "dataHash", "type": "bytes32" },
+          { "internalType": "address", "name": "inspector", "type": "address" }
+        ],
+        "internalType": "struct MachineHealthPassport.InspectionRecord",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "_machineId", "type": "string" }],
+    "name": "getTotalInspections",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_machineId", "type": "string" },
+      { "internalType": "uint256", "name": "_index", "type": "uint256" },
+      { "internalType": "bytes32", "name": "_expectedHash", "type": "bytes32" }
+    ],
+    "name": "verifyDataIntegrity",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
