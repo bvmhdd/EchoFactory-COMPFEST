@@ -55,11 +55,16 @@ class BlockchainService:
         self.account = None
         self.contract = None
 
-        if self.private_key and self.private_key.startswith("0x") and len(self.private_key) == 66:
-            try:
-                self.account = self.w3.eth.account.from_key(self.private_key)
-            except Exception as ex:
-                print(f"[WARN] Inisialisasi wallet gagal: {ex}")
+        if self.private_key:
+            pk = self.private_key.strip()
+            if not pk.startswith("0x") and len(pk) == 64:
+                pk = "0x" + pk
+            if pk.startswith("0x") and len(pk) == 66:
+                try:
+                    self.account = self.w3.eth.account.from_key(pk)
+                    self.private_key = pk
+                except Exception as ex:
+                    print(f"[WARN] Inisialisasi wallet gagal: {ex}")
 
         if self.contract_address and self.w3.is_address(self.contract_address) and CONTRACT_ABI:
             try:
@@ -159,6 +164,24 @@ class BlockchainService:
             nonce = self.w3.eth.get_transaction_count(self.account.address)
             gas_price = self.w3.eth.gas_price
 
+            # 1. Estimasi gas dinamis presisi
+            try:
+                est_gas = self.contract.functions.recordInspection(
+                    machine_id,
+                    score_scaled,
+                    status,
+                    defect_type,
+                    ipfs_metadata,
+                    data_hash_bytes
+                ).estimate_gas({"from": self.account.address})
+                gas_limit = int(est_gas * 1.05) # Buffer hemat 5%
+            except Exception:
+                gas_limit = 225000 # Default pas
+
+            # 2. Gunakan gas price standar jaringan Polygon Amoy
+            priority_fee = self.w3.to_wei("25", "gwei")
+            max_fee = int(gas_price * 1.05) + priority_fee
+
             tx = self.contract.functions.recordInspection(
                 machine_id,
                 score_scaled,
@@ -169,9 +192,9 @@ class BlockchainService:
             ).build_transaction({
                 "from": self.account.address,
                 "nonce": nonce,
-                "gas": 250000,
-                "maxFeePerGas": int(gas_price * 1.35),
-                "maxPriorityFeePerGas": self.w3.to_wei("30", "gwei"),
+                "gas": gas_limit,
+                "maxFeePerGas": max_fee,
+                "maxPriorityFeePerGas": priority_fee,
                 "chainId": CHAIN_ID
             })
 
@@ -194,8 +217,10 @@ class BlockchainService:
         except Exception as err:
             return {
                 "status": "failed",
+                "machine_id": machine_id,
+                "data_hash": "0x" + data_hash_bytes.hex(),
                 "error": str(err),
-                "message": "Gagal mengirim transaksi ke Polygon Amoy."
+                "message": "Gagal mengirim transaksi on-chain (Saldo gas wallet kurang)."
             }
 
     def get_machine_history(self, machine_id: str) -> List[Dict[str, Any]]:
