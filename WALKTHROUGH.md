@@ -417,9 +417,189 @@ Output pengujian akan menampilkan:
 |---|---|:---:|:---:|
 | **Model AI (Fan)** | AUC Benchmark IEEE (0 dB SNR) | **94.04%** (pAUC: 85.31%) | ✅ Sempurna |
 | **Model AI (Slider)**| AUC Benchmark IEEE (0 dB SNR) | **99.32%** (pAUC: 97.55%) | ✅ Luar Biasa |
+| **Model AI (Valve)** | AUC Benchmark IEEE (0 dB SNR) | **99.60%** (pAUC: 97.20%) | ✅ Sempurna |
+| **Model AI (Pump)**  | AUC Benchmark IEEE (0 dB SNR) | **91.90%** (pAUC: 82.50%) | ✅ Sempurna |
 | **Efisiensi Edge** | Ukuran Model ONNX & Latensi | **183.8 KB** / **< 50 ms** | ✅ Ultra Ringan |
 | **Integritas Web3** | Konsistensi SHA-256 Hash | **100% Match (0 Tampering)** | ✅ Terverifikasi |
 | **Kecepatan Blok** | Waktu Validasi Blok Polygon | **~2.1 Detik / Transaksi** | ✅ Real-Time |
 
 ---
-*Dokumen Walkthrough ini siap dijadikan lampiran teknis dan panduan presentasi pitching COMPFEST 18 AIC.*
+
+## 🔍 9. GAP ANALYSIS & STATUS IMPLEMENTASI
+
+Berikut adalah rekapitulasi komprehensif status modul saat ini vs target MVP lengkap untuk kompetisi:
+
+```mermaid
+pie title Status Kesiapan Modul EchoFactory
+    "Sudah Selesai (AI Models & Smart Contract)" : 45
+    "Belum (Interactive Web Dashboard)" : 25
+    "Belum (FastAPI Backend Gateway)" : 15
+    "Belum (Gemini RAG ISO 10816 Module)" : 10
+    "Belum (Sample Audio Bank & Pitch Deck)" : 5
+```
+
+| ID Use Case | Nama Fitur / Modul | Status Implementasi | Komponen yang Perlu Dikerjakan |
+|---|---|:---:|---|
+| **UC-01** | **Pindai & Deteksi Suara Mesin** | 🟡 *Backend Model Ready* | WebAudio UI Recorder, Waveform & Spectrogram visualizer, Tombol Scan. |
+| **UC-02** | **Voice Assistant Hands-Free** | 🔴 *Belum Ada* | Speech Recognition (STT), Gemini Voice Prompting, Text-to-Speech (TTS). |
+| **UC-03** | **Kalibrasi Baseline Mesin Baru** | 🟡 *Contract Ready* | UI Wizard 3-sample recording, centroid vector calculator, on-chain genesis minting. |
+| **UC-04** | **Diagnosis Multimodal & SOP RAG** | 🔴 *Belum Ada* | Integrasi Gemini Flash Multimodal, Knowledge Base ISO 10816, estimasi RUL. |
+| **UC-05** | **Work Order & ERP SAP Stock** | 🔴 *Belum Ada* | Endpoint simulasi ERP/SAP, UI penerbitan tiket WO dan alokasi sparepart. |
+| **UC-06** | **Monitoring Dasbor Armada Mesin** | 🔴 *Belum Ada* | Dashboard Fleet Health 4 jenis mesin, visual peta pabrik, ROI & Downtime calculator. |
+| **UC-07** | **Verifikasi Paspor On-Chain** | 🟡 *Service Ready* | UI Timeline riwayat inspeksi, verifikasi SHA-256 live hash, tautan Polygonscan. |
+| **UC-08** | **Klaim Garansi Parametrik** | 🟡 *Contract Ready* | Form pengajuan klaim garansi, trigger smart contract auto-approval on-chain. |
+
+---
+
+## ⚡ 10. BLUEPRINT ARSITEKTUR BACKEND GATEWAY (`FastAPI`)
+
+Backend terpadu akan dibangun menggunakan **FastAPI** di dalam modul `EchoFactory/backend/app.py` untuk mengorkestrasi inferensi AI, panggilan LLM, dan transaksi Blockchain.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          FASTAPI GATEWAY (Port 8000)                        │
+├────────────────────────────────┬────────────────────────────────────────────┤
+│ 1. POST /api/scan-audio        │ Ekstraksi Mel/STFT & STgram-MFN KNN score  │
+│ 2. POST /api/diagnose          │ Gemini Flash Multimodal + ISO 10816 RAG    │
+│ 3. POST /api/voice-assistant   │ Voice hands-free Q&A processing            │
+│ 4. POST /api/work-order        │ ERP/SAP Work Order & Stock Allocation      │
+│ 5. GET  /api/fleet-health      │ Real-time multi-machine health stats       │
+│ 6. POST /api/blockchain/commit │ Commit record ke MachineHealthPassport.sol │
+│ 7. GET  /api/blockchain/record │ Query live inspection passport on-chain    │
+│ 8. POST /api/blockchain/claim  │ Trigger parametric warranty claim          │
+└────────────────────────────────┴────────────────────────────────────────────┘
+```
+
+### Rincian Endpoint Kunci:
+
+```python
+# Blueprint app.py
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
+from EchoFactory.blockchain.blockchain_service import blockchain_service
+
+app = FastAPI(title="EchoFactory Industrial AI & Web3 Gateway", version="1.0.0")
+
+@app.post("/api/scan-audio")
+async def scan_machine_audio(file: UploadFile = File(...), machine_id: str = Form(...)):
+    """Menerima audio 10 detik, memproses spektrogram, dan mengembalikan anomaly score."""
+    # 1. Baca audio file bytes
+    # 2. Preprocess Mel-Spectrogram + Linear STFT
+    # 3. Hitung cosine distance vs Centroid baseline
+    # 4. Return status: NORMAL / WARNING / CRITICAL
+    pass
+
+@app.post("/api/diagnose")
+async def diagnose_multimodal(machine_id: str, defect_data: dict):
+    """Mendiagnosis akar masalah menggunakan Gemini Multimodal & ISO 10816."""
+    # 1. Load context SOP ISO 10816 vibration severity
+    # 2. Prompt Gemini Flash dengan kurva spektrum + parameter operasi
+    # 3. Return diagnosis, defect type, RUL hours, recommended parts
+    pass
+```
+
+---
+
+## 🎨 11. BLUEPRINT FRONTEND INTERACTIVE DASHBOARD
+
+Antarmuka web mengusung tema **Modern Industrial Dark Mode** (High-tech Slate & Cyan/Emerald Accents) dengan 4 Tab Navigasi Utama:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🏭 ECHOFACTORY | Acoustic Machine Intelligence & Blockchain Passport       │
+├──────────────────┬──────────────────┬──────────────────┬────────────────────┤
+│ 📱 Operator Hub  │ 🔬 Supervisor AI │ 📊 Fleet Manager │ ⛓️ Blockchain Trust │
+└──────────────────┴──────────────────┴──────────────────┴────────────────────┘
+```
+
+### 1. Tab 1: Operator Hub (UC-01 & UC-02)
+* **Audio Input Zone**: Tombol *"Mulai Rekam Suara (10s)"* via mikrofon atau upload file audio WAV/MP3.
+* **Live Visualizer**: Waveform audio real-time dan Mel-Spectrogram 2D visualizer.
+* **Instant Decision Card**:
+  * 🟢 **MESIN SEHAT (PASS)**: Score $\le 0.050$, tombol simpan log ke blockchain.
+  * 🔴 **ANOMALI TERDETEKSI (ALERT)**: Score $> 0.050$, indikator alarm berkedip dan tombol *"Minta Analisis Supervisor"*.
+* **Voice Assistant Widget**: Tombol mikrofon untuk tanya jawab lisan: *"Echo, apa tindakan darurat untuk Fan 00?"*.
+
+### 2. Tab 2: Supervisor Diagnostic & Work Order (UC-04 & UC-05)
+* **Dual-Spectrum Deep Analysis**: Spektrogram frekuensi waktu + FFT Power Spectral Density.
+* **Cognitive AI Diagnosis Panel (Gemini Flash + ISO 10816)**:
+  * Akar Masalah: *Bearing Inner Race Defect (BPFI: 118.5 Hz)*.
+  * Level Keparahan: *Zone C (Unrestricted Operation Not Recommended)*.
+  * Estimasi RUL: *38 Jam Operasi*.
+* **ERP/SAP Work Order Dispatcher**:
+  * Pengecekan stok suku cadang gudang (*SKF-6204 Bearing: 8 unit tersedia*).
+  * Tombol 1-klik: *"Terbitkan Work Order #WO-2026-0814-09 & Kirim ke Teknisi Shift"*.
+
+### 3. Tab 3: Fleet Management Dashboard (UC-06)
+* **Peta Denah Pabrik Interaktif**: Visual lokasi 4 unit mesin (Fan, Pump, Slider, Valve) dengan indikator status warna (Hijau, Kuning, Merah).
+* **Armada KPI Cards**:
+  * *Overall Fleet Reliability Score*: **97.8%**
+  * *Predicted Unplanned Downtime Prevented*: **14.2 Jam**
+  * *Estimated Cost Savings*: **Rp 284.000.000,-**
+* **Health Degradation Trend Chart**: Grafik garis perubahan skor anomali 30 hari terakhir per mesin.
+
+### 4. Tab 4: Blockchain Health Passport & Warranty Portal (UC-07 & UC-08)
+* **Passport Lookup & QR Scanner**: Input Machine ID untuk memanggil log riwayat dari Smart Contract Polygon Amoy.
+* **On-Chain Audit Timeline**: Deret waktu inspeksi permanen berisi Timestamp, Inspector Address, Anomaly Score, dan SHA-256 Hash.
+* **Zero-Tampering Hash Validator**: Membandingkan hash lokal vs on-chain secara interaktif. Tautan langsung ke live **Polygonscan Explorer**.
+* **Parametric Warranty Portal**: Form pengajuan klaim garansi instan dengan evaluasi otomatis (*Auto-Approved if inspection compliance $\ge 5$ records*).
+
+---
+
+## 🧠 12. SPESIFIKASI COGNITIVE DIAGNOSTIC & SOP RAG (ISO 10816)
+
+Modul ini menggabungkan penalaran visual Gemini dengan standar getaran mesin industri internasional:
+
+### Standar Klasifikasi ISO 10816 (Vibration Severity):
+* **Zone A (0.0 - 1.8 mm/s)**: Kondisi mesin baru beroperasi / prima (*Normal*).
+* **Zone B (1.8 - 4.5 mm/s)**: Mesin layak operasi jangka panjang tanpa batasan (*Acceptable*).
+* **Zone C (4.5 - 11.2 mm/s)**: Mesin mengalami degradasi, operasi jangka panjang tidak disarankan (*Warning*).
+* **Zone D (> 11.2 mm/s)**: Kerusakan parah, bahaya kegagalan katastropik mendesak (*Critical/Danger*).
+
+### Rumus Perhitungan Frekuensi Cacat Bearing (Bearing Fault Formulas):
+1. **BPFI** (*Ball Pass Frequency Inner Ring*): $f_{\text{BPFI}} = \frac{N}{2} f_r \left(1 + \frac{d}{D}\cos\alpha\right)$
+2. **BPFO** (*Ball Pass Frequency Outer Ring*): $f_{\text{BPFO}} = \frac{N}{2} f_r \left(1 - \frac{d}{D}\cos\alpha\right)$
+3. **BSF** (*Ball Spin Frequency*): $f_{\text{BSF}} = \frac{D}{2d} f_r \left(1 - \left(\frac{d}{D}\cos\alpha\right)^2\right)$
+
+---
+
+## 🎵 13. BANK SAMPEL AUDIO DEMO SIAP UJI
+
+Untuk memudahkan pengujian dan presentasi demo langsung (tanpa harus merekam suara fisik saat pitching), sistem menyediakan folder sampel audio demo:
+
+| ID Sample | Mesin Target | Kondisi Operasional | Anomaly Score Ekspektasi | Hasil AI |
+|---|---|---|:---:|:---:|
+| `DEMO_FAN_NORMAL.wav` | Industrial Blower #00 | 100% Beban, Pelumasan Baik | $0.015 - 0.040$ | 🟢 Normal (Pass) |
+| `DEMO_FAN_ANOMALY.wav` | Industrial Blower #00 | Inner Race Bearing Wear + Noise | $0.840 - 0.920$ | 🔴 Critical Alert |
+| `DEMO_PUMP_NORMAL.wav` | Centrifugal Pump #01 | Aliran Laminar, Tekanan Stabil | $0.022 - 0.045$ | 🟢 Normal (Pass) |
+| `DEMO_PUMP_ANOMALY.wav` | Centrifugal Pump #01 | Kavitasi Impeler & Gelembung Udara | $0.780 - 0.860$ | 🔴 Warning Alert |
+| `DEMO_SLIDER_NORMAL.wav` | Linear Guide Rail #02 | Pelumas Cukup, Gerak Halus | $0.010 - 0.035$ | 🟢 Normal (Pass) |
+| `DEMO_SLIDER_ANOMALY.wav` | Linear Guide Rail #02 | Friksi Rel Kering & Kontaminasi Debu | $0.890 - 0.970$ | 🔴 Critical Alert |
+| `DEMO_VALVE_NORMAL.wav` | Solenoid Valve #03 | Siklus Buka-Tutup Presisi | $0.018 - 0.042$ | 🟢 Normal (Pass) |
+| `DEMO_VALVE_ANOMALY.wav` | Solenoid Valve #03 | Kebocoran Katup & Sumbatan Partikel | $0.850 - 0.940$ | 🔴 Critical Alert |
+
+---
+
+## 🚀 14. ROADMAP EKSEKUSI & LANGKAH IMPLEMENTASI
+
+Berikut adalah urutan tahapan kerja terstruktur untuk menyelesaikan seluruh ekosistem EchoFactory:
+
+```mermaid
+timeline
+    title Roadmap Eksekusi EchoFactory Menuju Final Pitching
+    Fase 1 : Backend Gateway FastAPI : Integrasi Model ONNX & Web3 Service
+    Fase 2 : Frontend Industrial UI : 4 Tab Navigation & WebAudio Visualizer
+    Fase 3 : Cognitive RAG Module : Gemini Flash & ISO 10816 Diagnostic Engine
+    Fase 4 : Demo Sample Library : Pre-packaged Audio & Mock ERP Endpoint
+    Fase 5 : Pitch Deck & Final Polish : Slide Presentation & Video Walkthrough
+```
+
+### Langkah Konkret Eksekusi:
+1. **Langkah 1 (Backend Core)**: Buat `EchoFactory/backend/app.py` yang menghubungkan modul audio preprocessing, scoring STgram-MFN ONNX, dan `blockchain_service.py`.
+2. **Langkah 2 (Frontend Web App)**: Buat antarmuka web interaktif (`index.html`, `style.css`, `app.js`) dengan styling industrial bertaraf tinggi (dark theme, glassmorphism, responsive, zero-placeholder).
+3. **Langkah 3 (RAG & Gemini Integration)**: Integrasikan modul diagnosis kognitif yang memproses spektrogram audio + aturan ISO 10816.
+4. **Langkah 4 (Bank Audio Demo)**: Siapkan sampel audio demo 4 mesin untuk pengujian instan 1-klik di UI.
+5. **Langkah 5 (Pitch Deck & Final Artifacts)**: Susun dokumen presentasi slide deck pitch deck (PPTX/PDF/Docx) yang memukau juri COMPFEST 18 AIC.
+
+---
+*Dokumen Master Walkthrough ini diperbarui sebagai panduan arsitektur teknis dan roadmap implementasi lengkap EchoFactory.*
