@@ -12,6 +12,29 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import gradio as gr
 
+# ---------------------------------------------------------------------------
+# FIX: gradio_client schema-generation bug ("TypeError: argument of type
+# 'bool' is not iterable"). This is triggered when a function's JSON schema
+# contains a boolean `additionalProperties` value (common with the
+# @spaces.GPU / ZeroGPU decorator) and gradio_client's get_type() tries to
+# do `"const" in schema` on that boolean instead of a dict. Patching it here
+# makes schema generation degrade gracefully instead of crashing the whole
+# Space at startup.
+# ---------------------------------------------------------------------------
+try:
+    import gradio_client.utils as _gc_utils
+
+    _original_get_type = _gc_utils.get_type
+
+    def _patched_get_type(schema):
+        if not isinstance(schema, dict):
+            return "Any"
+        return _original_get_type(schema)
+
+    _gc_utils.get_type = _patched_get_type
+except Exception as _patch_err:
+    print(f"[WARN] Could not apply gradio_client schema patch: {_patch_err}")
+
 # Hugging Face ZeroGPU Support
 try:
     import spaces
@@ -496,4 +519,8 @@ with gr.Blocks(title="EchoFactory - Industrial AI & Blockchain Passport", css=cu
     btn_submit_claim.click(submit_parametric_claim, inputs=[bc_machine_select, claim_reason_input], outputs=[claim_output_html])
 
 if __name__ == "__main__":
-    demo.queue().launch(show_api=False)
+    demo.queue().launch(
+        server_name="0.0.0.0",
+        server_port=7860,
+        show_api=False
+    )
