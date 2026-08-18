@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, RotateCcw, Volume2, Sparkles } from "lucide-react";
+import { Play, Pause, RotateCcw, Volume2, Sparkles, Zap } from "lucide-react";
 import { PresetSample, playSyntheticIndustrialSound } from "@/lib/audio-presets";
 
 interface SpectrogramProps {
@@ -176,8 +176,9 @@ export function SpectrogramCanvas({ sample, condition }: SpectrogramProps) {
 
           {/* Anomaly annotation tag on canvas */}
           {isAbnormal && (
-            <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-rose-500/90 text-white font-mono text-[9px] font-bold tracking-wide shadow-md">
-              ⚡ HIGH HARMONIC ANOMALY ENERGY
+            <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-rose-500/90 text-white font-mono text-[9px] font-semibold tracking-wide shadow-md flex items-center gap-1">
+              <Zap className="w-2.5 h-2.5 fill-white" />
+              <span>HIGH HARMONIC ENERGY SPIKE</span>
             </div>
           )}
         </div>

@@ -12,27 +12,47 @@ const config: Config = {
         background: "#000000",
         foreground: "#FFFFFF",
         surface: {
-          DEFAULT: "#0A0A0B",
-          card: "#111113",
+          DEFAULT: "#09090B",
+          card: "#0F0F12",
           alt: "#18181B",
-          hover: "#1F1F23",
-          border: "#2A2A2E",
-          subtle: "#1C1C1F",
+          hover: "#202024",
+          border: "#27272A",
+          subtle: "#141417",
         },
         muted: {
-          DEFAULT: "#8B8B93",
-          foreground: "#5C5C63",
+          DEFAULT: "#71717A",
+          foreground: "#52525B",
         },
+        accent: {
+          blue: "#38BDF8",
+          emerald: "#10B981",
+          amber: "#F59E0B",
+          rose: "#F43F5E",
+          purple: "#A855F7",
+        }
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "Inter", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        sans: [
+          "var(--font-sans)",
+          "Inter",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "'Segoe UI'",
+          "Roboto",
+          "sans-serif",
+        ],
+        mono: [
+          "var(--font-mono)",
+          "JetBrains Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "monospace",
+        ],
       },
       animation: {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "glow-fade": "glowFade 2s ease-in-out infinite alternate",
         "waveform": "waveform 1.2s ease-in-out infinite alternate",
-        "marquee-right": "marqueeRight 25s linear infinite",
       },
       keyframes: {
         glowFade: {
@@ -42,10 +62,6 @@ const config: Config = {
         waveform: {
           "0%": { height: "15%" },
           "100%": { height: "95%" },
-        },
-        marqueeRight: {
-          "0%": { transform: "translateX(-50%)" },
-          "100%": { transform: "translateX(0%)" },
         },
       },
     },

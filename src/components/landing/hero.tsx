@@ -1,7 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, ShieldCheck, Zap, ArrowUpRight, CheckCircle2, Cpu } from "lucide-react";
+import {
+  ChevronRight,
+  ShieldCheck,
+  Zap,
+  ArrowUpRight,
+  CheckCircle2,
+  Cpu,
+  Wind,
+  Droplet,
+  SlidersHorizontal,
+  Activity,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -61,29 +72,33 @@ export function Hero() {
       {/* Machine Preset Quick Tickers */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl w-full mb-16 text-left">
         {[
-          { icon: "🌀", title: "Fan Blower", score: "94.04% AUC", status: "Optimal" },
-          { icon: "⛽", title: "Pump Centrifugal", score: "91.90% AUC", status: "Optimal" },
-          { icon: "🎚️", title: "Slider Rail", score: "99.32% AUC", status: "Optimal" },
-          { icon: "🚰", title: "Solenoid Valve", score: "99.60% AUC", status: "Optimal" },
-        ].map((item, idx) => (
-          <div
-            key={idx}
-            className="p-3.5 rounded-xl bg-[#0A0A0B]/80 border border-[#2A2A2E] flex flex-col gap-1 hover:border-zinc-500 transition-colors"
-          >
-            <div className="flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5 font-medium text-white">
-                <span>{item.icon}</span> {item.title}
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          { icon: Wind, title: "Fan Blower", score: "94.04% AUC", status: "Optimal" },
+          { icon: Droplet, title: "Pump Centrifugal", score: "91.90% AUC", status: "Optimal" },
+          { icon: SlidersHorizontal, title: "Slider Rail", score: "99.32% AUC", status: "Optimal" },
+          { icon: Activity, title: "Solenoid Valve", score: "99.60% AUC", status: "Optimal" },
+        ].map((item, idx) => {
+          const IconComp = item.icon;
+          return (
+            <div
+              key={idx}
+              className="p-3.5 rounded-xl bg-[#09090B]/80 border border-[#27272A] flex flex-col gap-1 hover:border-zinc-500 transition-colors shadow-lg"
+            >
+              <div className="flex items-center justify-between text-xs text-zinc-400">
+                <span className="flex items-center gap-2 font-medium text-white">
+                  <IconComp className="w-3.5 h-3.5 text-sky-400" />
+                  <span>{item.title}</span>
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-xs font-mono text-zinc-300">{item.score}</span>
+                <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                  0 dB SNR
+                </span>
+              </div>
             </div>
-            <div className="flex items-center justify-between mt-1">
-              <span className="text-xs font-mono text-zinc-400">{item.score}</span>
-              <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                0 dB SNR
-              </span>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Social Proof / Ecosystem Bar with Smooth Infinite Right-Sliding Marquee */}

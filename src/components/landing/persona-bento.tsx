@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Wrench, BarChart3, ShieldCheck, ArrowUpRight, CheckCircle, FileText } from "lucide-react";
+import { Activity, Wrench, BarChart3, ShieldCheck, ArrowUpRight, CheckCircle, FileText, AlertTriangle } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -48,8 +48,8 @@ export function PersonaBento() {
               </div>
               <div className="flex items-center justify-between text-zinc-300">
                 <span>Visual Indicator:</span>
-                <span className="text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/30">
-                  🔴 ABNORMAL ALERT (Score: 0.887)
+                <span className="text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/30 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3 h-3 text-rose-400" /> ABNORMAL ALERT (Score: 0.887)
                 </span>
               </div>
               <div className="flex items-center justify-between text-zinc-300">
