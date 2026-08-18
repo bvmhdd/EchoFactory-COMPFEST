@@ -5,7 +5,7 @@ import { LivePreview } from "@/components/landing/live-preview";
 import { PersonaBento } from "@/components/landing/persona-bento";
 import { MachineShowcase } from "@/components/landing/machine-showcase";
 import { BlockchainPassport } from "@/components/landing/blockchain-passport";
-import { PricingSection } from "@/components/landing/pricing-section";
+import { TeamSection } from "@/components/landing/team-section";
 import { Testimonials } from "@/components/landing/testimonials";
 import { CtaSection } from "@/components/landing/cta-section";
 import { Footer } from "@/components/landing/footer";
@@ -21,7 +21,7 @@ export default function LandingPage() {
           <PersonaBento />
           <MachineShowcase />
           <BlockchainPassport />
-          <PricingSection />
+          <TeamSection />
           <Testimonials />
           <CtaSection />
         </main>

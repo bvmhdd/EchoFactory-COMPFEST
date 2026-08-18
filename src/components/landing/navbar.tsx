@@ -57,8 +57,8 @@ export function Navbar() {
           <a href="#blockchain" className="hover:text-white transition-colors">
             On-Chain Ledger
           </a>
-          <a href="#pricing" className="hover:text-white transition-colors">
-            Deployment
+          <a href="#team" className="hover:text-white transition-colors">
+            Our Team
           </a>
         </nav>
 
@@ -121,11 +121,11 @@ export function Navbar() {
             On-Chain Ledger
           </a>
           <a
-            href="#pricing"
+            href="#team"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-sm text-zinc-300 hover:text-white"
           >
-            Deployment
+            Our Team
           </a>
           <div className="pt-2 border-t border-[#2A2A2E]/60 flex flex-col gap-3">
             <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
