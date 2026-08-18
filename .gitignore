@@ -20,9 +20,8 @@ create_docx.py
 generate_*.py
 update_*.py
 scratch_diagrams/
-~$*.docx
-*.tmp
-*.bak
+# Temporary repo clones
+compfest_space_repo/
 
 # Other competition ideation drafts (non-EchoFactory)
 SAVED_IDEA_*

@@ -15,10 +15,16 @@ import gradio as gr
 from audio_engine import audio_engine
 from cognitive_engine import cognitive_engine, ERP_INVENTORY
 from blockchain_service import hf_blockchain_service
+from demo_samples_generator import generate_all_samples
 
-# Path Demo Samples
+# Path Demo Samples (Otomatis Dibuat saat Space Dijalankan)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEMO_DIR = os.path.join(BASE_DIR, "demo_samples")
+try:
+    if not os.path.exists(DEMO_DIR) or len(os.listdir(DEMO_DIR)) < 8:
+        generate_all_samples(DEMO_DIR)
+except Exception as ex:
+    print(f"[WARN] Auto-generating demo samples fallback: {ex}")
 
 # State Penyimpanan Diagnosis Terakhir
 CURRENT_SCAN_STATE = {
