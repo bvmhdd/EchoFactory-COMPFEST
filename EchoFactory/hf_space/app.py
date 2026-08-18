@@ -50,6 +50,36 @@ try:
 except Exception as _patch_err:
     print(f"[WARN] Could not apply gradio_client schema patch: {_patch_err}")
 
+# ---------------------------------------------------------------------------
+# FIX: Jinja2 LRU cache TypeError: unhashable type: 'dict'
+#
+# Root cause: Starlette >= 0.37 changed TemplateResponse's calling convention.
+# Gradio 4.44.0 may call templates.TemplateResponse(name, context_dict) in
+# a way that passes the context dict as the cache_key to Jinja2, crashing with
+# TypeError: unhashable type: 'dict' in jinja2/utils.py LRUCache.__getitem__.
+#
+# Fix: Patch Jinja2Templates.TemplateResponse to normalize argument order
+# and ensure the template name is always a string, never a dict.
+# ---------------------------------------------------------------------------
+try:
+    from starlette.templating import Jinja2Templates as _Jinja2Templates
+
+    _orig_template_response = _Jinja2Templates.TemplateResponse
+
+    def _safe_template_response(self, *args, **kwargs):
+        # If first positional arg is a dict (context), the args are likely swapped.
+        # Detect this and fix the order: (name:str, context:dict)
+        if args and isinstance(args[0], dict):
+            context = args[0]
+            name = args[1] if len(args) > 1 else kwargs.pop("name", "")
+            return _orig_template_response(self, name, context, **kwargs)
+        return _orig_template_response(self, *args, **kwargs)
+
+    _Jinja2Templates.TemplateResponse = _safe_template_response
+    print("[INFO] Jinja2Templates.TemplateResponse patch applied successfully.")
+except Exception as _jinja_patch_err:
+    print(f"[WARN] Could not apply Jinja2Templates patch: {_jinja_patch_err}")
+
 # Hugging Face ZeroGPU Support
 try:
     import spaces
