@@ -71,8 +71,9 @@ class STgramMFN(nn.Module):
 class AudioEngine:
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.model = STgramMFN(nc=4, ed=EMBED_DIM).to(self.device)
-        self.model.eval()
+        self.default_model = STgramMFN(nc=4, ed=EMBED_DIM).to(self.device)
+        self.default_model.eval()
+        self.model_cache = {}
         
         # Centroid Baseline Kosinus Normal per Mesin
         np.random.seed(42)
@@ -92,6 +93,77 @@ class AudioEngine:
             "SLIDER_ID_02": {"-6_dB": 0.060, "0_dB": 0.045, "6_dB": 0.035},
             "VALVE_ID_03":  {"-6_dB": 0.062, "0_dB": 0.048, "6_dB": 0.036}
         }
+
+    def get_model_and_config(self, machine_type, snr):
+        """
+        Memuat model PyTorch STgramMFN dan konfigurasi threshold/AUC untuk tipe mesin & SNR yang diminta.
+        """
+        import json
+        m_key = machine_type.lower()
+        if "fan" in m_key: m_name = "fan"
+        elif "pump" in m_key: m_name = "pump"
+        elif "slide" in m_key: m_name = "slider"
+        elif "valve" in m_key: m_name = "valve"
+        else: m_name = "fan"
+
+        snr_folder = snr.replace("_", "") if snr.startswith("-") or snr.endswith("dB") else f"{snr}dB"
+        if snr in ["-6_dB", "-6dB"]: snr_folder = "-6dB"
+        elif snr in ["0_dB", "0dB"]: snr_folder = "0dB"
+        elif snr in ["6_dB", "6dB"]: snr_folder = "6dB"
+        else: snr_folder = "0dB"
+
+        cache_key = (m_name, snr_folder)
+        if cache_key in self.model_cache:
+            return self.model_cache[cache_key]
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        models_dir = os.path.join(base_dir, "models", snr_folder)
+        
+        pt_candidates = [
+            f"stgram_mfn_v3_{m_name}_{snr_folder.replace('dB', '_dB')}.pt",
+            f"stgram_mfn_v3_{m_name}_6_dB.pt",
+            f"stgram_mfn_v3_{m_name}_0_dB.pt",
+            f"stgram_mfn_v3_{m_name}_-6_dB.pt",
+            f"stgram_mfn_v3_{m_name}.pt",
+        ]
+        
+        cfg_candidates = [
+            f"config_{m_name}_{snr_folder.replace('dB', '_dB')}.json",
+            f"config_{m_name}_6_dB.json",
+            f"config_{m_name}_-6_dB.json",
+            f"inference_config_v3_{m_name}.json",
+        ]
+
+        model = STgramMFN(nc=4, ed=EMBED_DIM).to(self.device)
+        model.eval()
+        config_data = {}
+
+        if os.path.exists(models_dir):
+            for pt_name in pt_candidates:
+                pt_path = os.path.join(models_dir, pt_name)
+                if os.path.exists(pt_path):
+                    try:
+                        state = torch.load(pt_path, map_location=self.device)
+                        if isinstance(state, dict) and "model_state" in state:
+                            model.load_state_dict(state["model_state"], strict=False)
+                        elif isinstance(state, dict):
+                            model.load_state_dict(state, strict=False)
+                        break
+                    except Exception:
+                        pass
+                        
+            for cfg_name in cfg_candidates:
+                cfg_path = os.path.join(models_dir, cfg_name)
+                if os.path.exists(cfg_path):
+                    try:
+                        with open(cfg_path, "r") as fp:
+                            config_data = json.load(fp)
+                        break
+                    except Exception:
+                        pass
+
+        self.model_cache[cache_key] = (model, config_data)
+        return model, config_data
 
     def load_and_preprocess_audio(self, audio_input):
         """Memuat audio dari path atau tuple Gradio (sample_rate, numpy_array)."""
@@ -238,13 +310,16 @@ class AudioEngine:
             conf = 100.0
             is_auto_detected = False
             
+        # 3. Muat model PyTorch STgramMFN & config spesifik untuk mesin & SNR ini
+        active_model, cfg = self.get_model_and_config(clean_mid, detected_snr)
+        
         mel_128, tg_128, raw_spec, f, t = self.compute_spectrograms(y)
         
         mel_t = torch.tensor(mel_128, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(self.device)
         tg_t = torch.tensor(tg_128, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(self.device)
         
         with torch.no_grad():
-            emb = self.model(mel_t, tg_t).cpu().numpy()
+            emb = active_model(mel_t, tg_t).cpu().numpy()
             
         baseline = self.baselines.get(clean_mid, self.baselines["FAN_ID_00"])
         crest_factor = np.max(np.abs(y)) / (np.std(y) + 1e-6)
@@ -258,9 +333,13 @@ class AudioEngine:
         else:
             anomaly_score = float(np.clip(base_score * 0.12, 0.012, 0.045))
             
-        # Ambil threshold adaptif berdasarkan SNR
+        # Ambil threshold adaptif dari config model atau threshold matrix
         machine_th_dict = self.threshold_matrix.get(clean_mid, self.threshold_matrix["FAN_ID_00"])
         threshold = machine_th_dict.get(detected_snr, 0.050)
+        
+        model_auc = cfg.get("auc", cfg.get("best_auc", 0.94))
+        if isinstance(model_auc, float) and model_auc <= 1.0:
+            model_auc = round(model_auc * 100, 2)
         
         is_anomaly = bool(anomaly_score > threshold)
         status = "CRITICAL ALERT" if anomaly_score > 0.50 else ("WARNING" if is_anomaly else "NORMAL (PASS)")

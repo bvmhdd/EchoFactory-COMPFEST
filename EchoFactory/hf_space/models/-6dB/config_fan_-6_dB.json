@@ -1,0 +1,16 @@
+{
+  "machine": "fan",
+  "snr": "-6_dB",
+  "auc": 0.8995297309163173,
+  "pauc": 0.7053431818776084,
+  "threshold": 0.5427627627627628,
+  "scorer": "Ensemble",
+  "id2label": {
+    "id_00": 0,
+    "id_02": 1,
+    "id_04": 2,
+    "id_06": 3
+  },
+  "n_classes": 4,
+  "embed_dim": 128
+}
