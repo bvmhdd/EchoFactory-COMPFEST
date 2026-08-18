@@ -8,7 +8,7 @@ sdk_version: 4.44.0
 app_file: app.py
 pinned: false
 license: mit
-short_description: Industrial Predictive Maintenance via Acoustic AI & Polygon Blockchain
+short_description: Acoustic AI & Blockchain Health Passport
 ---
 
 # 🏭 EchoFactory: Acoustic Machine Intelligence & Blockchain Health Passport
