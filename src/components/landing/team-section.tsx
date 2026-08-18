@@ -17,60 +17,45 @@ export interface TeamMember {
 
 export const TEAM_MEMBERS: TeamMember[] = [
   {
-    name: "Nama Rekan 1",
-    role: "Lead Acoustic AI & Deep Learning Engineer",
-    division: "Artificial Intelligence Core",
+    name: "[Nama Tim - Lead AI & Blockchain]",
+    role: "Lead AI & Blockchain Systems Architect",
+    division: "AI Core & Decentralized Trust",
     icon: Cpu,
-    bio: "Merancang dan melatih arsitektur STgram-MFN v3 dual-branch (Mel-Spectrogram + Linear STFT) dengan ArcFace Loss untuk deteksi anomali suara mesin presisi tinggi pada noise 0 dB SNR.",
+    bio: "Memimpin perancangan model deep metric learning STgram-MFN v3 dual-branch pada dataset Hitachi MIMII, optimasi kuantisasi ONNX, dan arsitektur smart contract paspor kesehatan mesin di Polygon Amoy.",
     contributions: [
-      "Pelatihan model STgram-MFN v3 pada dataset Hitachi MIMII (-6dB & 6dB)",
-      "Optimasi ekstraksi fitur Time-Frequency & Mel-Filterbank 16 kHz",
-      "Kuantisasi bobot model ke ONNX Opset 17 (< 184 KB footprint)",
+      "Pelatihan model STgram-MFN v3 (Mel-Spectrogram + Linear STFT) dengan ArcFace Loss",
+      "Kuantisasi bobot ONNX Opset 17 (< 184 KB) untuk inferensi edge sub-50ms",
+      "Pembangunan smart contract Solidity MachineHealthPassport.sol & hashing SHA-256",
     ],
-    skills: ["PyTorch", "STgram-MFN", "Librosa", "ArcFace", "ONNX Runtime"],
+    skills: ["PyTorch", "STgram-MFN v3", "Solidity", "Polygon Amoy", "ONNX Opset 17", "ArcFace"],
     github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
-    name: "Nama Rekan 2",
-    role: "Blockchain & Smart Contract Architect",
-    division: "Decentralized Trust & Web3",
-    icon: ShieldCheck,
-    bio: "Mengembangkan smart contract MachineHealthPassport.sol pada jaringan Polygon Amoy Testnet untuk pencatatan paspor kesehatan mesin yang anti-manipulasi (tamper-proof) dan klaim garansi parametrik.",
-    contributions: [
-      "Arsitektur Solidity smart contract MachineHealthPassport.sol",
-      "Integrasi hashing kriptografi SHA-256 dan verifikasi on-chain",
-      "Deployment dan verifikasi contract di PolygonScan Amoy Explorer",
-    ],
-    skills: ["Solidity", "Polygon Amoy", "Web3.py / Ethers", "SHA-256", "Hardhat"],
-    github: "https://github.com",
-    linkedin: "https://linkedin.com",
-  },
-  {
-    name: "Nama Rekan 3",
-    role: "Full-Stack & Edge Systems Engineer",
-    division: "Unified Console & Architecture",
+    name: "[Nama Rekan 1 - Full-Stack]",
+    role: "Full-Stack & Edge Telemetry Engineer",
+    division: "Console & Frontend Architecture",
     icon: Code2,
-    bio: "Membangun antarmuka Next.js 15 konsol industri 4 persona terintegrasi, pemrosesan audio WebAudio API real-time, serta backend inferensi terdistribusi di Hugging Face Spaces.",
+    bio: "Mengembangkan antarmuka Next.js 15 konsol industri 4 persona (Operator, Supervisor, Manager, Auditor), streaming audio WebAudio API 16 kHz, dan visualisasi spektrogram interaktif.",
     contributions: [
-      "Pengembangan Unified 4-Persona Industrial Console (Next.js + Tailwind)",
-      "Streaming audio WebAudio API & visualisasi Mel-Spectrogram interaktif",
-      "Arsitektur backend Gradio API & integrasi REST inferensi sub-50ms",
+      "Pengembangan Unified 4-Persona Industrial Console (Next.js 15 + Tailwind CSS)",
+      "Streaming audio WebAudio API 16 kHz & kanvas spektrogram real-time",
+      "Optimasi responsivitas antarmuka B2B Industrial SCADA & micro-interactions",
     ],
-    skills: ["Next.js 15", "TypeScript", "Tailwind CSS", "WebAudio API", "Gradio"],
+    skills: ["Next.js 15", "TypeScript", "Tailwind CSS", "WebAudio API", "Lucide React"],
     github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
-    name: "Nama Rekan 4 (Opsional)",
+    name: "[Nama Rekan 2 - Cognitive AI]",
     role: "Cognitive Diagnostic & IoT Domain Specialist",
-    division: "Manufacturing Intelligence",
+    division: "Manufacturing Intelligence & MLOps",
     icon: Sparkles,
-    bio: "Menyusun sistem diagnosis kognitif berbasis Gemini Flash Multimodal yang dipadukan dengan standardisasi vibrasi ISO 10816-3 untuk rekomendasi SOP mekanik dan estimasi sisa umur mesin (RUL).",
+    bio: "Menyusun Cognitive Diagnostic Core menggunakan Gemini Flash Multimodal RAG terintegrasi standar ISO 10816-3 untuk rekomendasi SOP preventif dan estimasi sisa umur operasional mesin (RUL).",
     contributions: [
-      "Integrasi RAG SOP mekanik berdasarkan standar ISO 10816-3",
-      "Prompt engineering Gemini Flash untuk estimasi finansial downtime",
-      "Validasi domain industri manufaktur & kepatuhan Booklet COMPFEST 18",
+      "Integrasi RAG SOP mekanik berdasarkan standardisasi getaran ISO 10816-3",
+      "Prompt engineering Gemini Flash untuk analisis mitigasi kerugian finansial downtime",
+      "Kepatuhan teknis Booklet COMPFEST 18 & deployment backend Hugging Face Spaces",
     ],
     skills: ["Gemini Flash", "ISO 10816-3", "Prompt Engineering", "Predictive Maint.", "IoT"],
     github: "https://github.com",
@@ -101,7 +86,7 @@ export function TeamSection() {
       </div>
 
       {/* Team Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {TEAM_MEMBERS.map((member, idx) => {
           const IconComp = member.icon;
           return (
