@@ -58,18 +58,20 @@ def process_audio_scan(audio_input, machine_id):
             "Belum ada data komitmen blockchain."
         )
 
+    clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
+
     try:
-        # 1. Load & Preprocess Audio
+        # 1. Load & Preprocess Audio (Resample mono 16kHz, pad/trim 10 detik)
         y, sr = audio_engine.load_and_preprocess_audio(audio_input)
         
         # 2. Extract Embedding & Calculate Anomaly Score
-        scan_res = audio_engine.extract_embedding_and_score(y, machine_id=machine_id)
+        scan_res = audio_engine.extract_embedding_and_score(y, machine_id=clean_mid)
         
         # 3. Generate High-Tech Spectral Visualizer
         fig = audio_engine.generate_spectrogram_plot(scan_res, y)
         
         # 4. Update Current State
-        CURRENT_SCAN_STATE["machine_id"] = machine_id
+        CURRENT_SCAN_STATE["machine_id"] = clean_mid
         CURRENT_SCAN_STATE["anomaly_score"] = scan_res["anomaly_score"]
         CURRENT_SCAN_STATE["is_anomaly"] = scan_res["is_anomaly"]
         CURRENT_SCAN_STATE["crest_factor"] = scan_res["crest_factor"]
@@ -77,7 +79,7 @@ def process_audio_scan(audio_input, machine_id):
         
         # 5. Otomatis Commit Hash ke Blockchain Amoy
         bc_res = hf_blockchain_service.commit_inspection_record(
-            machine_id=machine_id,
+            machine_id=clean_mid,
             anomaly_score=scan_res["anomaly_score"],
             status=scan_res["status"],
             defect_type="None (Healthy)" if not scan_res["is_anomaly"] else "Acoustic Anomaly Detected"
@@ -294,11 +296,22 @@ with gr.Blocks(title="EchoFactory - Industrial AI & Blockchain Passport", css=cu
                 with gr.Column(scale=5):
                     machine_select = gr.Dropdown(
                         label="Pilih Unit Mesin Pabrik",
-                        choices=["FAN_ID_00", "PUMP_ID_01", "SLIDER_ID_02", "VALVE_ID_03"],
-                        value="FAN_ID_00"
+                        choices=["FAN_ID_00 (Industrial Blower)", "PUMP_ID_01 (Centrifugal Pump)", "SLIDER_ID_02 (Linear Guide Rail)", "VALVE_ID_03 (Solenoid Valve)"],
+                        value="FAN_ID_00 (Industrial Blower)"
                     )
                     
-                    gr.Markdown("#### 🎵 1-Click Bank Sampel Audio Demo (Tanpa Perlu Rekam Fisik):")
+                    gr.HTML(
+                        """
+                        <div style='background:#1E293B; border-left:4px solid #38BDF8; padding:10px 14px; border-radius:6px; margin:10px 0; font-size:13px; color:#CBD5E1;'>
+                            <b>💡 3 Pilihan Input Suara Mesin:</b><br>
+                            • <b>Rekam Mikrofon</b>: Klik tombol mikrofon di bawah untuk merekam langsung suara mesin fisik.<br>
+                            • <b>Upload File Sendiri</b>: Klik dropzone untuk mengunggah file rekaman Anda (.wav / .mp3).<br>
+                            • <b>Sampel Demo Instan</b>: Klik tombol preset di bawah untuk uji coba cepat.
+                        </div>
+                        """
+                    )
+                    
+                    gr.Markdown("#### 🎵 Preset Sampel Demo Cepat (1-Klik):")
                     with gr.Row():
                         btn_fan_norm = gr.Button("🌀 Fan Normal", size="sm", variant="secondary")
                         btn_fan_anom = gr.Button("🌀 Fan Anomali (BPFI Fault)", size="sm", variant="secondary")
@@ -312,7 +325,8 @@ with gr.Blocks(title="EchoFactory - Industrial AI & Blockchain Passport", css=cu
                     audio_input = gr.Audio(
                         sources=["microphone", "upload"],
                         type="filepath",
-                        label="Audio Input 16kHz PCM (Rekam Mikrofon / Upload WAV)"
+                        label="🎙️ Rekam Mikrofon Langsung / 📁 Upload File Audio Mesin (WAV/MP3)",
+                        show_download_button=True
                     )
                     
                     btn_scan = gr.Button("⚡ Mulai Analisis Akustik AI (<50ms)", variant="primary", size="lg")
