@@ -108,8 +108,8 @@ export function Hero() {
         </p>
 
         {/* Marquee Wrapper with Edge Fade Mask */}
-        <div className="relative w-full overflow-hidden mask-fade-x py-2">
-          <div className="flex w-max items-center animate-marquee-right hover:[animation-play-state:paused] select-none">
+        <div className="relative w-full overflow-hidden mask-fade-x py-3">
+          <div className="flex w-max items-center animate-marquee-left select-none">
             {/* First Set of Logos */}
             <div className="flex items-center gap-12 sm:gap-16 px-6 sm:px-8 text-xs sm:text-sm font-semibold tracking-wider text-zinc-400">
               <span className="hover:text-white transition-colors cursor-default whitespace-nowrap">POLYGON AMOY</span>

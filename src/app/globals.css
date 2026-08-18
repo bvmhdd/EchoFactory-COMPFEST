@@ -100,8 +100,45 @@ body {
 }
 
 .mask-fade-x {
-  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+@keyframes marqueeLeft {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marqueeRight {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee-left {
+  display: flex !important;
+  width: max-content !important;
+  animation: marqueeLeft 30s linear infinite !important;
+  will-change: transform;
+}
+
+.animate-marquee-right {
+  display: flex !important;
+  width: max-content !important;
+  animation: marqueeRight 30s linear infinite !important;
+  will-change: transform;
+}
+
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused !important;
 }
 
 /* Selection */

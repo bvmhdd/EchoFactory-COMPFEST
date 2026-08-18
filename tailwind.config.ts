@@ -53,6 +53,8 @@ const config: Config = {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "glow-fade": "glowFade 2s ease-in-out infinite alternate",
         "waveform": "waveform 1.2s ease-in-out infinite alternate",
+        "marquee-left": "marqueeLeft 25s linear infinite",
+        "marquee-right": "marqueeRight 25s linear infinite",
       },
       keyframes: {
         glowFade: {
@@ -62,6 +64,14 @@ const config: Config = {
         waveform: {
           "0%": { height: "15%" },
           "100%": { height: "95%" },
+        },
+        marqueeLeft: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        marqueeRight: {
+          "0%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(0%)" },
         },
       },
     },
