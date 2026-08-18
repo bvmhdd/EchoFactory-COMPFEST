@@ -16,13 +16,17 @@ except ImportError:
     HAS_GENAI = False
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
 
 if HAS_GENAI and GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+        gemini_model = genai.GenerativeModel(GEMINI_MODEL_NAME)
     except Exception:
-        gemini_model = None
+        try:
+            gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+        except Exception:
+            gemini_model = None
 else:
     gemini_model = None
 

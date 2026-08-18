@@ -4,10 +4,11 @@
 
 # Environment variables & Secret Keys
 .env
-*.env
 .env.local
 .env.*.local
 .env*.local
+*.env
+!.env.example
 
 # Node.js & Next.js Build Artifacts
 node_modules/
