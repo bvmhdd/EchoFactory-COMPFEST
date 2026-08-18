@@ -13,25 +13,40 @@ import matplotlib.pyplot as plt
 import gradio as gr
 
 # ---------------------------------------------------------------------------
-# FIX: gradio_client schema-generation bug ("TypeError: argument of type
-# 'bool' is not iterable"). This is triggered when a function's JSON schema
-# contains a boolean `additionalProperties` value (common with the
-# @spaces.GPU / ZeroGPU decorator) and gradio_client's get_type() tries to
-# do `"const" in schema` on that boolean instead of a dict. Patching it here
-# makes schema generation degrade gracefully instead of crashing the whole
-# Space at startup.
+# FIX: gradio_client schema-generation bug with ZeroGPU/spaces.GPU decorator.
+#
+# Root cause: The @spaces.GPU decorator injects `additionalProperties: true`
+# (a boolean) into the Pydantic JSON schema. gradio_client's schema parser
+# then calls _json_schema_to_python_type(True, defs) and get_type(True),
+# neither of which can handle a non-dict schema — crashing with:
+#   TypeError: argument of type 'bool' is not iterable
+#   APIInfoParseError: Cannot parse schema True
+#
+# Fix: Patch BOTH functions to return "Any" when the schema is not a dict.
 # ---------------------------------------------------------------------------
 try:
     import gradio_client.utils as _gc_utils
 
     _original_get_type = _gc_utils.get_type
+    _original_json_schema_to_python_type = _gc_utils._json_schema_to_python_type
 
     def _patched_get_type(schema):
         if not isinstance(schema, dict):
             return "Any"
         return _original_get_type(schema)
 
+    def _patched_json_schema_to_python_type(schema, defs=None):
+        """Guard against non-dict schemas (e.g. boolean additionalProperties)."""
+        if not isinstance(schema, dict):
+            return "Any"
+        try:
+            return _original_json_schema_to_python_type(schema, defs)
+        except Exception:
+            return "Any"
+
     _gc_utils.get_type = _patched_get_type
+    _gc_utils._json_schema_to_python_type = _patched_json_schema_to_python_type
+    print("[INFO] gradio_client schema patch applied successfully.")
 except Exception as _patch_err:
     print(f"[WARN] Could not apply gradio_client schema patch: {_patch_err}")
 
