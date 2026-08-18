@@ -1,37 +1,25 @@
+# =====================================================================
+# 🏭 EchoFactory — COMPFEST 18 AIC Production .gitignore
+# =====================================================================
+
 # Environment variables & Secret Keys
 .env
 *.env
 .env.local
 .env.*.local
+.env*.local
 
-# Temporary OCR & Raw Booklet PDF
-*.pdf
-[AIC]*
-page_*.png
-ocr_temp/
-ocr.ps1
-*ocr*.txt
-*booklet*.txt
-pdf_extracted.txt
+# Node.js & Next.js Build Artifacts
+node_modules/
+.next/
+out/
+build/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Scratch conversion & generation scripts
-convert_*.py
-create_docx.py
-generate_*.py
-update_*.py
-scratch_diagrams/
-# Temporary repo clones
-compfest_space_repo/
-
-# Other competition ideation drafts (non-EchoFactory)
-SAVED_IDEA_*
-PITCHDECK_AIC_*
-IDEATION_GUIDE_*
-Ideation Pitchdeck*
-EchoFactory_Diagrams_Backup.docx
-EchoFactory_System_Architecture_and_Workflow_V2.docx
-
-# Python & Jupyter
+# Python & Jupyter Notebook Artifacts
 __pycache__/
 *.py[cod]
 *$py.class
@@ -43,14 +31,44 @@ venv/
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
-# IDE & OS
-.vscode/
-.idea/
+# Binary Audio Assets (Auto-Generated at Runtime)
+demo_samples/
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+
+# Temporary PDF, OCR, and Document Scratch Files
+*.pdf
+[AIC]*
+page_*.png
+ocr_temp/
+ocr.ps1
+*ocr*.txt
+*booklet*.txt
+pdf_extracted.txt
+*.docx
+~$*.docx
+scratch_diagrams/
+compfest_space_repo/
+
+# Scratch conversion & generation helper scripts
+convert_*.py
+create_docx.py
+generate_*.py
+update_*.py
+
+# Ideation Drafts & Scratch Notes
+SAVED_IDEA_*
+PITCHDECK_AIC_*
+IDEATION_GUIDE_*
+Ideation Pitchdeck*
+design.md
+kineticgrid.md
+
+# Operating System & IDE Cache
 .DS_Store
 Thumbs.db
-# Next.js & Node
-node_modules/
-.next/
-out/
-build/
-
+.vscode/
+.idea/
