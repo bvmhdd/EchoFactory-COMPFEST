@@ -357,31 +357,140 @@ def submit_parametric_claim(machine_id, claim_reason):
     )
 
 # =====================================================================
-# GRADIO INTERFACE LAYOUT (HIGH-TECH INDUSTRIAL THEME)
+# =====================================================================
+# GRADIO INTERFACE LAYOUT (MATCHING NEXT.JS DASHBOARD THEME)
 # =====================================================================
 
 custom_css = """
-#app-container { max-width: 1200px; margin: 0 auto; font-family: 'Inter', sans-serif; }
-.gr-button-primary { background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important; border: none !important; color: white !important; font-weight: 600 !important; }
-.gr-button-secondary { background: #1E293B !important; border: 1px solid #334155 !important; color: #E2E8F0 !important; }
-.stat-card { background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 15px; text-align: center; }
+:root {
+    --bg-dark: #090d16;
+    --surface-dark: #0f172a;
+    --border-dark: #1e293b;
+    --accent-emerald: #10b981;
+    --accent-cyan: #06b6d4;
+}
+
+body, .gradio-container {
+    background-color: #090d16 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    color: #e2e8f0 !important;
+}
+
+#app-container {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* Tab styling */
+.tabs {
+    border-bottom: 1px solid #1e293b !important;
+}
+.tab-nav button {
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    color: #94a3b8 !important;
+    border-bottom: 2px solid transparent !important;
+    transition: all 0.2s ease !important;
+}
+.tab-nav button.selected {
+    color: #38bdf8 !important;
+    border-bottom: 2px solid #38bdf8 !important;
+    background: transparent !important;
+}
+
+/* Buttons */
+.gr-button-primary {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+    border: 1px solid #10b981 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25) !important;
+    transition: all 0.2s ease !important;
+}
+.gr-button-primary:hover {
+    filter: brightness(1.1) !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+.gr-button-secondary {
+    background: #0f172a !important;
+    border: 1px solid #1e293b !important;
+    color: #cbd5e1 !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+}
+.gr-button-secondary:hover {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Input boxes, textareas, dropdowns */
+.gr-input, .gr-box, input, select, textarea {
+    background: #0f172a !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 8px !important;
+    color: #f1f5f9 !important;
+}
+
+/* Stat & metric cards */
+.stat-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
 """
 
-with gr.Blocks(title="EchoFactory - Industrial AI & Blockchain Passport", css=custom_css) as demo:
+theme = gr.themes.Base(
+    primary_hue="emerald",
+    secondary_hue="slate",
+    neutral_hue="slate",
+    font=[gr.themes.GoogleFont("Inter"), "ui-sans-serif", "system-ui", "sans-serif"],
+).set(
+    body_background_fill="#090d16",
+    body_background_fill_dark="#090d16",
+    block_background_fill="#0f172a",
+    block_background_fill_dark="#0f172a",
+    block_border_color="#1e293b",
+    block_border_color_dark="#1e293b",
+    input_background_fill="#090d16",
+    input_background_fill_dark="#090d16",
+    input_border_color="#1e293b",
+    input_border_color_dark="#1e293b",
+)
+
+with gr.Blocks(title="EchoFactory — Industrial Acoustic Intelligence & Verification", css=custom_css, theme=theme) as demo:
     gr.HTML(
         """
-        <div style='background: linear-gradient(90deg, #0F172A 0%, #1E293B 100%); padding: 20px 25px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 15px;'>
-            <div style='display: flex; justify-content: space-between; align-items: center;'>
-                <div>
-                    <h1 style='margin: 0; color: #38BDF8; font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 8px;'>
-                        🏭 ECHOFACTORY <span style='font-size: 13px; background: #065F46; color: #34D399; padding: 3px 8px; border-radius: 20px;'>COMPFEST 18 AIC</span>
-                    </h1>
-                    <p style='margin: 5px 0 0 0; color: #94A3B8; font-size: 13px;'>Acoustic Machine Intelligence & Tamper-Proof Health Passport (Polygon Amoy Testnet)</p>
+        <div style='background: #0f172a; padding: 20px 24px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 20px;'>
+            <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;'>
+                <div style='display: flex; align-items: center; gap: 14px;'>
+                    <div style='width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #0284c7 0%, #10b981 100%); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: white;'>
+                        EF
+                    </div>
+                    <div>
+                        <div style='display: flex; align-items: center; gap: 10px;'>
+                            <h1 style='margin: 0; color: #f8fafc; font-size: 20px; font-weight: 700; letter-spacing: -0.02em;'>EchoFactory</h1>
+                            <span style='background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9999px;'>
+                                Active Node
+                            </span>
+                        </div>
+                        <p style='margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;'>Acoustic Machine Intelligence & Tamper-Proof Health Verification Engine</p>
+                    </div>
                 </div>
-                <div style='text-align: right;'>
-                    <span style='background: #0284C7; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold;'>STgram-MFN v3</span>
-                    <span style='background: #7C3AED; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-left: 5px;'>Gemini Multimodal</span>
-                    <span style='background: #059669; color: white; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-left: 5px;'>Web3 Amoy</span>
+                <div style='display: flex; gap: 8px; align-items: center; flex-wrap: wrap;'>
+                    <span style='background: #1e293b; border: 1px solid #334155; color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;'>
+                        STgram-MFN v3 ONNX
+                    </span>
+                    <span style='background: #1e293b; border: 1px solid #334155; color: #a78bfa; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;'>
+                        Gemini Flash Multimodal
+                    </span>
+                    <span style='background: #1e293b; border: 1px solid #334155; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;'>
+                        Polygon Amoy (80002)
+                    </span>
                 </div>
             </div>
         </div>
