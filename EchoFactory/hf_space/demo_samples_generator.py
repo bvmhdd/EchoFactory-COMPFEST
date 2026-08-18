@@ -94,22 +94,34 @@ def create_valve_anomaly():
     audio = leakage
     return np.int16(audio / np.max(np.abs(audio)) * 32767 * 0.9)
 
+REAL_SAMPLE_SIZE_THRESHOLD_BYTES = 500_000  # real MIMII files are ~2.5 MB; synthetic ones ~320 KB
+
 def generate_all_samples(output_dir="demo_samples"):
+    """
+    Generates synthetic fallback audio samples ONLY for files that don't exist
+    or are smaller than the threshold (i.e., haven't been replaced by real MIMII samples).
+    Real MIMII samples (~2.5 MB each) are preserved and never overwritten.
+    """
     os.makedirs(output_dir, exist_ok=True)
-    samples = {
-        "DEMO_FAN_NORMAL.wav": create_fan_normal(),
-        "DEMO_FAN_ANOMALY.wav": create_fan_anomaly(),
-        "DEMO_PUMP_NORMAL.wav": create_pump_normal(),
-        "DEMO_PUMP_ANOMALY.wav": create_pump_anomaly(),
-        "DEMO_SLIDER_NORMAL.wav": create_slider_normal(),
-        "DEMO_SLIDER_ANOMALY.wav": create_slider_anomaly(),
-        "DEMO_VALVE_NORMAL.wav": create_valve_normal(),
-        "DEMO_VALVE_ANOMALY.wav": create_valve_anomaly(),
+    generators = {
+        "DEMO_FAN_NORMAL.wav": create_fan_normal,
+        "DEMO_FAN_ANOMALY.wav": create_fan_anomaly,
+        "DEMO_PUMP_NORMAL.wav": create_pump_normal,
+        "DEMO_PUMP_ANOMALY.wav": create_pump_anomaly,
+        "DEMO_SLIDER_NORMAL.wav": create_slider_normal,
+        "DEMO_SLIDER_ANOMALY.wav": create_slider_anomaly,
+        "DEMO_VALVE_NORMAL.wav": create_valve_normal,
+        "DEMO_VALVE_ANOMALY.wav": create_valve_anomaly,
     }
-    for filename, audio_data in samples.items():
+    for filename, generator_fn in generators.items():
         filepath = os.path.join(output_dir, filename)
+        # Skip if real MIMII sample already exists (large file)
+        if os.path.exists(filepath) and os.path.getsize(filepath) >= REAL_SAMPLE_SIZE_THRESHOLD_BYTES:
+            print(f"[INFO] Real sample found, skipping generation: {filename} ({os.path.getsize(filepath)//1024} KB)")
+            continue
+        audio_data = generator_fn()
         wavfile.write(filepath, SR, audio_data)
-        print(f"Generated: {filepath} ({len(audio_data)/SR:.1f}s)")
+        print(f"Generated synthetic fallback: {filepath} ({len(audio_data)/SR:.1f}s)")
 
 if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
