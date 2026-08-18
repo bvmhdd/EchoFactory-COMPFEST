@@ -16,6 +16,7 @@ import {
   SlidersHorizontal,
   Activity,
   Layers,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -100,22 +101,22 @@ export function InputPanel({
     <div className="p-6 bg-[#09090B] border border-[#27272A] rounded-2xl flex flex-col justify-between space-y-6 h-full shadow-2xl">
       <div className="space-y-6">
         {/* Panel Header */}
-        <div className="border-b border-[#27272A] pb-3 flex items-center justify-between">
+        <div className="border-b border-[#27272A] pb-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-sky-400" />
-            <span className="text-xs font-mono font-semibold tracking-wider uppercase text-zinc-200">
-              Acoustic Ingestion Console
+            <span className="text-xs font-mono font-bold tracking-wider uppercase text-white">
+              PANEL INPUT TUNGGAL
             </span>
           </div>
-          <Badge variant="mono" className="text-[10px] font-mono border-zinc-700 bg-zinc-900 text-zinc-300">
-            16 kHz PCM
+          <Badge variant="mono" className="text-[10px] font-mono border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
+            SINKRON (HAL. 15)
           </Badge>
         </div>
 
         {/* 1. Pilih Unit Mesin */}
         <div>
-          <label className="block text-xs font-mono font-medium uppercase tracking-wider text-zinc-400 mb-3">
-            1. Select Target Unit
+          <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 mb-3">
+            1. Pilih Unit Mesin Pabrik
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {machines.map((m) => {
@@ -160,8 +161,8 @@ export function InputPanel({
 
         {/* 2. Input Sampel Suara (10s) */}
         <div>
-          <label className="block text-xs font-mono font-medium uppercase tracking-wider text-zinc-400 mb-3">
-            2. Audio Signal Source
+          <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 mb-3">
+            2. Sumber Sinyal Suara (10 Detik 16kHz PCM)
           </label>
 
           {/* Ingestion Mode Tabs */}
@@ -170,34 +171,34 @@ export function InputPanel({
               onClick={() => setIngestionTab("preset")}
               className={`py-2 text-xs font-mono rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "preset"
-                  ? "bg-[#27272A] text-white font-medium shadow"
+                  ? "bg-[#27272A] text-white font-semibold shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <Radio className="w-3.5 h-3.5" />
-              <span>Presets</span>
+              <span>Sampel Preset</span>
             </button>
             <button
               onClick={() => setIngestionTab("mic")}
               className={`py-2 text-xs font-mono rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "mic"
-                  ? "bg-[#27272A] text-white font-medium shadow"
+                  ? "bg-[#27272A] text-white font-semibold shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <Mic className="w-3.5 h-3.5" />
-              <span>Live Mic</span>
+              <span>Rekam Mic</span>
             </button>
             <button
               onClick={() => setIngestionTab("upload")}
               className={`py-2 text-xs font-mono rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "upload"
-                  ? "bg-[#27272A] text-white font-medium shadow"
+                  ? "bg-[#27272A] text-white font-semibold shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <UploadCloud className="w-3.5 h-3.5" />
-              <span>Upload</span>
+              <span>Unggah File</span>
             </button>
           </div>
 
@@ -205,7 +206,7 @@ export function InputPanel({
           {ingestionTab === "preset" && (
             <div className="space-y-2.5">
               <span className="text-[11px] text-zinc-400 block font-mono">
-                Acoustic baseline for {selectedMachine.toUpperCase()}:
+                Pilih kondisi sampel akustik mesin {selectedMachine.toUpperCase()}:
               </span>
               <div className="space-y-2">
                 {presetsForCurrentMachine.map((preset) => {
@@ -229,11 +230,11 @@ export function InputPanel({
                           <Badge variant={isAbnormal ? "danger" : "success"} className="text-[10px] uppercase font-mono">
                             {isAbnormal ? (
                               <span className="flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" /> Abnormal
+                                <AlertCircle className="w-3 h-3" /> ABNORMAL
                               </span>
                             ) : (
                               <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> Normal
+                                <CheckCircle2 className="w-3 h-3" /> NORMAL
                               </span>
                             )}
                           </Badge>
@@ -267,10 +268,10 @@ export function InputPanel({
               </div>
               <div className="text-xs font-mono text-white">
                 {isRecording
-                  ? `Capturing Machine Sound: ${recordingSeconds} / 10s`
+                  ? `Merekam Suara Mesin: ${recordingSeconds} / 10s`
                   : recordingSeconds === 10
-                  ? "10s Acoustic Buffer Ready (16kHz PCM)"
-                  : "Point sensor/microphone at casing for 10 seconds"}
+                  ? "Buffer Akustik 10s Siap (16kHz PCM)"
+                  : "Arahkan mikrofon ke casing mesin 10 detik"}
               </div>
 
               {/* Volume Meter Wave */}
@@ -293,7 +294,7 @@ export function InputPanel({
                 onClick={handleToggleRecord}
                 className="w-full justify-center text-xs font-mono"
               >
-                {isRecording ? "Stop Recording" : "Start Live Mic Acquisition (10s)"}
+                {isRecording ? "Hentikan Rekaman" : "Mulai Rekam Mikrofon (10s)"}
               </Button>
             </div>
           )}
@@ -313,10 +314,10 @@ export function InputPanel({
               />
               <UploadCloud className="w-6 h-6 text-zinc-400 mx-auto" />
               <div className="text-xs text-white font-medium">
-                {uploadedFileName ? uploadedFileName : "Click to select WAV/MP3 file"}
+                {uploadedFileName ? uploadedFileName : "Klik untuk memilih file .WAV / audio"}
               </div>
               <p className="text-[10px] text-zinc-400 font-mono">
-                Standard: 16,000 Hz, 16-bit Mono PCM (.wav)
+                Standar: 16,000 Hz, 16-bit Mono PCM (.wav)
               </p>
             </div>
           )}
@@ -331,22 +332,22 @@ export function InputPanel({
           disabled={isLoading}
           variant="secondary"
           size="lg"
-          className="w-full justify-center text-xs font-mono font-semibold tracking-wider gap-2 py-4 shadow-lg hover:shadow-xl transition-all"
+          className="w-full justify-center text-xs font-mono font-bold tracking-wider gap-2 py-4 shadow-lg hover:shadow-xl transition-all"
         >
           {isLoading ? (
             <>
               <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
-              PROCESSING STGRAM-MFN V3...
+              MEMPROSES INFERENSI STGRAM-MFN...
             </>
           ) : (
             <>
               <Zap className="w-4 h-4 text-black fill-black" />
-              EXECUTE AI DIAGNOSIS (&lt;50ms)
+              JALANKAN DIAGNOSIS AI (&lt;50ms)
             </>
           )}
         </Button>
         <span className="text-[10px] text-zinc-400 text-center block mt-2 font-mono">
-          Dual-Branch STgram-MFN v3 ONNX Edge • Latency: &lt; 50 ms
+          Dual-Branch STgram-MFN v3 ONNX Edge • Latensi: &lt; 50 ms
         </span>
       </div>
     </div>

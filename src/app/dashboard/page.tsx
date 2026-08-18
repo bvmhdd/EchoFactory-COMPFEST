@@ -9,6 +9,7 @@ import { OperatorWidget } from "@/components/dashboard/operator-widget";
 import { SupervisorWidget } from "@/components/dashboard/supervisor-widget";
 import { ManagerWidget } from "@/components/dashboard/manager-widget";
 import { AuditorWidget } from "@/components/dashboard/auditor-widget";
+import { Cpu, CheckCircle2, ShieldCheck, Zap, Activity } from "lucide-react";
 
 export default function DashboardPage() {
   const [selectedMachine, setSelectedMachine] = useState<MachineType>("fan");
@@ -40,19 +41,16 @@ export default function DashboardPage() {
 
       if (res.ok) {
         const data: DetectionResult = await res.json();
-        // Tiny artificial pause to make the sub-50ms execution feel tangible to human eye
         setTimeout(() => {
           setDetectionResult(data);
           setIsLoading(false);
-        }, 120);
+        }, 100);
       } else {
-        // Fallback to local simulation
         const fallback = runInferenceSimulation(preset.machineType, preset.machineId, preset.id);
         setDetectionResult(fallback);
         setIsLoading(false);
       }
     } catch {
-      // Fallback
       const fallback = runInferenceSimulation(preset.machineType, preset.machineId, preset.id);
       setDetectionResult(fallback);
       setIsLoading(false);
@@ -91,6 +89,19 @@ export default function DashboardPage() {
 
           {/* Right Panel: Unified Multi-Stakeholder Output Panel (1 Layar Instan) */}
           <div className="lg:col-span-8 flex flex-col space-y-6">
+            {/* Right Panel Header: Output AI Terintegrasi */}
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-2 text-xs font-mono">
+                <Cpu className="w-4 h-4 text-sky-400" />
+                <span className="font-bold uppercase tracking-wider text-white">
+                  PANEL OUTPUT INFERENSI AI (HASIL SINKRON)
+                </span>
+              </div>
+              <span className="text-[11px] font-mono text-zinc-400 hidden sm:inline">
+                1x Input Audio ➔ Visualisasi Spektrum + 3 Rekomendasi Pemangku Kepentingan
+              </span>
+            </div>
+
             {/* Top Widget: Operator Acoustic & Spectrogram */}
             <OperatorWidget result={detectionResult} sample={selectedPreset} />
 
@@ -105,14 +116,18 @@ export default function DashboardPage() {
       </main>
 
       {/* Console Bottom Bar */}
-      <footer className="border-t border-[#2A2A2E] bg-[#050508] px-6 py-3 text-xs font-mono text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div className="flex items-center gap-4">
-          <span>● Single Synchronous Ingestion</span>
-          <span>● STgram-MFN v3 Deterministic Metric</span>
-          <span>● Polygon Amoy Proof Ledger</span>
+      <footer className="border-t border-[#27272A] bg-[#09090B] px-6 py-3.5 text-xs font-mono text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-4 text-[11px]">
+          <span className="flex items-center gap-1.5 text-emerald-400">
+            <CheckCircle2 className="w-3.5 h-3.5" /> Input Tunggal Terverifikasi
+          </span>
+          <span className="text-zinc-600">•</span>
+          <span>Inferensi Sinkron STgram-MFN v3 (&lt;50ms)</span>
+          <span className="text-zinc-600">•</span>
+          <span>Ledger On-Chain Polygon Amoy</span>
         </div>
-        <div>
-          <span>COMPFEST 18 AIC • Smart Manufacturing</span>
+        <div className="text-[11px] text-zinc-400">
+          COMPFEST 18 AIC • Smart Manufacturing Track (Kepatuhan Booklet Hal. 15)
         </div>
       </footer>
     </div>
