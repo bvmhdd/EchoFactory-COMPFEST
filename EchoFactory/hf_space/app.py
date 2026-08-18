@@ -12,6 +12,19 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import gradio as gr
 
+# Hugging Face ZeroGPU Support
+try:
+    import spaces
+    has_spaces = True
+except ImportError:
+    has_spaces = False
+    class spaces:
+        @staticmethod
+        def GPU(func=None, duration=60):
+            if func is None:
+                return lambda f: f
+            return func
+
 from audio_engine import audio_engine
 from cognitive_engine import cognitive_engine, ERP_INVENTORY
 from blockchain_service import hf_blockchain_service
@@ -52,6 +65,7 @@ def load_demo_audio(sample_filename, machine_id):
         return path, machine_id
     return None, machine_id
 
+@spaces.GPU
 def process_audio_scan(audio_input, machine_id):
     """Memproses file audio atau rekaman mikrofon dengan auto-detection mesin & SNR."""
     if audio_input is None:
@@ -147,6 +161,7 @@ def process_audio_scan(audio_input, machine_id):
             str(e)
         )
 
+@spaces.GPU
 def run_deep_diagnostic(machine_id):
     """Menjalankan penalaran diagnostik kognitif Gemini Multimodal + ISO 10816."""
     score = CURRENT_SCAN_STATE["anomaly_score"]
@@ -213,6 +228,7 @@ def trigger_work_order_dispatch():
     )
     return wo_html
 
+@spaces.GPU
 def voice_assistant_qa(user_text):
     """Menjawab pertanyaan suara/teks operator lapangan."""
     ans = cognitive_engine.process_voice_assistant(user_text, CURRENT_SCAN_STATE)
