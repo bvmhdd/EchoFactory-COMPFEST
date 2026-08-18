@@ -8,15 +8,13 @@ import {
   UploadCloud,
   Zap,
   Radio,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   Wind,
   Droplet,
   SlidersHorizontal,
   Activity,
-  Layers,
-  ArrowRight,
+  Sliders,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,22 +99,22 @@ export function InputPanel({
     <div className="p-6 bg-[#09090B] border border-[#27272A] rounded-2xl flex flex-col justify-between space-y-6 h-full shadow-2xl">
       <div className="space-y-6">
         {/* Panel Header */}
-        <div className="border-b border-[#27272A] pb-3.5 flex items-center justify-between">
+        <div className="border-b border-[#27272A] pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-sky-400" />
-            <span className="text-xs font-mono font-bold tracking-wider uppercase text-white">
-              PANEL INPUT TUNGGAL
+            <Sliders className="w-4 h-4 text-sky-400" />
+            <span className="text-xs font-semibold tracking-wide text-white">
+              Konfigurasi Input
             </span>
           </div>
-          <Badge variant="mono" className="text-[10px] font-mono border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
-            SINKRON (HAL. 15)
+          <Badge variant="mono" className="text-[10px] font-mono border-zinc-700 bg-zinc-900 text-zinc-300">
+            16 kHz PCM
           </Badge>
         </div>
 
         {/* 1. Pilih Unit Mesin */}
         <div>
-          <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 mb-3">
-            1. Pilih Unit Mesin Pabrik
+          <label className="block text-xs font-medium text-zinc-400 mb-2.5">
+            Mesin Target
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {machines.map((m) => {
@@ -127,23 +125,23 @@ export function InputPanel({
                   key={m.type}
                   type="button"
                   onClick={() => handleMachineChange(m.type)}
-                  className={`p-3.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+                  className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                     isSelected
                       ? "bg-[#18181B] border-sky-500/60 text-white shadow-[0_0_20px_rgba(56,189,248,0.12)] ring-1 ring-sky-500/30"
                       : "bg-[#111113] border-[#27272A] text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center ${
                         isSelected ? "bg-sky-500/15 text-sky-400" : "bg-zinc-800/80 text-zinc-400"
                       }`}
                     >
-                      <IconComp className="w-4 h-4" />
+                      <IconComp className="w-3.5 h-3.5" />
                     </div>
                     <div>
-                      <div className="text-xs font-semibold text-white">{m.label}</div>
-                      <div className="text-[10px] font-mono text-zinc-400">{m.id}</div>
+                      <div className="text-xs font-medium text-white">{m.label}</div>
+                      <div className="text-[10px] font-mono text-zinc-500">{m.id}</div>
                     </div>
                   </div>
                   <div
@@ -159,19 +157,19 @@ export function InputPanel({
           </div>
         </div>
 
-        {/* 2. Input Sampel Suara (10s) */}
+        {/* 2. Input Sampel Suara */}
         <div>
-          <label className="block text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 mb-3">
-            2. Sumber Sinyal Suara (10 Detik 16kHz PCM)
+          <label className="block text-xs font-medium text-zinc-400 mb-2.5">
+            Sumber Audio
           </label>
 
           {/* Ingestion Mode Tabs */}
-          <div className="grid grid-cols-3 gap-1 p-1 bg-[#111113] rounded-xl border border-[#27272A] mb-4">
+          <div className="grid grid-cols-3 gap-1 p-1 bg-[#111113] rounded-xl border border-[#27272A] mb-3">
             <button
               onClick={() => setIngestionTab("preset")}
-              className={`py-2 text-xs font-mono rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "preset"
-                  ? "bg-[#27272A] text-white font-semibold shadow"
+                  ? "bg-[#27272A] text-white font-medium shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -180,20 +178,20 @@ export function InputPanel({
             </button>
             <button
               onClick={() => setIngestionTab("mic")}
-              className={`py-2 text-xs font-mono rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "mic"
-                  ? "bg-[#27272A] text-white font-semibold shadow"
+                  ? "bg-[#27272A] text-white font-medium shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               <Mic className="w-3.5 h-3.5" />
-              <span>Rekam Mic</span>
+              <span>Mikrofon</span>
             </button>
             <button
               onClick={() => setIngestionTab("upload")}
-              className={`py-2 text-xs font-mono rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "upload"
-                  ? "bg-[#27272A] text-white font-semibold shadow"
+                  ? "bg-[#27272A] text-white font-medium shadow"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -204,55 +202,50 @@ export function InputPanel({
 
           {/* Mode A: Quick Presets */}
           {ingestionTab === "preset" && (
-            <div className="space-y-2.5">
-              <span className="text-[11px] text-zinc-400 block font-mono">
-                Pilih kondisi sampel akustik mesin {selectedMachine.toUpperCase()}:
-              </span>
-              <div className="space-y-2">
-                {presetsForCurrentMachine.map((preset) => {
-                  const isAbnormal = preset.condition === "ABNORMAL";
-                  const isSelected = selectedPreset.id === preset.id;
-                  return (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => onSelectPreset(preset)}
-                      className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
-                        isSelected
-                          ? isAbnormal
-                            ? "bg-rose-500/10 border-rose-500/60 text-white shadow-[0_0_15px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/30"
-                            : "bg-emerald-500/10 border-emerald-500/60 text-white shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30"
-                          : "bg-[#111113] border-[#27272A] text-zinc-300 hover:border-zinc-600"
-                      }`}
-                    >
-                      <div className="flex flex-col gap-0.5">
-                        <div className="flex items-center gap-2">
-                          <Badge variant={isAbnormal ? "danger" : "success"} className="text-[10px] uppercase font-mono">
-                            {isAbnormal ? (
-                              <span className="flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" /> ABNORMAL
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> NORMAL
-                              </span>
-                            )}
-                          </Badge>
-                          <span className="text-xs font-semibold text-white truncate">
-                            {preset.name.split("(")[1]?.replace(")", "") || preset.name}
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">
-                          {preset.description}
+            <div className="space-y-2">
+              {presetsForCurrentMachine.map((preset) => {
+                const isAbnormal = preset.condition === "ABNORMAL";
+                const isSelected = selectedPreset.id === preset.id;
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => onSelectPreset(preset)}
+                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                      isSelected
+                        ? isAbnormal
+                          ? "bg-rose-500/10 border-rose-500/60 text-white shadow-[0_0_15px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/30"
+                          : "bg-emerald-500/10 border-emerald-500/60 text-white shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30"
+                        : "bg-[#111113] border-[#27272A] text-zinc-300 hover:border-zinc-600"
+                    }`}
+                  >
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <Badge variant={isAbnormal ? "danger" : "success"} className="text-[10px] font-medium">
+                          {isAbnormal ? (
+                            <span className="flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" /> Abnormal
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> Normal
+                            </span>
+                          )}
+                        </Badge>
+                        <span className="text-xs font-medium text-white truncate">
+                          {preset.name.split("(")[1]?.replace(")", "") || preset.name}
                         </span>
                       </div>
-                      {isSelected && (
-                        <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                      <span className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5 font-normal">
+                        {preset.description}
+                      </span>
+                    </div>
+                    {isSelected && (
+                      <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -266,12 +259,12 @@ export function InputPanel({
                   <MicOff className="w-6 h-6 text-zinc-400" />
                 )}
               </div>
-              <div className="text-xs font-mono text-white">
+              <div className="text-xs text-white">
                 {isRecording
-                  ? `Merekam Suara Mesin: ${recordingSeconds} / 10s`
+                  ? `Merekam: ${recordingSeconds} / 10s`
                   : recordingSeconds === 10
-                  ? "Buffer Akustik 10s Siap (16kHz PCM)"
-                  : "Arahkan mikrofon ke casing mesin 10 detik"}
+                  ? "Rekaman 10 detik siap diproses"
+                  : "Arahkan mikrofon ke mesin selama 10 detik"}
               </div>
 
               {/* Volume Meter Wave */}
@@ -292,9 +285,9 @@ export function InputPanel({
                 variant={isRecording ? "danger" : "outline"}
                 size="sm"
                 onClick={handleToggleRecord}
-                className="w-full justify-center text-xs font-mono"
+                className="w-full justify-center text-xs"
               >
-                {isRecording ? "Hentikan Rekaman" : "Mulai Rekam Mikrofon (10s)"}
+                {isRecording ? "Hentikan Rekaman" : "Mulai Rekam (10s)"}
               </Button>
             </div>
           )}
@@ -314,10 +307,10 @@ export function InputPanel({
               />
               <UploadCloud className="w-6 h-6 text-zinc-400 mx-auto" />
               <div className="text-xs text-white font-medium">
-                {uploadedFileName ? uploadedFileName : "Klik untuk memilih file .WAV / audio"}
+                {uploadedFileName ? uploadedFileName : "Pilih file audio (.WAV)"}
               </div>
-              <p className="text-[10px] text-zinc-400 font-mono">
-                Standar: 16,000 Hz, 16-bit Mono PCM (.wav)
+              <p className="text-[10px] text-zinc-500 font-mono">
+                Format standar: 16 kHz Mono PCM
               </p>
             </div>
           )}
@@ -332,23 +325,20 @@ export function InputPanel({
           disabled={isLoading}
           variant="secondary"
           size="lg"
-          className="w-full justify-center text-xs font-mono font-bold tracking-wider gap-2 py-4 shadow-lg hover:shadow-xl transition-all"
+          className="w-full justify-center text-xs font-semibold tracking-wide gap-2 py-3.5 shadow-md hover:shadow-lg transition-all"
         >
           {isLoading ? (
             <>
               <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
-              MEMPROSES INFERENSI STGRAM-MFN...
+              Memproses Inferensi...
             </>
           ) : (
             <>
               <Zap className="w-4 h-4 text-black fill-black" />
-              JALANKAN DIAGNOSIS AI (&lt;50ms)
+              Jalankan Analisis
             </>
           )}
         </Button>
-        <span className="text-[10px] text-zinc-400 text-center block mt-2 font-mono">
-          Dual-Branch STgram-MFN v3 ONNX Edge • Latensi: &lt; 50 ms
-        </span>
       </div>
     </div>
   );

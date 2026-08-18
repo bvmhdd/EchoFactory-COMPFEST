@@ -1,12 +1,11 @@
 "use client";
 
-import { BarChart3, TrendingUp, DollarSign, Clock, ShieldAlert, HeartPulse, Gauge } from "lucide-react";
+import { Gauge } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DetectionResult } from "@/lib/inference-engine";
 
 export function ManagerWidget({ result }: { result: DetectionResult }) {
   const health = result.manager_view.machine_health_percentage;
-  const isAbnormal = result.operator_view.condition === "ABNORMAL";
 
   const radius = 38;
   const circumference = 2 * Math.PI * radius;
@@ -22,10 +21,9 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
               <Gauge className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-xs font-mono font-semibold tracking-wider text-zinc-200 uppercase">
-                Plant Manager Executive Hub
+              <span className="text-xs font-semibold text-zinc-200">
+                Ringkasan Kondisi Mesin
               </span>
-              <span className="text-[10px] text-zinc-400 block font-mono">Health Index & Financial Risk Assessment</span>
             </div>
           </div>
 
@@ -37,9 +35,13 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
                 ? "warning"
                 : "success"
             }
-            className="text-[10px] font-mono px-2.5 py-0.5"
+            className="text-[10px] font-medium px-2 py-0.5"
           >
-            {result.manager_view.risk_level.replace("_", " ")}
+            {result.manager_view.risk_level === "HIGH_CRITICAL"
+              ? "Risiko Tinggi"
+              : result.manager_view.risk_level === "MEDIUM_WARNING"
+              ? "Peringatan"
+              : "Aman"}
           </Badge>
         </div>
 
@@ -47,7 +49,7 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
           {/* Circular Health Gauge */}
           <div className="sm:col-span-5 flex items-center justify-center">
-            <div className="relative w-28 h-28 flex items-center justify-center">
+            <div className="relative w-24 h-24 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle
                   cx="50"
@@ -74,7 +76,7 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
                 <span className="text-xl font-bold font-mono text-white leading-none">
                   {health.toFixed(0)}%
                 </span>
-                <span className="text-[9px] font-mono text-zinc-400 uppercase mt-0.5">
+                <span className="text-[9px] text-zinc-400 mt-0.5 font-medium">
                   Health Index
                 </span>
               </div>
@@ -82,27 +84,27 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
           </div>
 
           {/* Metric Cards */}
-          <div className="sm:col-span-7 space-y-2 font-mono text-xs">
+          <div className="sm:col-span-7 space-y-2 text-xs">
             <div className="p-2.5 rounded-xl bg-[#111113] border border-[#27272A] flex items-center justify-between">
-              <span className="text-zinc-400 text-[11px]">Downtime Mitigated:</span>
-              <span className="text-white font-semibold text-sm">
+              <span className="text-zinc-400 text-[11px]">Downtime Dicegah:</span>
+              <span className="text-white font-semibold font-mono text-xs">
                 ${result.manager_view.estimated_downtime_mitigated_usd.toLocaleString()} USD
               </span>
             </div>
 
             <div className="p-2.5 rounded-xl bg-[#111113] border border-[#27272A] flex items-center justify-between">
-              <span className="text-zinc-400 text-[11px]">Est. Remaining Life:</span>
-              <span className="text-amber-400 font-semibold">
-                ~{result.manager_view.estimated_rul_days} Days
+              <span className="text-zinc-400 text-[11px]">Estimasi Sisa Umur:</span>
+              <span className="text-amber-400 font-semibold font-mono text-xs">
+                ~{result.manager_view.estimated_rul_days} Hari
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="pt-3 border-t border-[#27272A] text-[11px] text-zinc-400 flex items-center justify-between font-mono">
-        <span>Fleet Optimization Impact:</span>
-        <span className="text-emerald-400 font-semibold">99.98% SLA Availability</span>
+      <div className="pt-3 border-t border-[#27272A] text-[11px] text-zinc-400 flex items-center justify-between">
+        <span>Ketersediaan Armada:</span>
+        <span className="text-emerald-400 font-semibold font-mono">99.98% Availability</span>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, CheckCircle2, AlertCircle, Zap, Radio, HardHat } from "lucide-react";
+import { Activity, CheckCircle2, AlertCircle, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DetectionResult } from "@/lib/inference-engine";
 import { PresetSample } from "@/lib/audio-presets";
@@ -34,10 +34,9 @@ export function OperatorWidget({
             <Activity className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-xs font-mono font-semibold tracking-wider text-zinc-200 uppercase">
-              Operator Telemetry Console
+            <span className="text-xs font-semibold text-zinc-200">
+              Kondisi Akustik
             </span>
-            <span className="text-[10px] text-zinc-400 block font-mono">Real-time Acoustic Health Stream</span>
           </div>
         </div>
 
@@ -48,17 +47,17 @@ export function OperatorWidget({
           </Badge>
           <Badge
             variant={isAbnormal ? "danger" : "success"}
-            className="text-xs font-mono font-semibold px-2.5 py-1"
+            className="text-xs font-medium px-2.5 py-1"
           >
             {isAbnormal ? (
               <span className="flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" />
-                ABNORMAL (ALERT)
+                Abnormal
               </span>
             ) : (
               <span className="flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                HEALTHY (PASS)
+                Normal
               </span>
             )}
           </Badge>
@@ -66,32 +65,32 @@ export function OperatorWidget({
       </div>
 
       {/* Main Condition Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 font-mono text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-xs">
         <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800/80">
-          <span className="text-zinc-400 block text-[10px] uppercase">Anomaly Score</span>
+          <span className="text-zinc-400 block text-[11px]">Skor Anomali</span>
           <div className="flex items-baseline gap-1.5 mt-0.5">
             <span
-              className={`text-lg font-bold ${
+              className={`text-lg font-bold font-mono ${
                 isAbnormal ? "text-rose-400" : "text-emerald-400"
               }`}
             >
               {result.operator_view.anomaly_score.toFixed(3)}
             </span>
-            <span className="text-[10px] text-zinc-400">(Limit: 0.500)</span>
+            <span className="text-[10px] text-zinc-500 font-mono">(Threshold: 0.500)</span>
           </div>
         </div>
 
         <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800/80">
-          <span className="text-zinc-400 block text-[10px] uppercase">Confidence</span>
-          <span className="text-lg font-bold text-white block mt-0.5">
+          <span className="text-zinc-400 block text-[11px]">Tingkat Keyakinan</span>
+          <span className="text-lg font-bold text-white block mt-0.5 font-mono">
             {result.operator_view.confidence_level}
           </span>
         </div>
 
         <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800/80">
-          <span className="text-zinc-400 block text-[10px] uppercase">Acoustic Architecture</span>
+          <span className="text-zinc-400 block text-[11px]">Arsitektur Model</span>
           <span className="text-xs font-semibold text-sky-400 truncate block mt-1">
-            STgram-MFN v3 ONNX
+            STgram-MFN v3
           </span>
         </div>
       </div>

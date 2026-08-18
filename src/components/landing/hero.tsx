@@ -6,15 +6,12 @@ import {
   ShieldCheck,
   Zap,
   ArrowUpRight,
-  CheckCircle2,
-  Cpu,
   Wind,
   Droplet,
   SlidersHorizontal,
   Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export function Hero() {
   return (
@@ -22,8 +19,8 @@ export function Hero() {
       {/* Top Engine Pill Badge */}
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/15 bg-white/5 backdrop-blur-md mb-8 hover:border-white/30 transition-all cursor-default">
         <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-        <span className="text-xs font-medium text-zinc-300 font-mono tracking-wide">
-          STgram-MFN v3 ONNX Edge • Polygon Amoy 80002
+        <span className="text-xs font-medium text-zinc-300 tracking-wide">
+          Acoustic Machine Intelligence • Polygon Amoy Ledger
         </span>
         <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
       </div>
@@ -35,8 +32,8 @@ export function Hero() {
 
       {/* Subtitle */}
       <p className="max-w-2xl text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed mb-10 font-normal">
-        Detect microscopic mechanical degradation in 0 dB SNR industrial noise.
-        Durable sub-50ms edge inference, ISO 10816 cognitive SOP diagnostics, and tamper-proof on-chain machine health ledgers.
+        Deteksi degradasi mekanik mikro di tengah kebisingan lantai pabrik.
+        Inferensi cepat di perangkat lokal, rekomendasi perbaikan berbasis standar ISO 10816, dan paspor kesehatan mesin on-chain.
       </p>
 
       {/* Dual CTA Buttons */}
@@ -47,7 +44,7 @@ export function Hero() {
             size="lg"
             className="w-full sm:w-auto px-8 py-4 text-sm font-semibold tracking-wide border-zinc-700 hover:border-white gap-2 shadow-[0_0_30px_rgba(255,255,255,0.08)]"
           >
-            LAUNCH CONSOLE
+            BUKA KONSOL DIAGNOSTIK
             <span className="text-zinc-400 font-mono">»</span>
           </Button>
         </Link>
@@ -63,7 +60,7 @@ export function Hero() {
             size="lg"
             className="w-full sm:w-auto px-8 py-4 text-sm font-semibold tracking-wide gap-2 shadow-[0_0_30px_rgba(255,255,255,0.18)]"
           >
-            VIEW SMART CONTRACT
+            LIHAT SMART CONTRACT
             <ArrowUpRight className="w-4 h-4 text-black" />
           </Button>
         </a>
@@ -73,25 +70,23 @@ export function Hero() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl w-full mb-16 text-left">
         {[
           { icon: Wind, title: "Fan Blower", score: "94.04% AUC", status: "Optimal" },
-          { icon: Droplet, title: "Pump Centrifugal", score: "91.90% AUC", status: "Optimal" },
-          { icon: SlidersHorizontal, title: "Slider Rail", score: "99.32% AUC", status: "Optimal" },
-          { icon: Activity, title: "Solenoid Valve", score: "99.60% AUC", status: "Optimal" },
-        ].map((item, idx) => {
-          const IconComp = item.icon;
+          { icon: Droplet, title: "Pump Station", score: "93.78% AUC", status: "Optimal" },
+          { icon: SlidersHorizontal, title: "Slider Guide", score: "99.32% AUC", status: "Optimal" },
+          { icon: Activity, title: "Hydro Valve", score: "97.42% AUC", status: "Optimal" },
+        ].map((item) => {
+          const IconComponent = item.icon;
           return (
             <div
-              key={idx}
-              className="p-3.5 rounded-xl bg-[#09090B]/80 border border-[#27272A] flex flex-col gap-1 hover:border-zinc-500 transition-colors shadow-lg"
+              key={item.title}
+              className="p-3.5 rounded-xl border border-[#27272A] bg-[#0A0A0B]/80 backdrop-blur flex flex-col justify-between hover:border-zinc-700 transition-colors"
             >
-              <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span className="flex items-center gap-2 font-medium text-white">
-                  <IconComp className="w-3.5 h-3.5 text-sky-400" />
-                  <span>{item.title}</span>
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <div className="flex items-center justify-between mb-2">
+                <IconComponent className="w-4 h-4 text-zinc-400" />
+                <span className="text-[10px] font-mono text-zinc-400">{item.score}</span>
               </div>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-xs font-mono text-zinc-300">{item.score}</span>
+              <div className="text-xs font-semibold text-white">{item.title}</div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] text-zinc-400">Baseline</span>
                 <span className="text-[10px] uppercase font-mono tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                   0 dB SNR
                 </span>
@@ -101,8 +96,8 @@ export function Hero() {
         })}
       </div>
 
-      {/* Social Proof / Ecosystem Bar with Smooth Infinite Right-Sliding Marquee */}
-      <div className="w-full max-w-6xl border-t border-[#2A2A2E]/60 pt-10 overflow-hidden">
+      {/* Social Proof / Ecosystem Bar with Smooth Infinite Running Marquee */}
+      <div className="w-full max-w-6xl border-t border-[#27272A]/60 pt-10 overflow-hidden">
         <p className="text-xs uppercase tracking-widest text-zinc-400 font-mono mb-8">
           INDUSTRIAL STANDARDS & EMBEDDED ECOSYSTEM
         </p>

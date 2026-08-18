@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Wrench, CheckCircle2, FileText, Clock, AlertTriangle, Check, ShieldAlert } from "lucide-react";
+import { Wrench, CheckCircle2, FileText, AlertTriangle, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DetectionResult } from "@/lib/inference-engine";
 
@@ -19,10 +19,9 @@ export function SupervisorWidget({ result }: { result: DetectionResult }) {
               <Wrench className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-xs font-mono font-semibold tracking-wider text-zinc-200 uppercase">
-                Supervisor Diagnostic Core
+              <span className="text-xs font-semibold text-zinc-200">
+                Analisis Akar Masalah
               </span>
-              <span className="text-[10px] text-zinc-400 block font-mono">Root Cause & ISO 10816 SOP RAG</span>
             </div>
           </div>
 
@@ -34,10 +33,10 @@ export function SupervisorWidget({ result }: { result: DetectionResult }) {
         {/* Fault Diagnosis */}
         <div className="space-y-3">
           <div>
-            <span className="text-[10px] font-mono text-zinc-400 uppercase block">
-              Component Anomaly Identification
+            <span className="text-[11px] text-zinc-400 block mb-1">
+              Identifikasi Masalah
             </span>
-            <div className="text-sm font-semibold text-white mt-1 flex items-center gap-2">
+            <div className="text-sm font-semibold text-white flex items-center gap-2">
               {isAbnormal ? (
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
               ) : (
@@ -48,9 +47,9 @@ export function SupervisorWidget({ result }: { result: DetectionResult }) {
           </div>
 
           {/* Standard & Actionable SOP */}
-          <div className="p-3.5 rounded-xl bg-[#111113] border border-[#27272A] space-y-1.5">
-            <span className="text-[10px] font-mono text-zinc-400 uppercase block">
-              Standard Operating Procedure (SOP)
+          <div className="p-3 rounded-xl bg-[#111113] border border-[#27272A] space-y-1">
+            <span className="text-[10px] text-zinc-400 uppercase font-mono block">
+              Rekomendasi Tindakan
             </span>
             <p className="text-xs text-zinc-300 leading-relaxed font-sans">
               {result.supervisor_view.recommended_action}
@@ -59,30 +58,30 @@ export function SupervisorWidget({ result }: { result: DetectionResult }) {
         </div>
       </div>
 
-      {/* Automated Work Order Draft Action */}
-      <div className="pt-3 border-t border-[#27272A] flex items-center justify-between text-xs font-mono">
-        <div className="text-zinc-400">
-          <span>Ticket: </span>
+      {/* Automated Work Order Action */}
+      <div className="pt-3 border-t border-[#27272A] flex items-center justify-between text-xs">
+        <div className="text-zinc-400 font-mono text-[11px]">
+          <span>Tiket: </span>
           <span className="text-zinc-200 font-semibold">{result.supervisor_view.work_order_draft.wo_id}</span>
         </div>
 
         <button
           onClick={() => setWoCreated(!woCreated)}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-mono transition-all flex items-center gap-1.5 ${
+          className={`px-3 py-1.5 rounded-lg border text-xs transition-all flex items-center gap-1.5 ${
             woCreated
-              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 font-medium"
               : "bg-[#18181B] hover:bg-[#27272A] border-zinc-700 text-zinc-300 hover:text-white"
           }`}
         >
           {woCreated ? (
             <>
               <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Work Order Dispatched</span>
+              <span>Work Order Diterbitkan</span>
             </>
           ) : (
             <>
               <FileText className="w-3.5 h-3.5" />
-              <span>Dispatch Work Order (ERP)</span>
+              <span>Buat Work Order</span>
             </>
           )}
         </button>
