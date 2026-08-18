@@ -93,12 +93,15 @@ class CognitiveDiagnosticEngine:
         machine_id: str,
         anomaly_score: float,
         is_anomaly: bool,
-        crest_factor: float
+        crest_factor: float,
+        snr_label: str = "0 dB"
     ) -> Dict[str, Any]:
         """
         Mendiagnosis akar masalah komponen, zona ISO 10816, estimasi RUL,
-        dan rekomendasi suku cadang ERP.
+        dan rekomendasi suku cadang ERP dengan memperhitungkan profil SNR.
         """
+        clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
+
         # 1. Tentukan Zona ISO 10816 & Estimasi RUL
         if anomaly_score <= 0.050:
             zone = "Zone A"
@@ -113,16 +116,16 @@ class CognitiveDiagnosticEngine:
         elif anomaly_score <= 0.600:
             zone = "Zone C"
             rul_hours = random.randint(120, 240)
-            defect_type = self._get_default_defect(machine_id)
+            defect_type = self._get_default_defect(clean_mid)
             severity = "WARNING (ZONE C)"
         else:
             zone = "Zone D"
             rul_hours = random.randint(24, 48)
-            defect_type = self._get_critical_defect(machine_id)
+            defect_type = self._get_critical_defect(clean_mid)
             severity = "CRITICAL DANGER (ZONE D)"
 
         iso_info = ISO_10816_ZONES[zone]
-        erp_part = ERP_INVENTORY.get(machine_id, ERP_INVENTORY["FAN_ID_00"])
+        erp_part = ERP_INVENTORY.get(clean_mid, ERP_INVENTORY["FAN_ID_00"])
 
         # 2. Panggil Gemini Flash jika API Key tersedia
         gemini_explanation = None
@@ -130,14 +133,15 @@ class CognitiveDiagnosticEngine:
             try:
                 prompt = (
                     f"Sebagai AI Predictive Maintenance Engineer standar ISO 10816, analisis anomali suara mesin berikut:\n"
-                    f"- Machine ID: {machine_id}\n"
+                    f"- Machine ID: {clean_mid}\n"
+                    f"- Noise SNR Profile: {snr_label}\n"
                     f"- Anomaly Score: {anomaly_score:.4f} (Threshold: 0.050)\n"
                     f"- Spectral Crest Factor: {crest_factor:.2f}\n"
                     f"- ISO 10816 Severity: {zone} ({iso_info['condition']})\n"
                     f"- Defect: {defect_type}\n"
                     f"- Estimated RUL: {rul_hours} Jam\n"
                     f"Berikan ringkasan diagnosis teknis berbahasa Indonesia maksimal 3 kalimat: "
-                    f"(1) Akar masalah mekanik, (2) Risiko jika dibiarkan, (3) Tindakan perbaikan segera."
+                    f"(1) Identifikasi akar masalah pada kondisi noise {snr_label}, (2) Risiko jika dibiarkan, (3) Tindakan perbaikan segera."
                 )
                 response = self.model.generate_content(prompt)
                 gemini_explanation = response.text.strip()
@@ -146,11 +150,12 @@ class CognitiveDiagnosticEngine:
 
         if not gemini_explanation:
             gemini_explanation = self._generate_rule_based_diagnosis(
-                machine_id, defect_type, zone, rul_hours, erp_part
+                clean_mid, defect_type, zone, rul_hours, erp_part, snr_label
             )
 
         return {
-            "machine_id": machine_id,
+            "machine_id": clean_mid,
+            "snr_label": snr_label,
             "anomaly_score": anomaly_score,
             "is_anomaly": is_anomaly,
             "severity": severity,
@@ -183,12 +188,12 @@ class CognitiveDiagnosticEngine:
         return defects.get(machine_id, "Severe Mechanical Defect")
 
     def _generate_rule_based_diagnosis(
-        self, machine_id: str, defect: str, zone: str, rul: int, part: dict
+        self, machine_id: str, defect: str, zone: str, rul: int, part: dict, snr_label: str = "0 dB"
     ) -> str:
         if "NORMAL" in zone or zone in ["Zone A", "Zone B"]:
-            return f"✅ Mesin beroperasi dalam batas toleransi standar ISO 10816 ({zone}). Spektrogram akustik menunjukkan harmonik rotasi yang stabil. Lanjutkan jadwal inspeksi rutin harian."
+            return f"✅ Mesin {machine_id} beroperasi dalam batas toleransi standar ISO 10816 ({zone}) pada profil kebisingan {snr_label}. Spektrogram akustik menunjukkan harmonik rotasi yang stabil. Lanjutkan jadwal inspeksi rutin harian."
         return (
-            f"⚠️ Terdeteksi anomali pada {machine_id} terklasifikasi dalam ISO 10816 {zone}. "
+            f"⚠️ Terdeteksi anomali pada {machine_id} terklasifikasi dalam ISO 10816 {zone} (Kondisi Noise: {snr_label}). "
             f"Akar masalah teridentifikasi sebagai '{defect}' dengan estimasi sisa umur operasional (RUL) tersisa ~{rul} jam. "
             f"Disarankan segera melakukan inspeksi dan pergantian {part['part_name']} ({part['sku']}) sebelum terjadi downtime tak terduga."
         )

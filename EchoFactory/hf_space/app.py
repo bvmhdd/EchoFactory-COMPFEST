@@ -29,6 +29,11 @@ except Exception as ex:
 # State Penyimpanan Diagnosis Terakhir
 CURRENT_SCAN_STATE = {
     "machine_id": "FAN_ID_00",
+    "machine_label": "Fan #00 (Industrial Blower)",
+    "is_auto_detected": False,
+    "machine_confidence": 100.0,
+    "detected_snr": "0_dB",
+    "snr_label": "0 dB (Standard Factory Floor)",
     "anomaly_score": 0.024,
     "is_anomaly": False,
     "crest_factor": 3.2,
@@ -48,7 +53,7 @@ def load_demo_audio(sample_filename, machine_id):
     return None, machine_id
 
 def process_audio_scan(audio_input, machine_id):
-    """Memproses file audio atau rekaman mikrofon."""
+    """Memproses file audio atau rekaman mikrofon dengan auto-detection mesin & SNR."""
     if audio_input is None:
         return (
             None,
@@ -58,20 +63,24 @@ def process_audio_scan(audio_input, machine_id):
             "Belum ada data komitmen blockchain."
         )
 
-    clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
-
     try:
         # 1. Load & Preprocess Audio (Resample mono 16kHz, pad/trim 10 detik)
         y, sr = audio_engine.load_and_preprocess_audio(audio_input)
         
-        # 2. Extract Embedding & Calculate Anomaly Score
-        scan_res = audio_engine.extract_embedding_and_score(y, machine_id=clean_mid)
+        # 2. Extract Embedding, Auto-Detect Machine & SNR, Calculate Anomaly Score
+        scan_res = audio_engine.extract_embedding_and_score(y, machine_id=machine_id)
+        clean_mid = scan_res["machine_id"]
         
         # 3. Generate High-Tech Spectral Visualizer
         fig = audio_engine.generate_spectrogram_plot(scan_res, y)
         
         # 4. Update Current State
         CURRENT_SCAN_STATE["machine_id"] = clean_mid
+        CURRENT_SCAN_STATE["machine_label"] = scan_res["machine_label"]
+        CURRENT_SCAN_STATE["is_auto_detected"] = scan_res["is_auto_detected"]
+        CURRENT_SCAN_STATE["machine_confidence"] = scan_res["machine_confidence"]
+        CURRENT_SCAN_STATE["detected_snr"] = scan_res["detected_snr"]
+        CURRENT_SCAN_STATE["snr_label"] = scan_res["snr_label"]
         CURRENT_SCAN_STATE["anomaly_score"] = scan_res["anomaly_score"]
         CURRENT_SCAN_STATE["is_anomaly"] = scan_res["is_anomaly"]
         CURRENT_SCAN_STATE["crest_factor"] = scan_res["crest_factor"]
@@ -82,28 +91,40 @@ def process_audio_scan(audio_input, machine_id):
             machine_id=clean_mid,
             anomaly_score=scan_res["anomaly_score"],
             status=scan_res["status"],
-            defect_type="None (Healthy)" if not scan_res["is_anomaly"] else "Acoustic Anomaly Detected"
+            defect_type="None (Healthy)" if not scan_res["is_anomaly"] else f"Acoustic Anomaly ({scan_res['detected_snr']})"
         )
+        
+        # Format Info Deteksi
+        detect_badge_info = ""
+        if scan_res["is_auto_detected"]:
+            detect_badge_info = f"<div style='margin-bottom:8px; font-size:13px; color:#38BDF8;'>🤖 <b>Auto-Detected Mesin:</b> <span style='color:#F1F5F9; font-weight:bold;'>{scan_res['machine_label']}</span> (Keyakinan Akustik: <b>{scan_res['machine_confidence']}%</b>)</div>"
+        
+        snr_badge_info = f"<div style='margin-bottom:8px; font-size:12.5px; color:#FBBF24;'>🔊 <b>Profil Kebisingan (SNR):</b> <span style='color:#FEF08A; font-weight:bold;'>{scan_res['snr_label']}</span> (Estimasi SNR: {scan_res['snr_db']} dB)</div>"
         
         # Format Badge Keputusan
         if not scan_res["is_anomaly"]:
             status_html = (
                 f"<div style='background-color:#064E3B; border:2px solid #10B981; border-radius:10px; padding:15px; color:#ECFDF5;'>"
+                f"{detect_badge_info}"
+                f"{snr_badge_info}"
                 f"<h3 style='margin:0; color:#34D399;'>🟢 MESIN SEHAT (PASS)</h3>"
-                f"<p style='margin:5px 0 0 0; font-size:14px;'>Skor Anomali: <b>{scan_res['anomaly_score']:.4f}</b> (Batas Maks: {scan_res['threshold']}) | Spektrum stabil dalam zona toleransi ISO 10816.</p>"
+                f"<p style='margin:5px 0 0 0; font-size:14px;'>Skor Anomali: <b>{scan_res['anomaly_score']:.4f}</b> (Batas Threshold {scan_res['detected_snr']}: {scan_res['threshold']}) | Spektrum stabil dalam standar ISO 10816.</p>"
                 f"</div>"
             )
         else:
             status_html = (
                 f"<div style='background-color:#7F1D1D; border:2px solid #EF4444; border-radius:10px; padding:15px; color:#FEF2F2; animation:pulse 2s infinite;'>"
+                f"{detect_badge_info}"
+                f"{snr_badge_info}"
                 f"<h3 style='margin:0; color:#F87171;'>🔴 ANOMALI TERDETEKSI (ALERT)</h3>"
-                f"<p style='margin:5px 0 0 0; font-size:14px;'>Skor Anomali: <b>{scan_res['anomaly_score']:.4f}</b> (Melebihi Batas {scan_res['threshold']}) | <b>Segera buka Tab 2 (Supervisor Hub) untuk diagnosis akar masalah!</b></p>"
+                f"<p style='margin:5px 0 0 0; font-size:14px;'>Skor Anomali: <b>{scan_res['anomaly_score']:.4f}</b> (Melebihi Batas {scan_res['threshold']}) | <b>Buka Tab 2 (Supervisor Hub) untuk diagnosis akar masalah & Work Order!</b></p>"
                 f"</div>"
             )
             
         bc_html = (
             f"<div style='background:#1E293B; padding:12px; border-radius:8px; font-size:13px; color:#CBD5E1;'>"
             f"<b>⛓️ Status Web3 Ledger:</b> {bc_res['status']}<br>"
+            f"<b>Mesin:</b> <code style='color:#F1F5F9;'>{clean_mid}</code> | <b>SNR:</b> <code style='color:#FEF08A;'>{scan_res['detected_snr']}</code><br>"
             f"<b>Data Hash SHA-256:</b> <code style='color:#38BDF8;'>{bc_res['data_hash']}</code><br>"
             f"<b>Tx Hash:</b> <code style='color:#A78BFA;'>{bc_res['tx_hash'][:22]}...</code><br>"
             f"{bc_res['explorer_link']}"
@@ -131,8 +152,10 @@ def run_deep_diagnostic(machine_id):
     score = CURRENT_SCAN_STATE["anomaly_score"]
     is_anom = CURRENT_SCAN_STATE["is_anomaly"]
     crest = CURRENT_SCAN_STATE["crest_factor"]
+    mid = CURRENT_SCAN_STATE["machine_id"]
+    snr_lbl = CURRENT_SCAN_STATE["snr_label"]
     
-    diag = cognitive_engine.diagnose_anomaly(machine_id, score, is_anom, crest)
+    diag = cognitive_engine.diagnose_anomaly(mid, score, is_anom, crest, snr_label=snr_lbl)
     CURRENT_SCAN_STATE["diagnosis"] = diag
     
     # Format Card ISO & RUL
@@ -140,7 +163,8 @@ def run_deep_diagnostic(machine_id):
     
     diag_html = (
         f"<div style='background:#0F172A; border-left:5px solid {iso_color}; padding:15px; border-radius:8px; margin-bottom:15px;'>"
-        f"<h3 style='margin:0 0 8px 0; color:#E2E8F0;'>🔬 Hasil Analisis Kognitif Gemini Flash Multimodal & SOP RAG</h3>"
+        f"<h3 style='margin:0 0 8px 0; color:#E2E8F0;'>🔬 Analisis Kognitif Gemini Flash Multimodal & SOP ISO 10816</h3>"
+        f"<div style='background:#1E293B; display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; color:#FBBF24; margin-bottom:8px;'>🔊 Kondisi Kebisingan Terdeteksi: <b>{diag['snr_label']}</b></div>"
         f"<p style='margin:0 0 10px 0; font-size:14px; color:#94A3B8; line-height:1.5;'>{diag['diagnostic_summary']}</p>"
         f"<div style='display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px;'>"
         f"  <div style='background:#1E293B; padding:10px; border-radius:6px;'><b>Standar ISO 10816:</b><br><span style='color:{iso_color}; font-size:16px; font-weight:bold;'>{diag['iso_zone']}</span> ({diag['iso_condition']})</div>"
@@ -296,8 +320,14 @@ with gr.Blocks(title="EchoFactory - Industrial AI & Blockchain Passport", css=cu
                 with gr.Column(scale=5):
                     machine_select = gr.Dropdown(
                         label="Pilih Unit Mesin Pabrik",
-                        choices=["FAN_ID_00 (Industrial Blower)", "PUMP_ID_01 (Centrifugal Pump)", "SLIDER_ID_02 (Linear Guide Rail)", "VALVE_ID_03 (Solenoid Valve)"],
-                        value="FAN_ID_00 (Industrial Blower)"
+                        choices=[
+                            "🤖 AUTO-DETECT (Otomatis Deteksi Mesin & Noise SNR)",
+                            "FAN_ID_00 (Industrial Blower)",
+                            "PUMP_ID_01 (Centrifugal Pump)",
+                            "SLIDER_ID_02 (Linear Guide Rail)",
+                            "VALVE_ID_03 (Solenoid Valve)"
+                        ],
+                        value="🤖 AUTO-DETECT (Otomatis Deteksi Mesin & Noise SNR)"
                     )
                     
                     gr.HTML(
