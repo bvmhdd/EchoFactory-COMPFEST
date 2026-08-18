@@ -72,8 +72,6 @@ def process_audio_scan(audio_input, machine_id):
         return (
             None,
             "⚠️ Harap rekam suara via mikrofon atau pilih file audio sampel!",
-            "0.0000",
-            "UNKNOWN",
             "Belum ada data komitmen blockchain."
         )
 
@@ -148,16 +146,12 @@ def process_audio_scan(audio_input, machine_id):
         return (
             fig,
             status_html,
-            f"{scan_res['anomaly_score']:.4f}",
-            scan_res["status"],
             bc_html
         )
     except Exception as e:
         return (
             None,
             f"<div style='color:#EF4444;'>Error memproses audio: {str(e)}</div>",
-            "ERR",
-            "ERROR",
             str(e)
         )
 
@@ -487,7 +481,7 @@ with gr.Blocks(title="EchoFactory - Industrial AI & Blockchain Passport", css=cu
     btn_scan.click(
         process_audio_scan,
         inputs=[audio_input, machine_select],
-        outputs=[plot_output, decision_badge, gr.Textbox(visible=False), gr.Textbox(visible=False), bc_badge]
+        outputs=[plot_output, decision_badge, bc_badge]
     )
 
     # 3. Voice Assistant
@@ -502,4 +496,4 @@ with gr.Blocks(title="EchoFactory - Industrial AI & Blockchain Passport", css=cu
     btn_submit_claim.click(submit_parametric_claim, inputs=[bc_machine_select, claim_reason_input], outputs=[claim_output_html])
 
 if __name__ == "__main__":
-    demo.queue().launch(server_name="0.0.0.0", server_port=7860, share=False)
+    demo.queue().launch(show_api=False)
