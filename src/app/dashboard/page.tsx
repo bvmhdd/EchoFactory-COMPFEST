@@ -11,6 +11,7 @@ import { OperatorWidget } from "@/components/dashboard/operator-widget";
 import { SupervisorWidget } from "@/components/dashboard/supervisor-widget";
 import { ManagerWidget } from "@/components/dashboard/manager-widget";
 import { AuditorWidget } from "@/components/dashboard/auditor-widget";
+import { QueryAssistantWidget } from "@/components/dashboard/query-assistant-widget";
 import KineticGrid from "@/components/ui/kinetic-grid";
 import { Cpu, Activity, ShieldCheck } from "lucide-react";
 
@@ -332,6 +333,9 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Industrial Voice & Text Query Assistant (Gemini 1.5 Flash LLM RAG) */}
+                  <QueryAssistantWidget result={detectionResult} />
                 </>
               )}
             </div>
