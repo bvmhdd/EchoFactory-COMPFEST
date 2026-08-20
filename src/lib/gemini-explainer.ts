@@ -35,31 +35,34 @@ Tugas Anda: Berikan analisis diagnostik preskriptif yang ringkas, teknis, dan be
   `.trim();
 
   if (apiKey) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: {
-              temperature: 0.3,
-              maxOutputTokens: 300,
-            },
-          }),
-        }
-      );
+    const models = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash"];
+    for (const model of models) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }] }],
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 300,
+              },
+            }),
+          }
+        );
 
-      if (response.ok) {
-        const data = await response.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text && text.trim().length > 0) {
-          return text.trim();
+        if (response.ok) {
+          const data = await response.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text && text.trim().length > 0) {
+            return text.trim();
+          }
         }
+      } catch (_err) {
+        // Fallback to next model
       }
-    } catch (_err) {
-      // Fallback below
     }
   }
 
