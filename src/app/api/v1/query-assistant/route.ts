@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DetectionResult } from "@/lib/inference-engine";
 
+function sanitizeCompleteResponse(text: string): string {
+  let trimmed = text.trim();
+  if (!/[.!?\`\n]$/.test(trimmed)) {
+    const lastPeriodIndex = Math.max(
+      trimmed.lastIndexOf("."),
+      trimmed.lastIndexOf("!"),
+      trimmed.lastIndexOf("?")
+    );
+    if (lastPeriodIndex > 50) {
+      trimmed = trimmed.substring(0, lastPeriodIndex + 1);
+    }
+  }
+  return trimmed;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { query, result } = await req.json();
@@ -15,7 +30,7 @@ export async function POST(req: NextRequest) {
     // Attempt Gemini Live API Call if GEMINI_API_KEY is configured in .env.local
     if (apiKey && apiKey.trim().length > 5) {
       const systemPrompt = `
-Anda adalah Gemini 1.5 Flash Industrial Reliability AI Assistant untuk platform EchoFactory.
+Anda adalah Gemini Industrial Reliability AI Assistant untuk platform EchoFactory.
 Tugas Anda: Jawablah pertanyaan user berikut secara LANGSUNG, kontekstual, profesional, dan solutif.
 
 ${
@@ -38,11 +53,11 @@ ${
 
 PERTANYAAN USER: "${query}"
 
-Instruksi Respons:
+ATURAN UTAMA RESPONS:
 1. Jawab pertanyaan user secara LANGSUNG dan spesifik sesuai maksud teksnya.
 2. Jika user bertanya tentang perawatan/kebersihan ("bagaimana caranya agar mesin tetap terawat/bersih"), berikan langkah perawatan mekanis konkret (housekeeping, pembersihan rotor, pelumasan bearing, inspeksi kelurusan).
 3. Jika user bertanya "apakah bisa diperbaiki", jelaskan langkah perbaikan preskriptif ISO 10816-3 spesifik untuk kerusakan unit saat ini.
-4. Gunakan bahasa Indonesia yang ramah, profesional, dan mudah dipahami oleh operator pabrik.
+4. WAJIB: Tuliskan jawaban secara LENGKAP dan TUNTAS hingga titik akhir. Akhiri kalimat terakhir dengan tanda titik (.). JANGAN PERNAH memotong atau menggantung kalimat.
 `.trim();
 
       const geminiModels = [
@@ -63,7 +78,7 @@ Instruksi Respons:
                 contents: [{ parts: [{ text: systemPrompt }] }],
                 generationConfig: {
                   temperature: 0.3,
-                  maxOutputTokens: 1200,
+                  maxOutputTokens: 8192, // Full model capacity - no arbitrary truncation
                 },
               }),
             }
@@ -73,7 +88,7 @@ Instruksi Respons:
             const data = await response.json();
             const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (answer && answer.trim().length > 0) {
-              return NextResponse.json({ answer: answer.trim() });
+              return NextResponse.json({ answer: sanitizeCompleteResponse(answer) });
             }
           }
         } catch (_err) {
@@ -84,7 +99,7 @@ Instruksi Respons:
 
     // Dynamic High-Intelligence Natural Language NLP Engine
     const answer = solveUserQuery(query, currentResult);
-    return NextResponse.json({ answer });
+    return NextResponse.json({ answer: sanitizeCompleteResponse(answer) });
   } catch (_err) {
     return NextResponse.json(
       { error: "Gagal memproses query assistant Gemini Flash" },
@@ -108,16 +123,16 @@ function solveUserQuery(query: string, result: DetectionResult | null): string {
     q.includes("housekeeping")
   ) {
     if (result) {
-      return `[Gemini 1.5 Flash AI Assistant]
+      return `[Gemini Flash AI Assistant]
 Untuk menjaga unit **${result.machine_id}** (${result.machine_type.toUpperCase()}) agar tetap terawat baik, bersih, dan beroperasi optimal:
 
 1. **Pembersihan Komponen Utama (Housekeeping)**: Lakukan pembersihan rutin dari debu industri, akumulasi pelumas bekas, dan kotoran pada rumah komponen/rotor setiap 250 jam kerja. Penumpukan kotoran pada rotor dapat menyebabkan ketidakseimbangan (*unbalance*) getaran.
-2. **Pelumasan Briket & Bearing (ISO 10816-3)**: Berikan pelumas/grease standar manufaktur pada rumah bantalan (*bearing housing*) secara teratur dan periksa kelurusan poros (*shaft alignment*).
+2. **Pelumasan Bearing & Alignment (ISO 10816-3)**: Berikan pelumas/grease standar manufaktur pada rumah bantalan (*bearing housing*) secara teratur dan periksa kelurusan poros (*shaft alignment*).
 3. **Inspeksi Baut & Fondasi**: Pastikan baut dudukan (*mounting bolts*) terikat kencang dan tidak ada gesekan mekanis (*rubbing*) pada pelindung (*shroud*).
 
 Status kesehatan unit **${result.machine_id}** saat ini adalah **${result.manager_view.machine_health_percentage}%** (${result.operator_view.condition}).`;
     } else {
-      return `[Gemini 1.5 Flash AI Assistant]
+      return `[Gemini Flash AI Assistant]
 Untuk merawat mesin industri agar tetap bersih dan awet:
 1. Jalankan pembersihan komponen dari debu/minyak industri secara berkala.
 2. Lakukan pelumasan bearing sesuai spesifikasi manufaktur.
@@ -136,14 +151,14 @@ Untuk merawat mesin industri agar tetap bersih dan awet:
     if (result) {
       const isAbnormal = result.operator_view.condition === "ABNORMAL";
       if (isAbnormal) {
-        return `[Gemini 1.5 Flash AI Assistant]
+        return `[Gemini Flash AI Assistant]
 Ya, masalah pada unit **${result.machine_id}** (${result.supervisor_view.fault_type}) **SANGAT BISA DIPERBAIKI** dengan alur tindakan preskriptif berikut:
 
 1. **Tindakan Perbaikan Lapangan**: ${result.supervisor_view.recommended_action}.
 2. **Work Order Ticket**: Terbitkan tiket perbaikan **${result.supervisor_view.work_order_draft.wo_id}** (Prioritas: **${result.supervisor_view.work_order_draft.priority}**).
 3. **Estimasi Manfaat**: Perbaikan tepat waktu menghindarkan estimasi kerugian downtime senilai **$${result.manager_view.estimated_downtime_mitigated_usd.toLocaleString()} USD**.`;
       } else {
-        return `[Gemini 1.5 Flash AI Assistant]
+        return `[Gemini Flash AI Assistant]
 Unit **${result.machine_id}** saat ini dalam kondisi **NORMAL (PASS)** dengan kesehatan ${result.manager_view.machine_health_percentage}%. Tidak memerlukan perbaikan darurat, cukup lanjutkan perawatan pencegahan (*preventive maintenance*) berkala.`;
       }
     }
@@ -155,7 +170,7 @@ Unit **${result.machine_id}** saat ini dalam kondisi **NORMAL (PASS)** dengan ke
     (q.includes("melihat") || q.includes("tahu") || q.includes("lihat") || q.includes("deteksi") || q.includes("abnormal"))
   ) {
     if (result) {
-      return `[Gemini 1.5 Flash AI Assistant]
+      return `[Gemini Flash AI Assistant]
 Untuk melihat dan mengidentifikasi mesin abnormal pada dashboard EchoFactory:
 
 1. **Status Banner Utama**: Banner paling atas akan berubah menjadi **STATUS: ABNORMAL (FAIL)** berwarna MERAH jika Skor Anomali > 0.500 (Saat ini: ${result.operator_view.anomaly_score.toFixed(4)} pada ${result.machine_id}).
@@ -174,7 +189,7 @@ Untuk melihat dan mengidentifikasi mesin abnormal pada dashboard EchoFactory:
   ) {
     if (result) {
       const isAbnormal = result.operator_view.condition === "ABNORMAL";
-      return `[Gemini 1.5 Flash AI Assistant]
+      return `[Gemini Flash AI Assistant]
 Evaluasi Keamanan Operasional untuk **${result.machine_id}**:
 
 ${
@@ -194,7 +209,7 @@ ${
     q.includes("tahan")
   ) {
     if (result) {
-      return `[Gemini 1.5 Flash AI Assistant]
+      return `[Gemini Flash AI Assistant]
 Estimasi Sisa Umur Operasional (RUL) unit **${result.machine_id}**:
 
 - **Sisa Umur (RUL)**: ~**${result.manager_view.estimated_rul_days} hari kerja**.
@@ -212,7 +227,7 @@ Estimasi Sisa Umur Operasional (RUL) unit **${result.machine_id}**:
     q.includes("faktor")
   ) {
     if (result) {
-      return `[Gemini 1.5 Flash AI Assistant]
+      return `[Gemini Flash AI Assistant]
 Penyebab utama indikasi pada unit **${result.machine_id}**:
 
 Teridentifikasi masalah **${result.supervisor_view.fault_type}** yang disebabkan oleh degradasi komponen atau pergeseran kelurusan poros melebihi kriteria **${result.supervisor_view.iso_standard}**.`;
@@ -228,28 +243,26 @@ Teridentifikasi masalah **${result.supervisor_view.fault_type}** yang disebabkan
     q.includes("proof")
   ) {
     if (result) {
-      return `[Gemini 1.5 Flash AI Assistant]
+      return `[Gemini Flash AI Assistant]
 Integritas data telemetri **${result.machine_id}** terverifikasi secara immutable on-chain:
 
 - **SHA-256 Proof Hash**: \`${result.auditor_view.proof_hash}\`
 - **Network**: Polygon Amoy Testnet (Chain ID 80002)
-- **Contract Address**: \`0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864\``;
+- **Contract Address**: \`0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864\`.`;
     }
   }
 
   // 8. General Contextual Response for Any Other Natural Language Input
   if (result) {
-    return `[Gemini 1.5 Flash AI Assistant]
+    return `[Gemini Flash AI Assistant]
 Mengenai pertanyaan Anda "${query}" pada unit **${result.machine_id}**:
 
 - **Status Kondisi**: ${result.operator_view.condition} (Skor Anomali: ${result.operator_view.anomaly_score.toFixed(4)})
 - **Identifikasi Masalah**: ${result.supervisor_view.fault_type}
 - **Kesehatan Unit**: ${result.manager_view.machine_health_percentage}% (Estimasi RUL: ${result.manager_view.estimated_rul_days} hari)
-- **Rekomendasi Preskriptif**: ${result.supervisor_view.recommended_action}
-
-Pertanyaan Anda telah dicatat oleh sistem pemeliharaan prediktif EchoFactory.`;
+- **Rekomendasi Preskriptif**: ${result.supervisor_view.recommended_action}.`;
   }
 
-  return `[Gemini 1.5 Flash AI Assistant]
+  return `[Gemini Flash AI Assistant]
 Mengenai pertanyaan Anda "${query}": Silakan jalankan analisis akustik terlebih dahulu pada salah satu sampel mesin di panel kiri untuk mendapatkan telemetri real-time.`;
 }
