@@ -10,9 +10,13 @@ import { AudioPlayerWidget } from "./audio-player-widget";
 export function OperatorWidget({
   result,
   sample,
+  isLoading,
+  analysisStep,
 }: {
   result: DetectionResult;
   sample: PresetSample;
+  isLoading?: boolean;
+  analysisStep?: number;
 }) {
   const isAbnormal = result.operator_view.condition === "ABNORMAL";
 
@@ -36,7 +40,7 @@ export function OperatorWidget({
           </div>
           <div>
             <span className="text-xs font-semibold text-zinc-200">
-              Kondisi Akustik
+              Kondisi Akustik — {sample.machineId}
             </span>
           </div>
         </div>
@@ -65,8 +69,8 @@ export function OperatorWidget({
         </div>
       </div>
 
-      {/* Main Condition Banner */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 text-xs">
+      {/* Score Metrics Row */}
+      <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
         <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800/80">
           <span className="text-zinc-400 block text-[11px]">Skor Anomali</span>
           <div className="flex items-baseline gap-1.5 mt-0.5">
@@ -96,10 +100,15 @@ export function OperatorWidget({
         </div>
       </div>
 
-      {/* 2D Mel-Spectrogram & Linear STFT Visualizer */}
-      <SpectrogramCanvas sample={sample} condition={result.operator_view.condition} />
+      {/* Real-time Spectrogram (Mel + FFT) */}
+      <SpectrogramCanvas
+        sample={sample}
+        condition={result.operator_view.condition}
+        isLoading={isLoading}
+        analysisStep={analysisStep}
+      />
 
-      {/* Live 10-Second Waveform Audio Stream Player */}
+      {/* Audio Player */}
       <div className="mt-4">
         <AudioPlayerWidget sample={sample} />
       </div>

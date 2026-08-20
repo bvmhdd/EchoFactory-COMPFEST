@@ -8,9 +8,13 @@ import { DetectionResult } from "@/lib/inference-engine";
 export function SupervisorWidget({
   result,
   geminiDiagnosis,
+  isLoading,
+  analysisStepText,
 }: {
   result: DetectionResult;
   geminiDiagnosis?: string | null;
+  isLoading?: boolean;
+  analysisStepText?: string;
 }) {
   const [woCreated, setWoCreated] = useState(false);
   const isAbnormal = result.operator_view.condition === "ABNORMAL";
@@ -75,13 +79,35 @@ export function SupervisorWidget({
                 LLM RAG ISO-10816
               </Badge>
             </div>
-            <div className="text-[11px] text-zinc-300 leading-relaxed font-sans whitespace-pre-line bg-black/50 p-2.5 rounded-lg border border-zinc-800/80">
-              {geminiDiagnosis || (
-                isAbnormal
-                  ? `[Gemini Flash 1.5 Real-Time Analysis]\nTerdeteksi lonjakan getaran harmonik abnormal pada sinyal akustik ${result.machine_id}. Skor anomali (${result.operator_view.anomaly_score.toFixed(3)}) melebihi ambang batas aman 0.500. Diidentifikasi sebagai ${result.supervisor_view.fault_type}. Rekomendasi: ${result.supervisor_view.recommended_action}`
-                  : `[Gemini Flash 1.5 Real-Time Analysis]\nSpektrum akustik ${result.machine_id} dalam batas kerja normal (Skor anomali: ${result.operator_view.anomaly_score.toFixed(3)}). Memenuhi kriteria ${result.supervisor_view.iso_standard} tanpa tanda degradasi mekanis.`
-              )}
-            </div>
+            {isLoading ? (
+              <div className="bg-black/90 p-3 rounded-lg border border-sky-500/30 space-y-2.5 shadow-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
+                    <span className="text-[11px] font-mono text-sky-300 font-semibold animate-pulse">
+                      Gemini Flash 1.5 Diagnostic Pipeline...
+                    </span>
+                  </div>
+                  <Badge variant="mono" className="text-[9px] font-mono bg-sky-500/20 text-sky-300 border-sky-500/40">
+                    ANALYZING
+                  </Badge>
+                </div>
+                <div className="w-full bg-zinc-900 h-1.5 rounded-full overflow-hidden border border-zinc-800">
+                  <div className="bg-gradient-to-r from-sky-500 via-cyan-400 to-emerald-400 h-full animate-pulse w-3/4 transition-all duration-300" />
+                </div>
+                <p className="text-[10px] font-mono text-zinc-400 truncate">
+                  {analysisStepText || "Mengevaluasi spektrum getaran & rekomendasi SOP preskriptif..."}
+                </p>
+              </div>
+            ) : (
+              <div className="text-[11px] text-zinc-300 leading-relaxed font-sans whitespace-pre-line bg-black/50 p-2.5 rounded-lg border border-zinc-800/80">
+                {geminiDiagnosis || (
+                  isAbnormal
+                    ? `[Gemini Flash 1.5 Real-Time Analysis]\nTerdeteksi lonjakan getaran harmonik abnormal pada sinyal akustik ${result.machine_id}. Skor anomali (${result.operator_view.anomaly_score.toFixed(3)}) melebihi ambang batas aman 0.500. Diidentifikasi sebagai ${result.supervisor_view.fault_type}. Rekomendasi: ${result.supervisor_view.recommended_action}`
+                    : `[Gemini Flash 1.5 Real-Time Analysis]\nSpektrum akustik ${result.machine_id} dalam batas kerja normal (Skor anomali: ${result.operator_view.anomaly_score.toFixed(3)}). Memenuhi kriteria ${result.supervisor_view.iso_standard} tanpa tanda degradasi mekanis.`
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
