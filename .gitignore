@@ -48,6 +48,10 @@ demo_samples/
 *.ogg
 *.m4a
 
+# Allow public preset samples for Vercel deployment
+!public/samples/*.wav
+!public/samples/**/*.wav
+
 # Temporary PDF, OCR, and Document Scratch Files
 *.pdf
 [AIC]*

@@ -148,39 +148,51 @@ export function SpectrogramCanvas({ sample, condition }: SpectrogramProps) {
       </div>
 
       {/* Canvas Area with Frequency Y-Axis & Time X-Axis */}
-      <div className="relative w-full h-36 rounded-lg overflow-hidden border border-zinc-800 flex">
-        {/* Y-Axis labels */}
-        <div className="w-12 bg-black/80 flex flex-col justify-between py-1 px-1 text-[9px] font-mono text-zinc-400 border-r border-zinc-800 select-none">
-          <span>8.0 kHz</span>
-          <span>4.0 kHz</span>
-          <span>1.5 kHz</span>
-          <span>0 Hz</span>
+      <div className="relative w-full rounded-lg overflow-hidden border border-zinc-800 flex flex-col bg-black">
+        <div className="flex w-full h-36">
+          {/* Y-Axis labels */}
+          <div className="w-12 bg-black/90 flex flex-col justify-between py-1.5 px-1 text-[9px] font-mono text-zinc-400 border-r border-zinc-800 select-none shrink-0">
+            <span>8.0 kHz</span>
+            <span>4.0 kHz</span>
+            <span>1.5 kHz</span>
+            <span>0 Hz</span>
+          </div>
+
+          {/* Canvas */}
+          <div className="relative flex-1 h-full">
+            <canvas
+              ref={canvasRef}
+              width={480}
+              height={144}
+              className="w-full h-full object-cover"
+            />
+
+            {/* Time playback scrub line */}
+            {isPlaying && (
+              <div
+                className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_#ffffff] transition-all duration-75 pointer-events-none"
+                style={{ left: `${playProgress * 100}%` }}
+              />
+            )}
+
+            {/* Anomaly annotation tag on canvas */}
+            {isAbnormal && (
+              <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-rose-500/90 text-white font-mono text-[9px] font-semibold tracking-wide shadow-md flex items-center gap-1">
+                <Zap className="w-2.5 h-2.5 fill-white animate-pulse" />
+                <span>HIGH HARMONIC ENERGY SPIKE (3.8 - 4.5 kHz)</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Canvas */}
-        <div className="relative flex-1 h-full">
-          <canvas
-            ref={canvasRef}
-            width={480}
-            height={144}
-            className="w-full h-full object-cover"
-          />
-
-          {/* Time playback scrub line */}
-          {isPlaying && (
-            <div
-              className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_#ffffff] transition-all duration-75 pointer-events-none"
-              style={{ left: `${playProgress * 100}%` }}
-            />
-          )}
-
-          {/* Anomaly annotation tag on canvas */}
-          {isAbnormal && (
-            <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-rose-500/90 text-white font-mono text-[9px] font-semibold tracking-wide shadow-md flex items-center gap-1">
-              <Zap className="w-2.5 h-2.5 fill-white" />
-              <span>HIGH HARMONIC ENERGY SPIKE</span>
-            </div>
-          )}
+        {/* X-Axis 10-Second Time Markers */}
+        <div className="flex justify-between items-center pl-12 pr-2 py-1 bg-[#09090d] border-t border-zinc-800/80 text-[9px] font-mono text-zinc-400 select-none">
+          <span>0:00</span>
+          <span>0:02</span>
+          <span>0:04</span>
+          <span>0:06</span>
+          <span>0:08</span>
+          <span className="font-semibold text-zinc-300">0:10 (10s)</span>
         </div>
       </div>
 

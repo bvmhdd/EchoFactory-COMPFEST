@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MachineType, PRESET_SAMPLES, PresetSample } from "@/lib/audio-presets";
 import { DetectionResult, runInferenceSimulation } from "@/lib/inference-engine";
 import { useConnectionStatus } from "@/hooks/useConnectionStatus";
@@ -26,6 +26,11 @@ export default function DashboardPage() {
   const [geminiDiagnosis, setGeminiDiagnosis] = useState<string | null>(null);
 
   const connectionStatus = useConnectionStatus();
+
+  // Initial diagnosis on mount
+  useEffect(() => {
+    handleRunDiagnosis(selectedPreset);
+  }, []);
 
   const handleRunDiagnosis = async (preset: PresetSample) => {
     setIsLoading(true);

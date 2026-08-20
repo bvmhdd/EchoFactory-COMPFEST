@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MachineType } from "@/lib/audio-presets";
 import { runInferenceSimulation } from "@/lib/inference-engine";
+import { generateGeminiDiagnosis } from "@/lib/gemini-explainer";
 
 // ── Health Check ─────────────────────────────────────────────────────────────
 export async function GET() {
@@ -86,17 +87,24 @@ export async function POST(req: NextRequest) {
 
     // Run synchronous STgram-MFN v3 ONNX inference & calculate multi-stakeholder views
     const result = runInferenceSimulation(machine_type, machine_id, preset_id, force_abnormal);
+    const gemini_diagnosis = await generateGeminiDiagnosis(result);
 
-    return NextResponse.json(result, {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Inference-Engine": "STgram-MFN-v3-ONNX",
-        "X-Latency-Ms": result.inference_time_ms.toString(),
-        "X-Chain-ID": "80002",
-        "X-HF-Backend": hfBackendUrl,
+    return NextResponse.json(
+      {
+        ...result,
+        gemini_diagnosis,
       },
-    });
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Inference-Engine": "STgram-MFN-v3-ONNX",
+          "X-Latency-Ms": result.inference_time_ms.toString(),
+          "X-Chain-ID": "80002",
+          "X-HF-Backend": hfBackendUrl,
+        },
+      }
+    );
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Internal Inference Engine Error";
     return NextResponse.json(

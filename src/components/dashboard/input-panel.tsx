@@ -232,7 +232,7 @@ export function InputPanel({
 
           {/* Mode A: Quick Presets */}
           {ingestionTab === "preset" && (
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 font-sans">
               {presetsForCurrentMachine.map((preset) => {
                 const isAbnormal = preset.condition === "ABNORMAL";
                 const isSelected = selectedPreset.id === preset.id;
@@ -264,7 +264,7 @@ export function InputPanel({
                           )}
                         </Badge>
                         <span className="text-xs font-medium text-white truncate">
-                          {preset.name.split("(")[1]?.replace(")", "") || preset.name}
+                          {preset.machineId}: {preset.name.split("(")[1]?.replace(")", "") || preset.name}
                         </span>
                       </div>
                       <span className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5 font-mono">
