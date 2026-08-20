@@ -119,14 +119,14 @@ export function QueryAssistantWidget({ result }: QueryAssistantProps) {
               Industrial Voice Assistant (Hands-Free Technical Query):
             </h3>
             <p className="text-[10px] text-zinc-400 font-mono">
-              Powered by Gemini 1.5 Flash LLM RAG · Contextual Acoustic Telemetry
+              Powered by Gemini 3.6 Flash LLM RAG · Contextual Acoustic Telemetry
             </p>
           </div>
         </div>
 
         <Badge variant="mono" className="text-[10px] font-mono bg-sky-500/10 text-sky-300 border-sky-500/30">
           <Sparkles className="w-3 h-3 mr-1 text-sky-400" />
-          GEMINI 1.5 FLASH
+          GEMINI 3.6 FLASH
         </Badge>
       </div>
 
@@ -231,7 +231,7 @@ export function QueryAssistantWidget({ result }: QueryAssistantProps) {
 
           {assistantOutput && (
             <span className="text-[10px] font-mono text-emerald-400">
-              ✓ Gemini 1.5 Flash Response Ready
+              ✓ Gemini 3.6 Flash Response Ready
             </span>
           )}
         </div>
@@ -240,18 +240,18 @@ export function QueryAssistantWidget({ result }: QueryAssistantProps) {
           {isAsking ? (
             <div className="flex items-center gap-3 text-sky-400 animate-pulse font-mono text-xs py-4">
               <Cpu className="w-5 h-5 animate-spin" />
-              <span>Gemini 1.5 Flash RAG sedang menganalisis query telemetri Anda...</span>
+              <span>Gemini 3.6 Flash RAG sedang menganalisis query telemetri Anda...</span>
             </div>
           ) : assistantOutput ? (
             <div className="space-y-2">
               <div className="text-[10px] font-mono text-sky-400 font-semibold uppercase tracking-wider mb-1">
-                [Gemini 1.5 Flash Response]
+                [Gemini 3.6 Flash Response]
               </div>
               <div className="text-zinc-200">{assistantOutput}</div>
             </div>
           ) : (
             <span className="text-zinc-600 font-mono text-[11px] italic">
-              Ketik pertanyaan teknis atau pilih saran query di atas, lalu tekan "Query Assistant »" untuk mendapatkan jawaban dari Gemini 1.5 Flash AI.
+              Ketik pertanyaan teknis atau pilih saran query di atas, lalu tekan "Query Assistant »" untuk mendapatkan jawaban dari Gemini 3.6 Flash AI.
             </span>
           )}
         </div>
