@@ -13,6 +13,7 @@ export interface PresetSample {
   noiseLevel: number;
   modulationSpeed: number;
   expectedScore: number;
+  audioUrl?: string; // Path to real MIMII WAV file in /samples/
   faultDetails?: {
     faultType: string;
     isoStandard: string;
@@ -35,6 +36,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.15,
     modulationSpeed: 2,
     expectedScore: 0.082,
+    audioUrl: "/samples/DEMO_FAN_NORMAL.wav",
     faultDetails: {
       faultType: "Smooth Aerodynamic Flow (Healthy)",
       isoStandard: "ISO 10816-3 Class I (Good / Unrestricted)",
@@ -55,6 +57,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.78,
     modulationSpeed: 14,
     expectedScore: 0.887,
+    audioUrl: "/samples/DEMO_FAN_ANOMALY.wav",
     faultDetails: {
       faultType: "Bearing Outer Race Degradation (SKF-6204)",
       isoStandard: "ISO 10816-3 Class II (Unacceptable Vibration > 4.5 mm/s)",
@@ -75,6 +78,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.18,
     modulationSpeed: 3,
     expectedScore: 0.095,
+    audioUrl: "/samples/DEMO_PUMP_NORMAL.wav",
     faultDetails: {
       faultType: "Laminar Fluid Circulation (Healthy)",
       isoStandard: "ISO 10816-3 Group 1 (Zone A - Good)",
@@ -95,6 +99,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.85,
     modulationSpeed: 22,
     expectedScore: 0.912,
+    audioUrl: "/samples/DEMO_PUMP_ANOMALY.wav",
     faultDetails: {
       faultType: "Impeller Blade Erosion & Fluid Cavitation",
       isoStandard: "ISO 10816-7 Category I (Alarm Threshold Exceeded)",
@@ -115,6 +120,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.12,
     modulationSpeed: 1,
     expectedScore: 0.045,
+    audioUrl: "/samples/DEMO_SLIDER_NORMAL.wav",
     faultDetails: {
       faultType: "Precision Guideway Motion (Healthy)",
       isoStandard: "ISO 230-2 (Machine Tool Position Accuracy Compliant)",
@@ -135,6 +141,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.72,
     modulationSpeed: 18,
     expectedScore: 0.864,
+    audioUrl: "/samples/DEMO_SLIDER_ANOMALY.wav",
     faultDetails: {
       faultType: "Ball Screw Dry Friction & Rail Misalignment",
       isoStandard: "ISO 10816-3 Class III (Restricted Long-Term Operation)",
@@ -155,6 +162,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.10,
     modulationSpeed: 0.5,
     expectedScore: 0.038,
+    audioUrl: "/samples/DEMO_VALVE_NORMAL.wav",
     faultDetails: {
       faultType: "Hermetic Valve Sealing (Healthy)",
       isoStandard: "ISO 5208 (Zero Seat Leakage Standard)",
@@ -175,6 +183,7 @@ export const PRESET_SAMPLES: PresetSample[] = [
     noiseLevel: 0.81,
     modulationSpeed: 30,
     expectedScore: 0.899,
+    audioUrl: "/samples/DEMO_VALVE_ANOMALY.wav",
     faultDetails: {
       faultType: "Internal Gasket Seal Leak & Solenoid Jitter",
       isoStandard: "ISO 5208 Rate D (High Risk Seat Degradation)",
@@ -194,6 +203,25 @@ export function playSyntheticIndustrialSound(
   duration = 4
 ): { stop: () => void } {
   if (typeof window === "undefined") return { stop: () => {} };
+
+  if (preset.audioUrl) {
+    try {
+      const audio = new Audio(preset.audioUrl);
+      audio.play().catch(() => {});
+      return {
+        stop: () => {
+          try {
+            audio.pause();
+            audio.currentTime = 0;
+          } catch {
+            // ignore
+          }
+        },
+      };
+    } catch {
+      // fallback to synthesis below
+    }
+  }
 
   try {
     const AudioContextClass =
