@@ -10,6 +10,14 @@
 *.env
 !.env.example
 
+# Large Model Files & Archives (store on HF Space or Google Drive, not GitHub)
+Compfest Model/
+*.rar
+*.pt
+*.pt_extracted/
+*.onnx
+*.onnx.data
+
 # Node.js & Next.js Build Artifacts
 node_modules/
 .next/
