@@ -1,68 +1,118 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, ArrowLeft, Zap } from "lucide-react";
+import { Activity, ArrowLeft, Zap, Layers } from "lucide-react";
+
+export type ConsoleTab = "01" | "02" | "03" | "04" | "all";
+
+interface ConsoleHeaderProps {
+  inferenceLatency?: number;
+  status?: "idle" | "running" | "complete";
+  activeTab?: ConsoleTab;
+  onTabChange?: (tab: ConsoleTab) => void;
+}
 
 export function ConsoleHeader({
   inferenceLatency,
   status,
-}: {
-  inferenceLatency?: number;
-  status?: "idle" | "running" | "complete";
-}) {
+  activeTab = "01",
+  onTabChange,
+}: ConsoleHeaderProps) {
+  const tabs = [
+    { id: "01" as ConsoleTab, label: "01 / Ingestion & Acoustic Scan" },
+    { id: "02" as ConsoleTab, label: "02 / Cognitive Diagnostics & Work Order" },
+    { id: "03" as ConsoleTab, label: "03 / Fleet Analytics & Financial ROI" },
+    { id: "04" as ConsoleTab, label: "04 / On-Chain Passport & Warranty" },
+    { id: "all" as ConsoleTab, label: "Full Stacked Overview" },
+  ];
+
   return (
-    <header className="border-b border-[#1F1F23] bg-[#050507] px-4 sm:px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 select-none">
-      {/* Left: Back + Brand */}
-      <div className="flex items-center gap-4">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-white transition-colors bg-[#111113] px-2.5 py-1.5 rounded-lg border border-[#27272A] hover:border-zinc-600"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span className="font-mono">Kembali</span>
-        </Link>
+    <div className="border-b border-[#1F1F23] bg-[#050507] select-none">
+      {/* Top Header Row matching reference screenshot */}
+      <div className="px-4 sm:px-6 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#18181C]">
+        {/* Brand & Subtitle */}
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-white transition-colors bg-[#111113] px-2.5 py-1.5 rounded-lg border border-[#27272A] hover:border-zinc-600"
+            title="Kembali ke Landing Page"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span className="font-mono">Kembali</span>
+          </Link>
 
-        {/* Logo — identik dengan Navbar landing */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-zinc-200 to-zinc-600 p-[1px] shadow-[0_0_15px_rgba(255,255,255,0.12)] group-hover:shadow-[0_0_22px_rgba(255,255,255,0.25)] transition-all">
-            <div className="w-full h-full bg-[#0A0A0B] rounded-[11px] flex items-center justify-center">
-              <Activity className="w-4 h-4 text-white stroke-[2.2]" />
+          {/* White Square Icon matching user screenshot */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)] group-hover:scale-105 transition-all">
+              <Activity className="w-5 h-5 text-black stroke-[2.5]" />
             </div>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-sm tracking-wider text-white">
-              ECHOFACTORY
-            </span>
-            <span className="text-[9px] uppercase tracking-widest text-zinc-500 font-mono">
-              Diagnostic Console
-            </span>
-          </div>
-        </Link>
-      </div>
 
-      {/* Right: System Indicators */}
-      <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#111113] border border-[#1F1F23] text-zinc-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse" />
-          <span>STgram-MFN v3</span>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base tracking-wider text-white">
+                  ECHOFACTORY
+                </span>
+                {/* Green Amoy Node Badge matching user screenshot */}
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Amoy Testnet Node
+                </span>
+              </div>
+              <span className="text-[10px] text-zinc-400 font-mono tracking-tight">
+                Acoustic Machine Intelligence • Polygon Amoy Ledger • ISO 10816 Diagnostic Engine
+              </span>
+            </div>
+          </Link>
         </div>
 
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#111113] border border-[#1F1F23] text-zinc-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-          <span>Polygon Amoy</span>
-        </div>
+        {/* Right Indicators & Architecture Badge matching user screenshot */}
+        <div className="flex items-center gap-3 text-[10px] font-mono">
+          {inferenceLatency !== undefined && (
+            <div
+              className={`flex items-center gap-1 px-3 py-1 rounded-full border font-mono transition-all ${
+                status === "running"
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 animate-pulse"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-300"
+              }`}
+            >
+              <Zap className="w-3 h-3 text-sky-400" />
+              {status === "running" ? "Processing Pipeline…" : `${inferenceLatency} ms`}
+            </div>
+          )}
 
-        {inferenceLatency !== undefined && (
-          <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full border font-mono text-[10px] transition-colors ${
-            status === "running"
-              ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-              : "bg-white/5 border-white/15 text-white"
-          }`}>
-            <Zap className="w-3 h-3" />
-            {status === "running" ? "Processing…" : `${inferenceLatency} ms`}
+          {/* STgram-MFN v3 Pill Badge matching user screenshot */}
+          <div className="px-3 py-1 rounded-lg bg-[#111115] border border-zinc-800 text-zinc-300 font-mono font-semibold">
+            STgram-MFN v3
           </div>
-        )}
+        </div>
       </div>
-    </header>
+
+      {/* Tab Navigation Bar matching reference screenshot */}
+      <div className="px-4 sm:px-6 flex items-center gap-1 overflow-x-auto no-scrollbar pt-1 bg-[#07070a]">
+        {tabs.map((t) => {
+          const isActive = activeTab === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => onTabChange && onTabChange(t.id)}
+              className={`px-4 py-2.5 rounded-t-xl text-xs font-mono font-semibold transition-all whitespace-nowrap border-t border-x ${
+                isActive
+                  ? "bg-[#111115] border-zinc-700/80 text-white shadow-lg border-b-transparent"
+                  : "bg-transparent border-transparent text-zinc-500 hover:text-zinc-300 hover:bg-[#0c0c10]"
+              }`}
+            >
+              {t.id === "all" ? (
+                <span className="flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                  {t.label}
+                </span>
+              ) : (
+                <span>{t.label}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

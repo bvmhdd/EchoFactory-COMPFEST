@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MachineType, PRESET_SAMPLES, PresetSample } from "@/lib/audio-presets";
 import { DetectionResult, runInferenceSimulation } from "@/lib/inference-engine";
 import { useConnectionStatus } from "@/hooks/useConnectionStatus";
-import { ConsoleHeader } from "@/components/dashboard/console-header";
+import { ConsoleHeader, ConsoleTab } from "@/components/dashboard/console-header";
 import { ConnectionStatusBar } from "@/components/dashboard/connection-status-bar";
 import { InputPanel } from "@/components/dashboard/input-panel";
 import { OperatorWidget } from "@/components/dashboard/operator-widget";
@@ -30,7 +30,7 @@ export default function DashboardPage() {
     PRESET_SAMPLES.find((p) => p.id === "fan-abnormal-01") || PRESET_SAMPLES[1]
   );
 
-  // null = no result yet; shown only after analysis completes
+  const [activeTab, setActiveTab] = useState<ConsoleTab>("all");
   const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [useLiveBackend, setUseLiveBackend] = useState(false);
@@ -43,7 +43,6 @@ export default function DashboardPage() {
   const connectionStatus = useConnectionStatus();
 
   const handleSelectPreset = (p: PresetSample) => {
-    // Clear existing results when a new sample is chosen
     setSelectedPreset(p);
     setDetectionResult(null);
     setGeminiDiagnosis(null);
@@ -57,7 +56,6 @@ export default function DashboardPage() {
     setDetectionResult(null);
     setGeminiDiagnosis(null);
 
-    // Kick off step 1 immediately
     setAnalysisStep(1);
     setAnalysisStepText(PIPELINE_STEPS[0].label);
     setAnalysisProgress(PIPELINE_STEPS[0].pct);
@@ -90,7 +88,6 @@ export default function DashboardPage() {
         ? await res.json()
         : runInferenceSimulation(preset.machineType, preset.machineId, preset.id);
 
-      // Wait until minimum pipeline display is done (2.3s), then reveal
       setTimeout(() => {
         timers.forEach(clearTimeout);
         setAnalysisProgress(100);
@@ -101,7 +98,7 @@ export default function DashboardPage() {
           setAnalysisStep(0);
           setAnalysisStepText("");
           setAnalysisProgress(0);
-        }, 300); // short pause at 100% before revealing
+        }, 300);
       }, 2300);
     } catch {
       const fallback = runInferenceSimulation(preset.machineType, preset.machineId, preset.id);
@@ -119,10 +116,12 @@ export default function DashboardPage() {
   return (
     <KineticGrid globalColor="monochrome" className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
       <div className="flex flex-col min-h-screen">
-        {/* Console Header */}
+        {/* Console Header with Tabbed Navigation Bar */}
         <ConsoleHeader
           inferenceLatency={detectionResult?.inference_time_ms}
           status={isLoading ? "running" : detectionResult ? "complete" : "idle"}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
 
         {/* Connection Status Bar */}
@@ -158,7 +157,7 @@ export default function DashboardPage() {
             {/* ── RIGHT: Output Column ── */}
             <div className="lg:col-span-8 flex flex-col space-y-5">
 
-              {/* ─── Loading / Analysis HUD (shown while isLoading, no result yet) ─── */}
+              {/* ─── Loading / Analysis HUD ─── */}
               {isLoading && (
                 <div className="rounded-2xl border border-sky-500/20 bg-[#05080f] p-6 shadow-xl">
                   {/* HUD Header */}
@@ -231,7 +230,7 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* ─── Empty state (no result, not loading) ─── */}
+              {/* ─── Empty State ─── */}
               {!isLoading && !detectionResult && (
                 <div className="rounded-2xl border border-zinc-800 bg-[#050508] p-12 flex flex-col items-center justify-center gap-4 text-center">
                   <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
@@ -247,10 +246,10 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* ─── Results (only shown after analysis completes) ─── */}
+              {/* ─── Results Tab Navigation Views ─── */}
               {!isLoading && detectionResult && (
                 <>
-                  {/* Status Banner matching screenshot */}
+                  {/* Status Banner */}
                   <div className={`rounded-xl border px-5 py-4 transition-all duration-500 ${
                     detectionResult.operator_view.condition === "ABNORMAL"
                       ? "border-rose-500/30 bg-[#0c0508]"
@@ -286,56 +285,68 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {/* Spectrogram + Audio player */}
-                  <OperatorWidget
-                    result={detectionResult}
-                    sample={selectedPreset}
-                    isLoading={false}
-                    analysisStep={0}
-                  />
-
-                  {/* 3-column stakeholder widgets */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <SupervisorWidget
+                  {/* Tab 01 or ALL: Ingestion & Acoustic Scan */}
+                  {(activeTab === "01" || activeTab === "all") && (
+                    <OperatorWidget
                       result={detectionResult}
-                      geminiDiagnosis={geminiDiagnosis}
+                      sample={selectedPreset}
                       isLoading={false}
-                      analysisStepText=""
+                      analysisStep={0}
                     />
-                    <ManagerWidget result={detectionResult} />
-                    <AuditorWidget result={detectionResult} />
-                  </div>
+                  )}
 
-                  {/* Blockchain Ledger Footer (matching screenshot) */}
-                  <div className="rounded-xl border border-zinc-800/60 bg-[#06060a] p-4 font-mono text-[11px]">
-                    <div className="flex items-center gap-2 mb-3">
-                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      <span className="text-zinc-300 font-semibold">[WEB3 LEDGER STATUS] LOCALLY_VERIFIED_HASH</span>
+                  {/* Tab 02 or ALL: Cognitive Diagnostics & Work Order */}
+                  {(activeTab === "02" || activeTab === "all") && (
+                    <div className="space-y-5">
+                      <SupervisorWidget
+                        result={detectionResult}
+                        geminiDiagnosis={geminiDiagnosis}
+                        isLoading={false}
+                        analysisStepText=""
+                      />
+                      <QueryAssistantWidget result={detectionResult} />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
-                      <div className="space-y-1 text-zinc-400">
-                        <div><span className="text-zinc-600">Target: </span>{detectionResult.machine_id} | SNR: -6 dB</div>
-                        <div className="truncate"><span className="text-zinc-600">SHA-256 Hash: </span>
-                          <span className="text-zinc-300">{detectionResult.auditor_view.proof_hash}</span>
+                  )}
+
+                  {/* Tab 03 or ALL: Fleet Analytics & Financial ROI */}
+                  {(activeTab === "03" || activeTab === "all") && (
+                    <div className={activeTab === "03" ? "w-full" : ""}>
+                      <ManagerWidget result={detectionResult} />
+                    </div>
+                  )}
+
+                  {/* Tab 04 or ALL: On-Chain Passport & Warranty */}
+                  {(activeTab === "04" || activeTab === "all") && (
+                    <div className="space-y-5">
+                      <AuditorWidget result={detectionResult} />
+                      <div className="rounded-xl border border-zinc-800/60 bg-[#06060a] p-4 font-mono text-[11px]">
+                        <div className="flex items-center gap-2 mb-3">
+                          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                          <span className="text-zinc-300 font-semibold">[WEB3 LEDGER STATUS] LOCALLY_VERIFIED_HASH</span>
                         </div>
-                        <div className="truncate"><span className="text-zinc-600">Tx Hash: </span>
-                          <span className="text-zinc-300">0x{detectionResult.auditor_view.proof_hash.slice(2, 42)}...</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
+                          <div className="space-y-1 text-zinc-400">
+                            <div><span className="text-zinc-600">Target: </span>{detectionResult.machine_id} | SNR: -6 dB</div>
+                            <div className="truncate"><span className="text-zinc-600">SHA-256 Hash: </span>
+                              <span className="text-zinc-300">{detectionResult.auditor_view.proof_hash}</span>
+                            </div>
+                            <div className="truncate"><span className="text-zinc-600">Tx Hash: </span>
+                              <span className="text-zinc-300">0x{detectionResult.auditor_view.proof_hash.slice(2, 42)}...</span>
+                            </div>
+                          </div>
+                          <div className="space-y-1 text-zinc-400">
+                            <div><span className="text-zinc-600">Block: </span>#{detectionResult.auditor_view.block_number}</div>
+                            <div><span className="text-zinc-600">Contract: </span>
+                              <span className="text-zinc-300">0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864</span>
+                            </div>
+                            <div><span className="text-zinc-600">Network: </span>
+                              <span className="text-emerald-400">Polygon Amoy Testnet · Chain 80002 ✓</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="space-y-1 text-zinc-400">
-                        <div><span className="text-zinc-600">Block: </span>#{detectionResult.auditor_view.block_number}</div>
-                        <div><span className="text-zinc-600">Contract: </span>
-                          <span className="text-zinc-300">0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864</span>
-                        </div>
-                        <div><span className="text-zinc-600">Network: </span>
-                          <span className="text-emerald-400">Polygon Amoy Testnet · Chain 80002 ✓</span>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-
-                  {/* Industrial Voice & Text Query Assistant (Gemini 1.5 Flash LLM RAG) */}
-                  <QueryAssistantWidget result={detectionResult} />
+                  )}
                 </>
               )}
             </div>
