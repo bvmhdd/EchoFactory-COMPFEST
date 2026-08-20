@@ -177,36 +177,36 @@ def process_audio_scan(audio_input, machine_id):
         # Format Info Deteksi
         detect_badge_info = ""
         if scan_res["is_auto_detected"]:
-            detect_badge_info = f"<div style='margin-bottom:8px; font-size:13px; color:#38BDF8;'>🤖 <b>Auto-Detected Mesin:</b> <span style='color:#F1F5F9; font-weight:bold;'>{scan_res['machine_label']}</span> (Keyakinan Akustik: <b>{scan_res['machine_confidence']}%</b>)</div>"
+            detect_badge_info = f"<div style='margin-bottom:8px; font-size:12px; color:#38bdf8; font-family:\"JetBrains Mono\", monospace;'>[AUTO-DETECTED] Target: <span style='color:#ffffff; font-weight:bold;'>{scan_res['machine_label']}</span> (Acoustic Confidence: <b>{scan_res['machine_confidence']}%</b>)</div>"
         
-        snr_badge_info = f"<div style='margin-bottom:8px; font-size:12.5px; color:#FBBF24;'>🔊 <b>Profil Kebisingan (SNR):</b> <span style='color:#FEF08A; font-weight:bold;'>{scan_res['snr_label']}</span> (Estimasi SNR: {scan_res['snr_db']} dB)</div>"
+        snr_badge_info = f"<div style='margin-bottom:8px; font-size:12px; color:#f59e0b; font-family:\"JetBrains Mono\", monospace;'>[SNR PROFILE] Baseline: <span style='color:#ffffff; font-weight:bold;'>{scan_res['snr_label']}</span> (Estimated SNR: {scan_res['snr_db']} dB)</div>"
         
         # Format Badge Keputusan
         if not scan_res["is_anomaly"]:
             status_html = (
-                f"<div style='background-color:#064E3B; border:2px solid #10B981; border-radius:10px; padding:15px; color:#ECFDF5;'>"
+                f"<div style='background: rgba(6, 78, 59, 0.4); border: 1px solid #10b981; border-radius: 10px; padding: 16px; color: #ecfdf5;'>"
                 f"{detect_badge_info}"
                 f"{snr_badge_info}"
-                f"<h3 style='margin:0; color:#34D399;'>🟢 MESIN SEHAT (PASS)</h3>"
-                f"<p style='margin:5px 0 0 0; font-size:14px;'>Skor Anomali: <b>{scan_res['anomaly_score']:.4f}</b> (Batas Threshold {scan_res['detected_snr']}: {scan_res['threshold']}) | Spektrum stabil dalam standar ISO 10816.</p>"
+                f"<h3 style='margin:0; color:#34d399; font-size: 16px; font-weight: 700; letter-spacing: -0.01em;'>STATUS: NORMAL (PASS)</h3>"
+                f"<p style='margin:6px 0 0 0; font-size:13px; color: #a1a1aa;'>Anomaly Score: <b>{scan_res['anomaly_score']:.4f}</b> (Threshold [{scan_res['detected_snr']}]: {scan_res['threshold']}) | Spectral signature compliant with ISO 10816 baseline.</p>"
                 f"</div>"
             )
         else:
             status_html = (
-                f"<div style='background-color:#7F1D1D; border:2px solid #EF4444; border-radius:10px; padding:15px; color:#FEF2F2; animation:pulse 2s infinite;'>"
+                f"<div style='background: rgba(127, 29, 29, 0.4); border: 1px solid #ef4444; border-radius: 10px; padding: 16px; color: #fef2f2;'>"
                 f"{detect_badge_info}"
                 f"{snr_badge_info}"
-                f"<h3 style='margin:0; color:#F87171;'>🔴 ANOMALI TERDETEKSI (ALERT)</h3>"
-                f"<p style='margin:5px 0 0 0; font-size:14px;'>Skor Anomali: <b>{scan_res['anomaly_score']:.4f}</b> (Melebihi Batas {scan_res['threshold']}) | <b>Buka Tab 2 (Supervisor Hub) untuk diagnosis akar masalah & Work Order!</b></p>"
+                f"<h3 style='margin:0; color:#f87171; font-size: 16px; font-weight: 700; letter-spacing: -0.01em;'>STATUS: ABNORMAL DETECTED (ALERT)</h3>"
+                f"<p style='margin:6px 0 0 0; font-size:13px; color: #fca5a5;'>Anomaly Score: <b>{scan_res['anomaly_score']:.4f}</b> (Exceeds Threshold {scan_res['threshold']}) | <b>Open Tab 02 (Cognitive Diagnostics) for root cause analysis and work order generation.</b></p>"
                 f"</div>"
             )
             
         bc_html = (
-            f"<div style='background:#1E293B; padding:12px; border-radius:8px; font-size:13px; color:#CBD5E1;'>"
-            f"<b>⛓️ Status Web3 Ledger:</b> {bc_res['status']}<br>"
-            f"<b>Mesin:</b> <code style='color:#F1F5F9;'>{clean_mid}</code> | <b>SNR:</b> <code style='color:#FEF08A;'>{scan_res['detected_snr']}</code><br>"
-            f"<b>Data Hash SHA-256:</b> <code style='color:#38BDF8;'>{bc_res['data_hash']}</code><br>"
-            f"<b>Tx Hash:</b> <code style='color:#A78BFA;'>{bc_res['tx_hash'][:22]}...</code><br>"
+            f"<div style='background: #0f1117; border: 1px solid #1f2430; padding: 14px; border-radius: 10px; font-size: 12px; color: #a1a1aa; font-family: \"JetBrains Mono\", monospace;'>"
+            f"<b style='color:#ffffff;'>[WEB3 LEDGER STATUS]</b> {bc_res['status']}<br>"
+            f"Target: <code style='color:#ffffff;'>{clean_mid}</code> | SNR: <code style='color:#f59e0b;'>{scan_res['detected_snr']}</code><br>"
+            f"SHA-256 Hash: <code style='color:#38bdf8;'>{bc_res['data_hash']}</code><br>"
+            f"Tx Hash: <code style='color:#a78bfa;'>{bc_res['tx_hash'][:22]}...</code><br>"
             f"{bc_res['explorer_link']}"
             f"</div>"
         )
@@ -219,7 +219,7 @@ def process_audio_scan(audio_input, machine_id):
     except Exception as e:
         return (
             None,
-            f"<div style='color:#EF4444;'>Error memproses audio: {str(e)}</div>",
+            f"<div style='color:#ef4444;'>Error processing audio stream: {str(e)}</div>",
             str(e)
         )
 
@@ -236,27 +236,27 @@ def run_deep_diagnostic(machine_id):
     CURRENT_SCAN_STATE["diagnosis"] = diag
     
     # Format Card ISO & RUL
-    iso_color = "#10B981" if diag["iso_zone"] in ["Zone A", "Zone B"] else ("#F59E0B" if diag["iso_zone"] == "Zone C" else "#EF4444")
+    iso_color = "#10b981" if diag["iso_zone"] in ["Zone A", "Zone B"] else ("#f59e0b" if diag["iso_zone"] == "Zone C" else "#ef4444")
     
     diag_html = (
-        f"<div style='background:#0F172A; border-left:5px solid {iso_color}; padding:15px; border-radius:8px; margin-bottom:15px;'>"
-        f"<h3 style='margin:0 0 8px 0; color:#E2E8F0;'>🔬 Analisis Kognitif Gemini Flash Multimodal & SOP ISO 10816</h3>"
-        f"<div style='background:#1E293B; display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; color:#FBBF24; margin-bottom:8px;'>🔊 Kondisi Kebisingan Terdeteksi: <b>{diag['snr_label']}</b></div>"
-        f"<p style='margin:0 0 10px 0; font-size:14px; color:#94A3B8; line-height:1.5;'>{diag['diagnostic_summary']}</p>"
-        f"<div style='display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:10px;'>"
-        f"  <div style='background:#1E293B; padding:10px; border-radius:6px;'><b>Standar ISO 10816:</b><br><span style='color:{iso_color}; font-size:16px; font-weight:bold;'>{diag['iso_zone']}</span> ({diag['iso_condition']})</div>"
-        f"  <div style='background:#1E293B; padding:10px; border-radius:6px;'><b>Akar Masalah:</b><br><span style='color:#38BDF8; font-size:13px; font-weight:bold;'>{diag['defect_type']}</span></div>"
-        f"  <div style='background:#1E293B; padding:10px; border-radius:6px;'><b>Estimasi Sisa Umur (RUL):</b><br><span style='color:#FBBF24; font-size:16px; font-weight:bold;'>~{diag['estimated_rul_hours']} Jam</span> Operasi</div>"
+        f"<div style='background:#0f1117; border-left:4px solid {iso_color}; border:1px solid #1f2430; padding:18px; border-radius:12px; margin-bottom:16px;'>"
+        f"<h3 style='margin:0 0 10px 0; color:#ffffff; font-size:15px; font-weight:700;'>Multimodal Cognitive Diagnostic & ISO 10816 Evaluation</h3>"
+        f"<div style='background:#18181b; display:inline-block; padding:4px 10px; border-radius:6px; font-size:11px; color:#f59e0b; font-family:\"JetBrains Mono\", monospace; margin-bottom:10px;'>NOISE SNR PROFILE: <b>{diag['snr_label']}</b></div>"
+        f"<p style='margin:0 0 14px 0; font-size:13px; color:#a1a1aa; line-height:1.6;'>{diag['diagnostic_summary']}</p>"
+        f"<div style='display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:12px;'>"
+        f"  <div style='background:#14161f; padding:12px; border-radius:8px; border:1px solid #1f2430;'><span style='font-size:11px; color:#71717a; font-weight:600;'>ISO 10816 STANDARD</span><br><span style='color:{iso_color}; font-size:15px; font-weight:bold;'>{diag['iso_zone']}</span> <span style='font-size:12px; color:#a1a1aa;'>({diag['iso_condition']})</span></div>"
+        f"  <div style='background:#14161f; padding:12px; border-radius:8px; border:1px solid #1f2430;'><span style='font-size:11px; color:#71717a; font-weight:600;'>MECHANICAL DEFECT</span><br><span style='color:#38bdf8; font-size:12px; font-weight:bold;'>{diag['defect_type']}</span></div>"
+        f"  <div style='background:#14161f; padding:12px; border-radius:8px; border:1px solid #1f2430;'><span style='font-size:11px; color:#71717a; font-weight:600;'>ESTIMATED RUL</span><br><span style='color:#f59e0b; font-size:15px; font-weight:bold; font-family:\"JetBrains Mono\", monospace;'>~{diag['estimated_rul_hours']} Hours</span></div>"
         f"</div>"
         f"</div>"
     )
     
     part = diag["recommended_part"]
     part_html = (
-        f"<div style='background:#1E293B; padding:12px; border-radius:8px; font-size:13px; color:#E2E8F0;'>"
-        f"<b>📦 Rekomendasi Suku Cadang Gudang SAP:</b> {part['part_name']}<br>"
-        f"<b>SKU Part:</b> <code>{part['sku']}</code> | <b>Stok Tersedia:</b> <b style='color:#10B981;'>{part['stock']} Unit</b> ({part['location']})<br>"
-        f"<b>Estimasi Biaya Penggantian:</b> Rp {part['unit_price_idr']:,}"
+        f"<div style='background:#0f1117; border:1px solid #1f2430; padding:14px; border-radius:10px; font-size:12px; color:#a1a1aa; font-family:\"JetBrains Mono\", monospace;'>"
+        f"<b style='color:#ffffff;'>[ERP / SAP REPLACEMENT PART]:</b> {part['part_name']}<br>"
+        f"SKU: <code style='color:#ffffff;'>{part['sku']}</code> | Inventory Stock: <b style='color:#10b981;'>{part['stock']} Units</b> ({part['location']})<br>"
+        f"Estimated Replacement Cost: IDR {part['unit_price_idr']:,}"
         f"</div>"
     )
     
@@ -275,16 +275,16 @@ def trigger_work_order_dispatch():
     wo = cognitive_engine.generate_work_order(diag)
     
     wo_html = (
-        f"<div style='background:#064E3B; border:2px solid #34D399; padding:15px; border-radius:10px; color:#ECFDF5;'>"
-        f"<h3 style='margin:0 0 5px 0; color:#6EE7B7;'>✅ TIKET WORK ORDER TERBIT: #{wo['work_order_id']}</h3>"
-        f"<p style='margin:0; font-size:13px;'>Status: <b>{wo['status']}</b></p>"
-        f"<hr style='border:0; border-top:1px solid #065F46; margin:8px 0;'>"
-        f"<div style='font-size:13px; line-height:1.6;'>"
-        f"• <b>Mesin Target:</b> {wo['machine_id']}<br>"
-        f"• <b>Deskripsi Tindakan:</b> Overhaul & Ganti {wo['allocated_part']}<br>"
-        f"• <b>Alokasi Gudang:</b> {wo['warehouse_location']} (SKU: {wo['part_sku']})<br>"
-        f"• <b>Tim Teknisi Ditugaskan:</b> {wo['assigned_team']}<br>"
-        f"• <b>Estimasi Anggaran:</b> {wo['estimated_cost_idr']}"
+        f"<div style='background: rgba(6, 78, 59, 0.4); border: 1px solid #34d399; padding: 16px; border-radius: 12px; color: #ecfdf5;'>"
+        f"<h3 style='margin:0 0 6px 0; color:#6ee7b7; font-size: 15px; font-weight: 700; letter-spacing: -0.01em;'>WORK ORDER DISPATCHED: #{wo['work_order_id']}</h3>"
+        f"<p style='margin:0; font-size:12px; color: #a7f3d0; font-family:\"JetBrains Mono\", monospace;'>Status: <b>{wo['status']}</b></p>"
+        f"<hr style='border:0; border-top:1px solid rgba(52, 211, 153, 0.2); margin:10px 0;'>"
+        f"<div style='font-size:12px; line-height:1.7; color:#d1fae5; font-family:\"JetBrains Mono\", monospace;'>"
+        f"• Target Machinery   : {wo['machine_id']}<br>"
+        f"• Action Mandate     : Overhaul & Replace {wo['allocated_part']}<br>"
+        f"• Warehouse Stock    : {wo['warehouse_location']} (SKU: {wo['part_sku']})<br>"
+        f"• Maintenance Crew   : {wo['assigned_team']}<br>"
+        f"• Budget Allocation  : {wo['estimated_cost_idr']}"
         f"</div>"
         f"</div>"
     )
@@ -300,8 +300,8 @@ def generate_fleet_trend_chart():
     """Menghasilkan grafik garis tren getaran 30 hari armada mesin."""
     plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(10, 3.8))
-    fig.patch.set_facecolor('#0B0F19')
-    ax.set_facecolor('#111827')
+    fig.patch.set_facecolor('#090D16')
+    ax.set_facecolor('#0F1117')
     
     days = np.arange(1, 31)
     # Sintesis data getaran historis
@@ -321,10 +321,10 @@ def generate_fleet_trend_chart():
     ax.plot(days, valve_trend, label='Valve #03 (Solenoid)', color='#FBBF24', lw=1.5)
     ax.axhline(y=0.050, color='#EF4444', linestyle='--', label='Anomaly Threshold (0.050)', alpha=0.8)
     
-    ax.set_title("📈 30-Day Fleet Vibration Degradation Trend", fontsize=11, fontweight='bold', color='#F1F5F9')
+    ax.set_title("30-Day Fleet Vibration Degradation Trend", fontsize=11, fontweight='bold', color='#F1F5F9')
     ax.set_xlabel("Days of Month", fontsize=9, color='#94A3B8')
     ax.set_ylabel("Acoustic Anomaly Score", fontsize=9, color='#94A3B8')
-    ax.grid(True, linestyle='--', alpha=0.2, color='#64748B')
+    ax.grid(True, linestyle='--', alpha=0.15, color='#64748B')
     ax.legend(fontsize=8, loc='upper left')
     plt.tight_layout()
     return fig
@@ -349,147 +349,194 @@ def submit_parametric_claim(machine_id, claim_reason):
     claim_res = hf_blockchain_service.file_warranty_claim(machine_id, claim_reason)
     badge_col = "#10B981" if claim_res["is_approved"] else "#F59E0B"
     return (
-        f"<div style='background:#1E293B; border:2px solid {badge_col}; padding:15px; border-radius:10px; color:#F8FAFC;'>"
-        f"<h3 style='margin:0 0 5px 0; color:{badge_col};'>📋 ID Klaim: {claim_res['claim_id']} — {claim_res['status']}</h3>"
-        f"<p style='margin:0 0 8px 0; font-size:13px;'>Mesin: <b>{claim_res['machine_id']}</b> | Kepatuhan Inspeksi On-Chain: <b>{claim_res['inspection_compliance_count']} Log Tercatat</b></p>"
-        f"<p style='margin:0; font-size:13px; color:#94A3B8;'>{claim_res['resolution_note']}</p>"
+        f"<div style='background:#0f1117; border:1px solid {badge_col}; padding:16px; border-radius:12px; color:#f8fafc; font-family:\"JetBrains Mono\", monospace;'>"
+        f"<h3 style='margin:0 0 6px 0; color:{badge_col}; font-size:14px; font-weight:700;'>CLAIM RECORD: #{claim_res['claim_id']} — {claim_res['status']}</h3>"
+        f"<p style='margin:0 0 8px 0; font-size:12px;'>Target Machinery: <b>{claim_res['machine_id']}</b> | On-Chain Compliance Log Count: <b>{claim_res['inspection_compliance_count']} Records</b></p>"
+        f"<p style='margin:0; font-size:12px; color:#a1a1aa;'>{claim_res['resolution_note']}</p>"
         f"</div>"
     )
 
 # =====================================================================
-# =====================================================================
-# GRADIO INTERFACE LAYOUT (MATCHING NEXT.JS DASHBOARD THEME)
+# GRADIO INTERFACE LAYOUT (ENTERPRISE DARK GRID THEME - ZERO EMOJIS)
 # =====================================================================
 
 custom_css = """
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 :root {
-    --bg-dark: #090d16;
-    --surface-dark: #0f172a;
-    --border-dark: #1e293b;
+    --bg-dark: #000000;
+    --surface-dark: #090a0f;
+    --card-dark: #0f1117;
+    --border-dark: #1f2430;
+    --border-subtle: #27272a;
+    --text-main: #f4f4f5;
+    --text-muted: #a1a1aa;
     --accent-emerald: #10b981;
     --accent-cyan: #06b6d4;
+    --accent-indigo: #6366f1;
 }
 
 body, .gradio-container {
-    background-color: #090d16 !important;
+    background-color: var(--bg-dark) !important;
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
+    background-size: 36px 36px !important;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    color: #e2e8f0 !important;
+    color: var(--text-main) !important;
 }
 
 #app-container {
     max-width: 1280px;
     margin: 0 auto;
+    padding: 10px;
 }
 
-/* Tab styling */
+/* Tabs Header */
 .tabs {
-    border-bottom: 1px solid #1e293b !important;
-}
-.tab-nav button {
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    color: #94a3b8 !important;
-    border-bottom: 2px solid transparent !important;
-    transition: all 0.2s ease !important;
-}
-.tab-nav button.selected {
-    color: #38bdf8 !important;
-    border-bottom: 2px solid #38bdf8 !important;
+    border-bottom: 1px solid var(--border-dark) !important;
     background: transparent !important;
 }
-
-/* Buttons */
-.gr-button-primary {
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
-    border: 1px solid #10b981 !important;
-    color: #ffffff !important;
+.tab-nav {
+    gap: 8px !important;
+    background: transparent !important;
+}
+.tab-nav button {
+    font-family: 'Inter', sans-serif !important;
     font-weight: 600 !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25) !important;
-    transition: all 0.2s ease !important;
+    font-size: 13px !important;
+    letter-spacing: -0.01em !important;
+    color: var(--text-muted) !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 10px 18px !important;
+    background: transparent !important;
+    transition: all 0.15s ease !important;
+}
+.tab-nav button.selected {
+    color: #ffffff !important;
+    border-color: var(--border-dark) !important;
+    border-bottom-color: var(--bg-dark) !important;
+    background: var(--card-dark) !important;
+}
+
+/* Primary Button - Sleek White Pill */
+.gr-button-primary {
+    background: #ffffff !important;
+    border: 1px solid #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: -0.01em !important;
+    border-radius: 9999px !important;
+    padding: 10px 24px !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .gr-button-primary:hover {
-    filter: brightness(1.1) !important;
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+    background: #e4e4e7 !important;
+    border-color: #e4e4e7 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 25px rgba(255, 255, 255, 0.25) !important;
 }
 
+/* Secondary Button - Dark Glass Pill */
 .gr-button-secondary {
-    background: #0f172a !important;
-    border: 1px solid #1e293b !important;
-    color: #cbd5e1 !important;
-    font-weight: 500 !important;
-    border-radius: 8px !important;
+    background: rgba(15, 17, 23, 0.8) !important;
+    border: 1px solid var(--border-dark) !important;
+    color: #d4d4d8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    border-radius: 9999px !important;
+    backdrop-filter: blur(8px) !important;
+    transition: all 0.2s ease !important;
 }
 .gr-button-secondary:hover {
-    background: #1e293b !important;
-    border-color: #334155 !important;
+    background: #18181b !important;
+    border-color: #3f3f46 !important;
+    color: #ffffff !important;
 }
 
-/* Input boxes, textareas, dropdowns */
+/* Input Fields & Boxes */
 .gr-input, .gr-box, input, select, textarea {
-    background: #0f172a !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 8px !important;
-    color: #f1f5f9 !important;
+    background: var(--card-dark) !important;
+    border: 1px solid var(--border-dark) !important;
+    border-radius: 10px !important;
+    color: var(--text-main) !important;
+    font-family: 'Inter', sans-serif !important;
+}
+.gr-input:focus, input:focus, select:focus, textarea:focus {
+    border-color: #52525b !important;
+    box-shadow: 0 0 0 1px #52525b !important;
 }
 
-/* Stat & metric cards */
+/* Code & Monospace */
+code, pre {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Metric Cards */
 .stat-card {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 10px;
-    padding: 16px;
+    background: var(--card-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 12px;
+    padding: 18px;
     text-align: left;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 """
 
 theme = gr.themes.Base(
-    primary_hue="emerald",
+    primary_hue="slate",
     secondary_hue="slate",
     neutral_hue="slate",
     font=[gr.themes.GoogleFont("Inter"), "ui-sans-serif", "system-ui", "sans-serif"],
 ).set(
-    body_background_fill="#090d16",
-    body_background_fill_dark="#090d16",
-    block_background_fill="#0f172a",
-    block_background_fill_dark="#0f172a",
-    block_border_color="#1e293b",
-    block_border_color_dark="#1e293b",
-    input_background_fill="#090d16",
-    input_background_fill_dark="#090d16",
-    input_border_color="#1e293b",
-    input_border_color_dark="#1e293b",
+    body_background_fill="#000000",
+    body_background_fill_dark="#000000",
+    block_background_fill="#0f1117",
+    block_background_fill_dark="#0f1117",
+    block_border_color="#1f2430",
+    block_border_color_dark="#1f2430",
+    input_background_fill="#090a0f",
+    input_background_fill_dark="#090a0f",
+    input_border_color="#1f2430",
+    input_border_color_dark="#1f2430",
 )
 
-with gr.Blocks(title="EchoFactory — Industrial Acoustic Intelligence & Verification", css=custom_css, theme=theme) as demo:
+with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chain Ledger", css=custom_css, theme=theme) as demo:
     gr.HTML(
         """
-        <div style='background: #0f172a; padding: 20px 24px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 20px;'>
-            <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;'>
+        <div style='background: rgba(15, 17, 23, 0.9); padding: 20px 24px; border-radius: 14px; border: 1px solid #1f2430; margin-bottom: 20px; backdrop-filter: blur(12px);'>
+            <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;'>
                 <div style='display: flex; align-items: center; gap: 14px;'>
-                    <div style='width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #0284c7 0%, #10b981 100%); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: white;'>
-                        EF
+                    <div style='width: 44px; height: 44px; border-radius: 10px; background: #ffffff; display: flex; align-items: center; justify-content: center;'>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
                     </div>
                     <div>
-                        <div style='display: flex; align-items: center; gap: 10px;'>
-                            <h1 style='margin: 0; color: #f8fafc; font-size: 20px; font-weight: 700; letter-spacing: -0.02em;'>EchoFactory</h1>
-                            <span style='background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9999px;'>
-                                Active Node
+                        <div style='display: flex; align-items: center; gap: 12px;'>
+                            <h1 style='margin: 0; color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; font-family: Inter, sans-serif;'>ECHOFACTORY</h1>
+                            <span style='background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 6px;'>
+                                <span style='width: 6px; height: 6px; border-radius: 50%; background: #34d399;'></span>
+                                Amoy Testnet Node
                             </span>
                         </div>
-                        <p style='margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;'>Acoustic Machine Intelligence & Tamper-Proof Health Verification Engine</p>
+                        <p style='margin: 4px 0 0 0; color: #a1a1aa; font-size: 13px; font-weight: 400;'>Acoustic Machine Intelligence • Polygon Amoy Ledger • ISO 10816 Diagnostic Engine</p>
                     </div>
                 </div>
                 <div style='display: flex; gap: 8px; align-items: center; flex-wrap: wrap;'>
-                    <span style='background: #1e293b; border: 1px solid #334155; color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;'>
+                    <span style='background: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: "JetBrains Mono", monospace;'>
                         STgram-MFN v3 ONNX
                     </span>
-                    <span style='background: #1e293b; border: 1px solid #334155; color: #a78bfa; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;'>
+                    <span style='background: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: "JetBrains Mono", monospace;'>
                         Gemini Flash Multimodal
                     </span>
-                    <span style='background: #1e293b; border: 1px solid #334155; color: #34d399; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;'>
-                        Polygon Amoy (80002)
+                    <span style='background: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: "JetBrains Mono", monospace;'>
+                        Chain ID: 80002
                     </span>
                 </div>
             </div>
@@ -500,146 +547,146 @@ with gr.Blocks(title="EchoFactory — Industrial Acoustic Intelligence & Verific
     with gr.Tabs():
         
         # -------------------------------------------------------------
-        # TAB 1: OPERATOR INGESTION & SCANNER (UC-01 & UC-02)
+        # TAB 1: OPERATOR INGESTION & SCANNER
         # -------------------------------------------------------------
-        with gr.TabItem("📱 1. Pindai Suara Mesin (Operator)"):
+        with gr.TabItem("01 / Ingestion & Acoustic Scan"):
             with gr.Row():
                 with gr.Column(scale=5):
                     machine_select = gr.Dropdown(
-                        label="Pilih Unit Mesin Pabrik",
+                        label="Target Machinery Unit",
                         choices=[
-                            "🤖 AUTO-DETECT (Otomatis Deteksi Mesin & Noise SNR)",
+                            "AUTO-DETECT (Acoustic Signature & Noise Profiling)",
                             "FAN_ID_00 (Industrial Blower)",
                             "PUMP_ID_01 (Centrifugal Pump)",
                             "SLIDER_ID_02 (Linear Guide Rail)",
                             "VALVE_ID_03 (Solenoid Valve)"
                         ],
-                        value="🤖 AUTO-DETECT (Otomatis Deteksi Mesin & Noise SNR)"
+                        value="AUTO-DETECT (Acoustic Signature & Noise Profiling)"
                     )
                     
                     gr.HTML(
                         """
-                        <div style='background:#1E293B; border-left:4px solid #38BDF8; padding:10px 14px; border-radius:6px; margin:10px 0; font-size:13px; color:#CBD5E1;'>
-                            <b>💡 3 Pilihan Input Suara Mesin:</b><br>
-                            • <b>Rekam Mikrofon</b>: Klik tombol mikrofon di bawah untuk merekam langsung suara mesin fisik.<br>
-                            • <b>Upload File Sendiri</b>: Klik dropzone untuk mengunggah file rekaman Anda (.wav / .mp3).<br>
-                            • <b>Sampel Demo Instan</b>: Klik tombol preset di bawah untuk uji coba cepat.
+                        <div style='background: #0f1117; border-left: 3px solid #ffffff; padding: 12px 16px; border-radius: 6px; margin: 12px 0; font-size: 13px; color: #a1a1aa;'>
+                            <strong style='color: #ffffff;'>Acoustic Signal Source:</strong><br>
+                            • <strong>Live Microphone</strong>: Record direct physical machine acoustics.<br>
+                            • <strong>File Ingestion</strong>: Upload local WAV/MP3 recordings.<br>
+                            • <strong>Preset Benchmark</strong>: Select 1-click verified MIMII audio samples below.
                         </div>
                         """
                     )
                     
-                    gr.Markdown("#### 🎵 Preset Sampel Demo Cepat (1-Klik):")
+                    gr.Markdown("**Verified MIMII Sample Presets:**")
                     with gr.Row():
-                        btn_fan_norm = gr.Button("🌀 Fan Normal", size="sm", variant="secondary")
-                        btn_fan_anom = gr.Button("🌀 Fan Anomali (BPFI Fault)", size="sm", variant="secondary")
+                        btn_fan_norm = gr.Button("Fan Normal", size="sm", variant="secondary")
+                        btn_fan_anom = gr.Button("Fan Anomaly (BPFI Fault)", size="sm", variant="secondary")
                     with gr.Row():
-                        btn_pump_norm = gr.Button("🚰 Pump Normal", size="sm", variant="secondary")
-                        btn_pump_anom = gr.Button("🚰 Pump Anomali (Kavitasi)", size="sm", variant="secondary")
+                        btn_pump_norm = gr.Button("Pump Normal", size="sm", variant="secondary")
+                        btn_pump_anom = gr.Button("Pump Anomaly (Cavitation)", size="sm", variant="secondary")
                     with gr.Row():
-                        btn_slider_anom = gr.Button("🎚️ Slider Anomali (Friksi Rel)", size="sm", variant="secondary")
-                        btn_valve_anom = gr.Button("⛽ Valve Anomali (Kebocoran)", size="sm", variant="secondary")
+                        btn_slider_anom = gr.Button("Slider Anomaly (Rail Friction)", size="sm", variant="secondary")
+                        btn_valve_anom = gr.Button("Valve Anomaly (Leakage)", size="sm", variant="secondary")
                     
                     audio_input = gr.Audio(
                         sources=["microphone", "upload"],
                         type="filepath",
-                        label="🎙️ Rekam Mikrofon Langsung / 📁 Upload File Audio Mesin (WAV/MP3)",
+                        label="Audio Stream Ingestion (WAV/MP3)",
                         show_download_button=True
                     )
                     
-                    btn_scan = gr.Button("⚡ Mulai Analisis Akustik AI (<50ms)", variant="primary", size="lg")
+                    btn_scan = gr.Button("Execute Acoustic Analysis »", variant="primary", size="lg")
 
                 with gr.Column(scale=7):
                     decision_badge = gr.HTML(
-                        "<div style='background:#1E293B; padding:15px; border-radius:10px; color:#94A3B8; text-align:center;'>Tekan tombol 'Mulai Analisis Akustik AI' untuk memproses audio mesin.</div>"
+                        "<div style='background: #0f1117; border: 1px solid #1f2430; padding: 20px; border-radius: 12px; color: #71717a; text-align: center; font-size: 13px;'>Awaiting audio stream ingestion. Execute acoustic analysis to view spectral parameters.</div>"
                     )
-                    plot_output = gr.Plot(label="Spektrogram & Analisis Spektrum Frekuensi")
-                    bc_badge = gr.HTML("<div style='color:#64748B; font-size:12px;'>Blockchain ledger siap menerima hash audit.</div>")
+                    plot_output = gr.Plot(label="STFT Time-Frequency & Mel Spectrogram Analysis")
+                    bc_badge = gr.HTML("<div style='color: #71717a; font-size: 12px; font-family: \"JetBrains Mono\", monospace;'>Ledger Status: Standby for cryptographic hash commit.</div>")
 
             gr.Markdown("---")
-            gr.Markdown("#### 🎙️ Industrial Voice Assistant (Hands-Free Q&A Teknisi):")
+            gr.Markdown("**Industrial Voice Assistant (Hands-Free Technical Query):**")
             with gr.Row():
                 voice_query = gr.Textbox(
-                    label="Tanya Voice Assistant (Teks / Prompt Lisan)",
-                    placeholder="Contoh: 'Echo, bagaimana kondisi vibrasi Fan 00 sekarang?'",
+                    label="Voice Query / Natural Language Input",
+                    placeholder="Example: 'Echo, what is the current vibration status of Fan 00?'",
                     scale=8
                 )
-                btn_voice = gr.Button("Tanya Echo", variant="primary", scale=2)
-            voice_response = gr.Textbox(label="Jawaban Voice Assistant", lines=2)
+                btn_voice = gr.Button("Query Assistant »", variant="primary", scale=2)
+            voice_response = gr.Textbox(label="Assistant Diagnostic Output", lines=2)
 
         # -------------------------------------------------------------
-        # TAB 2: SUPERVISOR COGNITIVE DIAGNOSTIC (UC-04 & UC-05)
+        # TAB 2: SUPERVISOR COGNITIVE DIAGNOSTICS
         # -------------------------------------------------------------
-        with gr.TabItem("🔬 2. Diagnosis Multimodal & Work Order"):
-            gr.Markdown("### 🧠 Cognitive Diagnostic Core (Gemini Flash + SOP RAG ISO 10816)")
-            btn_run_diag = gr.Button("🔬 Jalankan Root Cause Reasoning & Estimasi RUL", variant="primary")
+        with gr.TabItem("02 / Cognitive Diagnostics & Work Order"):
+            gr.Markdown("### Root Cause Analysis & Maintenance Dispatch")
+            btn_run_diag = gr.Button("Execute Multimodal Reasoning & RUL Estimation »", variant="primary")
             
             diag_output_html = gr.HTML(
-                "<div style='background:#1E293B; padding:20px; border-radius:8px; color:#94A3B8;'>Jalankan diagnosis untuk melihat akar masalah mekanik dan standar keparahan getaran ISO 10816.</div>"
+                "<div style='background: #0f1117; border: 1px solid #1f2430; padding: 20px; border-radius: 12px; color: #71717a; font-size: 13px;'>Run cognitive diagnostics to generate mechanical root cause explanations and ISO 10816 severity mapping.</div>"
             )
             part_output_html = gr.HTML()
             
             gr.Markdown("---")
-            gr.Markdown("### 📋 Eksekusi Tiket Perbaikan ERP/SAP")
-            btn_dispatch_wo = gr.Button("🚀 Setujui & Terbitkan Work Order Resmi ke Teknisi Shift", variant="primary")
+            gr.Markdown("### ERP / SAP Maintenance Work Order Dispatch")
+            btn_dispatch_wo = gr.Button("Approve & Dispatch Official Work Order »", variant="primary")
             wo_output_html = gr.HTML()
 
         # -------------------------------------------------------------
-        # TAB 3: PLANT MANAGER FLEET HEALTH (UC-06)
+        # TAB 3: PLANT MANAGER FLEET HEALTH
         # -------------------------------------------------------------
-        with gr.TabItem("📊 3. Dasbor Armada Pabrik & ROI"):
-            gr.Markdown("### 🏭 Fleet Health Monitoring & Financial Downtime Avoided")
+        with gr.TabItem("03 / Fleet Analytics & Financial ROI"):
+            gr.Markdown("### Machinery Fleet Health & Avoided Downtime Metrics")
             with gr.Row():
                 with gr.Column(scale=3):
                     gr.HTML(
                         """
-                        <div style='display:flex; flex-direction:column; gap:10px;'>
+                        <div style='display: flex; flex-direction: column; gap: 12px;'>
                             <div class='stat-card'>
-                                <span style='font-size:12px; color:#94A3B8;'>FLEET RELIABILITY INDEX</span><br>
-                                <b style='font-size:24px; color:#10B981;'>97.8%</b>
+                                <span style='font-size: 11px; color: #a1a1aa; font-weight: 600; letter-spacing: 0.05em;'>FLEET RELIABILITY INDEX</span><br>
+                                <b style='font-size: 26px; color: #10b981; font-family: "JetBrains Mono", monospace;'>97.8%</b>
                             </div>
                             <div class='stat-card'>
-                                <span style='font-size:12px; color:#94A3B8;'>DOWNTIME PREVENTED</span><br>
-                                <b style='font-size:24px; color:#38BDF8;'>14.2 Jam</b>
+                                <span style='font-size: 11px; color: #a1a1aa; font-weight: 600; letter-spacing: 0.05em;'>DOWNTIME PREVENTED</span><br>
+                                <b style='font-size: 26px; color: #38bdf8; font-family: "JetBrains Mono", monospace;'>14.2 Hours</b>
                             </div>
                             <div class='stat-card'>
-                                <span style='font-size:12px; color:#94A3B8;'>ESTIMATED COST SAVINGS</span><br>
-                                <b style='font-size:22px; color:#FBBF24;'>Rp 284.000.000,-</b>
+                                <span style='font-size: 11px; color: #a1a1aa; font-weight: 600; letter-spacing: 0.05em;'>ESTIMATED COST SAVINGS</span><br>
+                                <b style='font-size: 22px; color: #f59e0b; font-family: "JetBrains Mono", monospace;'>IDR 284,000,000</b>
                             </div>
                         </div>
                         """
                     )
                 with gr.Column(scale=9):
-                    fleet_plot = gr.Plot(value=generate_fleet_trend_chart(), label="Grafik Tren Degradasi Akustik 30 Hari")
+                    fleet_plot = gr.Plot(value=generate_fleet_trend_chart(), label="30-Day Fleet Acoustic Degradation Trend")
 
         # -------------------------------------------------------------
-        # TAB 4: BLOCKCHAIN PASSPORT & WARRANTY (UC-07 & UC-08)
+        # TAB 4: BLOCKCHAIN PASSPORT & WARRANTY
         # -------------------------------------------------------------
-        with gr.TabItem("⛓️ 4. Paspor On-Chain & Klaim Garansi"):
-            gr.Markdown("### 🔐 Paspor Kesehatan Mesin Terdesentralisasi (Polygon Amoy Testnet)")
+        with gr.TabItem("04 / On-Chain Passport & Warranty"):
+            gr.Markdown("### Decentralized Machine Health Passport (Polygon Amoy Testnet)")
             with gr.Row():
                 bc_machine_select = gr.Dropdown(
-                    label="Pilih Machine ID untuk Verifikasi Paspor On-Chain",
+                    label="Target Machine Passport ID",
                     choices=["FAN_ID_00", "PUMP_ID_01", "SLIDER_ID_02", "VALVE_ID_03"],
                     value="FAN_ID_00",
                     scale=8
                 )
-                btn_fetch_bc = gr.Button("🔍 Query Smart Contract", variant="primary", scale=4)
+                btn_fetch_bc = gr.Button("Query Smart Contract »", variant="primary", scale=4)
 
             passport_table = gr.Dataframe(
                 headers=["Timestamp", "Score", "Status", "Defect Type", "SHA-256 Hash", "Inspector Address"],
                 datatype=["str", "str", "str", "str", "str", "str"],
-                label="Riwayat Log Inspeksi On-Chain (Tamper-Proof Ledger)"
+                label="Immutable On-Chain Inspection Ledger"
             )
 
             gr.Markdown("---")
-            gr.Markdown("### 📝 Portal Klaim Garansi Parametrik Otomatis")
+            gr.Markdown("### Automated Parametric Warranty Claims")
             with gr.Row():
                 claim_reason_input = gr.Textbox(
-                    label="Deskripsi Klaim Kerusakan Mesin",
-                    placeholder="Contoh: Terdeteksi degradasi bantalan dini setelah 1200 jam operasi rutin.",
+                    label="Claim Justification / Damage Description",
+                    placeholder="Example: Early bearing raceway degradation detected after 1,200 continuous operating hours.",
                     scale=8
                 )
-                btn_submit_claim = gr.Button("Ajukan Klaim Garansi", variant="primary", scale=4)
+                btn_submit_claim = gr.Button("Submit Parametric Claim »", variant="primary", scale=4)
             claim_output_html = gr.HTML()
 
     # =====================================================================
@@ -678,3 +725,4 @@ if __name__ == "__main__":
         server_port=7860,
         show_api=False
     )
+
