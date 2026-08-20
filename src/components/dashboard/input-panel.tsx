@@ -232,7 +232,7 @@ export function InputPanel({
 
           {/* Mode A: Quick Presets */}
           {ingestionTab === "preset" && (
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 font-sans">
+            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1 font-sans scrollbar-thin">
               {presetsForCurrentMachine.map((preset) => {
                 const isAbnormal = preset.condition === "ABNORMAL";
                 const isSelected = selectedPreset.id === preset.id;
