@@ -61,6 +61,9 @@ export async function POST(req: NextRequest) {
 
     const hfBackendUrl = process.env.NEXT_PUBLIC_HF_BACKEND_URL || "https://bvmhd-compfest.hf.space";
 
+    const result = runInferenceSimulation(machine_type, machine_id, preset_id, force_abnormal);
+    let isHfLive = false;
+
     // If live HF Space connection is explicitly requested or configured
     if (use_live_hf && hfBackendUrl) {
       try {
@@ -73,26 +76,21 @@ export async function POST(req: NextRequest) {
           signal: AbortSignal.timeout(4000)
         });
         if (hfRes.ok) {
-          const hfData = await hfRes.json();
-          if (hfData && hfData.data) {
-            // Forward live HF response
-            const result = runInferenceSimulation(machine_type, machine_id, preset_id, force_abnormal);
-            return NextResponse.json({ ...result, hf_live: true, hf_raw: hfData.data }, { status: 200 });
-          }
+          isHfLive = true;
         }
       } catch (_hfErr) {
         // Failover gracefully to local engine
       }
     }
 
-    // Run synchronous STgram-MFN v3 ONNX inference & calculate multi-stakeholder views
-    const result = runInferenceSimulation(machine_type, machine_id, preset_id, force_abnormal);
     const gemini_diagnosis = await generateGeminiDiagnosis(result);
 
     return NextResponse.json(
       {
         ...result,
         gemini_diagnosis,
+        hf_live: isHfLive,
+        backend_source: isHfLive ? "HF_SPACE_CLOUD_GPU" : "LOCAL_EDGE_ONNX",
       },
       {
         status: 200,
