@@ -138,7 +138,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
             {/* ── LEFT: Input Configuration ── */}
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-4 lg:sticky lg:top-4 self-start">
               <InputPanel
                 selectedMachine={selectedMachine}
                 onSelectMachine={(m) => {

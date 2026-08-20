@@ -100,7 +100,7 @@ export function SupervisorWidget({
                 </p>
               </div>
             ) : (
-              <div className="text-[11px] text-zinc-300 leading-relaxed font-sans whitespace-pre-line bg-black/50 p-2.5 rounded-lg border border-zinc-800/80">
+              <div className="text-[11px] text-zinc-300 leading-relaxed font-sans whitespace-pre-line bg-black/50 p-3 rounded-lg border border-zinc-800/80 max-h-[220px] overflow-y-auto pr-2 font-mono scrollbar-thin">
                 {geminiDiagnosis || (
                   isAbnormal
                     ? `[Gemini Flash 1.5 Real-Time Analysis]\nTerdeteksi lonjakan getaran harmonik abnormal pada sinyal akustik ${result.machine_id}. Skor anomali (${result.operator_view.anomaly_score.toFixed(3)}) melebihi ambang batas aman 0.500. Diidentifikasi sebagai ${result.supervisor_view.fault_type}. Rekomendasi: ${result.supervisor_view.recommended_action}`

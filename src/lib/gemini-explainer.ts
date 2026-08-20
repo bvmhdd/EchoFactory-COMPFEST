@@ -47,7 +47,7 @@ Tugas Anda: Berikan analisis diagnostik preskriptif yang ringkas, teknis, dan be
               contents: [{ parts: [{ text: promptText }] }],
               generationConfig: {
                 temperature: 0.3,
-                maxOutputTokens: 300,
+                maxOutputTokens: 1200,
               },
             }),
           }

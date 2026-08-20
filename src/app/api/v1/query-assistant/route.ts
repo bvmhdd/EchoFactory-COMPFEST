@@ -63,7 +63,7 @@ Instruksi Respons:
                 contents: [{ parts: [{ text: systemPrompt }] }],
                 generationConfig: {
                   temperature: 0.3,
-                  maxOutputTokens: 400,
+                  maxOutputTokens: 1200,
                 },
               }),
             }

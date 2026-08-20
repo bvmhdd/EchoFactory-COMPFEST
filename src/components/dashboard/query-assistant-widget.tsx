@@ -236,7 +236,7 @@ export function QueryAssistantWidget({ result }: QueryAssistantProps) {
           )}
         </div>
 
-        <div className="min-h-[100px] rounded-xl bg-[#09090d] border border-zinc-800 p-4 font-sans text-xs text-zinc-200 leading-relaxed whitespace-pre-line shadow-inner">
+        <div className="min-h-[100px] max-h-[260px] overflow-y-auto pr-2 rounded-xl bg-[#09090d] border border-zinc-800 p-4 font-sans text-xs text-zinc-200 leading-relaxed whitespace-pre-line shadow-inner scrollbar-thin">
           {isAsking ? (
             <div className="flex items-center gap-3 text-sky-400 animate-pulse font-mono text-xs py-4">
               <Cpu className="w-5 h-5 animate-spin" />
