@@ -1,21 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Wrench, CheckCircle2, FileText, AlertTriangle, Check } from "lucide-react";
+import { Wrench, CheckCircle2, FileText, AlertTriangle, Check, Cpu } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DetectionResult } from "@/lib/inference-engine";
 
-export function SupervisorWidget({ result }: { result: DetectionResult }) {
+export function SupervisorWidget({
+  result,
+  geminiDiagnosis,
+}: {
+  result: DetectionResult;
+  geminiDiagnosis?: string | null;
+}) {
   const [woCreated, setWoCreated] = useState(false);
   const isAbnormal = result.operator_view.condition === "ABNORMAL";
 
   return (
-    <div className="p-5 rounded-2xl border border-[#27272A] bg-[#09090B] flex flex-col justify-between space-y-4 shadow-xl">
+    <div className="p-5 rounded-2xl border border-[#1F1F23] bg-[#050508] flex flex-col justify-between space-y-4 shadow-xl">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#27272A] pb-3 mb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-zinc-800/80 text-zinc-400 flex items-center justify-center">
               <Wrench className="w-4 h-4" />
             </div>
             <div>
@@ -25,7 +31,7 @@ export function SupervisorWidget({ result }: { result: DetectionResult }) {
             </div>
           </div>
 
-          <Badge variant="warning" className="text-[10px] font-mono border-amber-500/30 bg-amber-500/10 text-amber-300">
+          <Badge variant="mono" className="text-[10px] font-mono border-zinc-800 bg-black text-zinc-500">
             {result.supervisor_view.iso_standard.split("(")[0]}
           </Badge>
         </div>
@@ -47,12 +53,25 @@ export function SupervisorWidget({ result }: { result: DetectionResult }) {
           </div>
 
           {/* Standard & Actionable SOP */}
-          <div className="p-3 rounded-xl bg-[#111113] border border-[#27272A] space-y-1">
-            <span className="text-[10px] text-zinc-400 uppercase font-mono block">
+          <div className="p-3 rounded-xl bg-black border border-[#1F1F23] space-y-1">
+            <span className="text-[10px] text-zinc-500 uppercase font-mono block">
               Rekomendasi Tindakan
             </span>
             <p className="text-xs text-zinc-300 leading-relaxed font-sans">
               {result.supervisor_view.recommended_action}
+            </p>
+          </div>
+
+          {/* Gemini Flash AI Diagnosis Panel */}
+          <div className="p-3 rounded-xl bg-[#0a0a0d] border border-white/8">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Cpu className="w-3 h-3 text-zinc-500" />
+              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+                Gemini Flash Analysis
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              {geminiDiagnosis ?? "Aktifkan Live Mode untuk diagnosis AI real-time dari Gemini Flash."}
             </p>
           </div>
         </div>

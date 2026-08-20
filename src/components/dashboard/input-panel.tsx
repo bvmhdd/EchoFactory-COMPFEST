@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MachineType, PRESET_SAMPLES, PresetSample } from "@/lib/audio-presets";
+import { MachineType, PRESET_SAMPLES, PresetSample, playSyntheticIndustrialSound } from "@/lib/audio-presets";
 import {
   Mic,
   MicOff,
@@ -15,6 +15,8 @@ import {
   SlidersHorizontal,
   Activity,
   Sliders,
+  Play,
+  Square,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +28,7 @@ interface InputPanelProps {
   onSelectPreset: (preset: PresetSample) => void;
   onRunDiagnosis: (preset: PresetSample, isCustomAudio?: boolean) => void;
   isLoading: boolean;
+  useLiveBackend?: boolean;
 }
 
 export function InputPanel({
@@ -35,13 +38,16 @@ export function InputPanel({
   onSelectPreset,
   onRunDiagnosis,
   isLoading,
+  useLiveBackend = false,
 }: InputPanelProps) {
   const [ingestionTab, setIngestionTab] = useState<"preset" | "mic" | "upload">("preset");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [playingPresetId, setPlayingPresetId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recordIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioStopRef = useRef<(() => void) | null>(null);
 
   const machines = [
     { type: "fan" as MachineType, id: "FAN-LINE-01", label: "Industrial Fan", icon: Wind },
@@ -55,9 +61,33 @@ export function InputPanel({
   );
 
   const handleMachineChange = (mType: MachineType) => {
+    // Stop any playing audio when switching machine
+    if (audioStopRef.current) { audioStopRef.current(); audioStopRef.current = null; }
+    setPlayingPresetId(null);
     onSelectMachine(mType);
     const firstPreset = PRESET_SAMPLES.find((p) => p.machineType === mType);
     if (firstPreset) onSelectPreset(firstPreset);
+  };
+
+  const handlePlayPreset = (e: React.MouseEvent, preset: PresetSample) => {
+    e.stopPropagation();
+    // Stop currently playing audio
+    if (audioStopRef.current) { audioStopRef.current(); audioStopRef.current = null; }
+    if (playingPresetId === preset.id) {
+      // Toggle off
+      setPlayingPresetId(null);
+      return;
+    }
+    setPlayingPresetId(preset.id);
+    const { stop } = playSyntheticIndustrialSound(preset);
+    audioStopRef.current = () => {
+      stop();
+      setPlayingPresetId(null);
+    };
+    // Auto-stop after ~10s
+    setTimeout(() => {
+      if (audioStopRef.current) { audioStopRef.current(); audioStopRef.current = null; }
+    }, 10000);
   };
 
   const handleToggleRecord = () => {
@@ -96,17 +126,17 @@ export function InputPanel({
   };
 
   return (
-    <div className="p-6 bg-[#09090B] border border-[#27272A] rounded-2xl flex flex-col justify-between space-y-6 h-full shadow-2xl">
+    <div className="p-6 bg-[#050508] border border-[#1F1F23] rounded-2xl flex flex-col justify-between space-y-6 h-full shadow-2xl">
       <div className="space-y-6">
         {/* Panel Header */}
-        <div className="border-b border-[#27272A] pb-3 flex items-center justify-between">
+        <div className="border-b border-[#1F1F23] pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-sky-400" />
+            <Sliders className="w-4 h-4 text-zinc-400" />
             <span className="text-xs font-semibold tracking-wide text-white">
               Konfigurasi Input
             </span>
           </div>
-          <Badge variant="mono" className="text-[10px] font-mono border-zinc-700 bg-zinc-900 text-zinc-300">
+          <Badge variant="mono" className="text-[10px] font-mono border-zinc-800 bg-black text-zinc-400">
             16 kHz PCM
           </Badge>
         </div>
@@ -125,16 +155,16 @@ export function InputPanel({
                   key={m.type}
                   type="button"
                   onClick={() => handleMachineChange(m.type)}
-                  className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                   className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                     isSelected
-                      ? "bg-[#18181B] border-sky-500/60 text-white shadow-[0_0_20px_rgba(56,189,248,0.12)] ring-1 ring-sky-500/30"
-                      : "bg-[#111113] border-[#27272A] text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                      ? "bg-[#18181B] border-white/40 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] ring-1 ring-white/20"
+                      : "bg-[#0d0d10] border-[#1F1F23] text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <div
                       className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                        isSelected ? "bg-sky-500/15 text-sky-400" : "bg-zinc-800/80 text-zinc-400"
+                        isSelected ? "bg-white/10 text-white" : "bg-zinc-900 text-zinc-500"
                       }`}
                     >
                       <IconComp className="w-3.5 h-3.5" />
@@ -146,10 +176,10 @@ export function InputPanel({
                   </div>
                   <div
                     className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
-                      isSelected ? "border-sky-400 bg-sky-400" : "border-zinc-600 bg-transparent"
+                      isSelected ? "border-white bg-white" : "border-zinc-700 bg-transparent"
                     }`}
                   >
-                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black"></div>}
+                    {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black" />}
                   </div>
                 </button>
               );
@@ -164,13 +194,13 @@ export function InputPanel({
           </label>
 
           {/* Ingestion Mode Tabs */}
-          <div className="grid grid-cols-3 gap-1 p-1 bg-[#111113] rounded-xl border border-[#27272A] mb-3">
+          <div className="grid grid-cols-3 gap-1 p-1 bg-black rounded-xl border border-[#1F1F23] mb-3">
             <button
               onClick={() => setIngestionTab("preset")}
               className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "preset"
-                  ? "bg-[#27272A] text-white font-medium shadow"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-[#1a1a1e] text-white font-medium shadow border border-white/10"
+                  : "text-zinc-500 hover:text-zinc-200"
               }`}
             >
               <Radio className="w-3.5 h-3.5" />
@@ -180,8 +210,8 @@ export function InputPanel({
               onClick={() => setIngestionTab("mic")}
               className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "mic"
-                  ? "bg-[#27272A] text-white font-medium shadow"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-[#1a1a1e] text-white font-medium shadow border border-white/10"
+                  : "text-zinc-500 hover:text-zinc-200"
               }`}
             >
               <Mic className="w-3.5 h-3.5" />
@@ -191,8 +221,8 @@ export function InputPanel({
               onClick={() => setIngestionTab("upload")}
               className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "upload"
-                  ? "bg-[#27272A] text-white font-medium shadow"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-[#1a1a1e] text-white font-medium shadow border border-white/10"
+                  : "text-zinc-500 hover:text-zinc-200"
               }`}
             >
               <UploadCloud className="w-3.5 h-3.5" />
@@ -206,22 +236,23 @@ export function InputPanel({
               {presetsForCurrentMachine.map((preset) => {
                 const isAbnormal = preset.condition === "ABNORMAL";
                 const isSelected = selectedPreset.id === preset.id;
+                const isPlaying = playingPresetId === preset.id;
                 return (
                   <button
                     key={preset.id}
                     type="button"
                     onClick={() => onSelectPreset(preset)}
-                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between group ${
                       isSelected
                         ? isAbnormal
-                          ? "bg-rose-500/10 border-rose-500/60 text-white shadow-[0_0_15px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/30"
-                          : "bg-emerald-500/10 border-emerald-500/60 text-white shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30"
-                        : "bg-[#111113] border-[#27272A] text-zinc-300 hover:border-zinc-600"
+                          ? "bg-rose-500/8 border-rose-500/40 text-white animate-glow-abnormal"
+                          : "bg-white/5 border-white/30 text-white shadow-[0_0_15px_rgba(255,255,255,0.06)]"
+                        : "bg-[#0a0a0d] border-[#1F1F23] text-zinc-300 hover:border-zinc-600 hover:bg-[#111113]"
                     }`}
                   >
-                    <div className="flex flex-col gap-0.5">
+                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <Badge variant={isAbnormal ? "danger" : "success"} className="text-[10px] font-medium">
+                        <Badge variant={isAbnormal ? "danger" : "success"} className="text-[10px] font-medium shrink-0">
                           {isAbnormal ? (
                             <span className="flex items-center gap-1">
                               <AlertCircle className="w-3 h-3" /> Abnormal
@@ -236,13 +267,40 @@ export function InputPanel({
                           {preset.name.split("(")[1]?.replace(")", "") || preset.name}
                         </span>
                       </div>
-                      <span className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5 font-normal">
+                      <span className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5 font-mono">
                         {preset.description}
                       </span>
                     </div>
-                    {isSelected && (
-                      <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
-                    )}
+
+                    {/* Play button + Waveform */}
+                    <div className="flex items-center gap-2 ml-3 shrink-0">
+                      {isPlaying && (
+                        <div className="flex items-end gap-[2px] h-5">
+                          {Array.from({ length: 8 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="w-[2px] bg-white rounded-full animate-waveform-bar"
+                              style={{
+                                animationDelay: `${i * 0.1}s`,
+                                animationDuration: `${0.55 + i * 0.07}s`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        onClick={(e) => handlePlayPreset(e, preset)}
+                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                          isPlaying
+                            ? "bg-white text-black"
+                            : "bg-white/8 hover:bg-white/18 text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        {isPlaying
+                          ? <Square className="w-3 h-3" />
+                          : <Play className="w-3 h-3" />}
+                      </button>
+                    </div>
                   </button>
                 );
               })}
@@ -318,18 +376,22 @@ export function InputPanel({
       </div>
 
       {/* 3. Action Button */}
-      <div className="pt-4 border-t border-[#27272A]">
+      <div className="pt-4 border-t border-[#1F1F23] space-y-2">
+        {/* Live mode indicator */}
+        <div className="text-[10px] font-mono text-zinc-600 text-center tracking-wider">
+          {useLiveBackend ? "→ HF SPACE BACKEND" : "→ LOCAL ENGINE (ONNX)"}
+        </div>
         <Button
           type="button"
           onClick={() => onRunDiagnosis(selectedPreset)}
           disabled={isLoading}
           variant="secondary"
           size="lg"
-          className="w-full justify-center text-xs font-semibold tracking-wide gap-2 py-3.5 shadow-md hover:shadow-lg transition-all"
+          className="w-full justify-center text-xs font-semibold tracking-wide gap-2 py-3.5 shadow-md hover:shadow-xl transition-all"
         >
           {isLoading ? (
             <>
-              <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+              <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
               Memproses Inferensi...
             </>
           ) : (

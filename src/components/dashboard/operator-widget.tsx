@@ -19,8 +19,8 @@ export function OperatorWidget({
     <div
       className={`p-5 rounded-2xl border transition-all duration-300 ${
         isAbnormal
-          ? "bg-[#0C0809] border-rose-500/30 shadow-[0_0_25px_rgba(244,63,94,0.08)]"
-          : "bg-[#080C0A] border-emerald-500/30 shadow-[0_0_25px_rgba(16,185,129,0.08)]"
+          ? "bg-[#0C0809] border-rose-500/30 animate-glow-abnormal"
+          : "bg-[#07090a] border-white/10"
       }`}
     >
       {/* Widget Header */}
@@ -89,7 +89,7 @@ export function OperatorWidget({
 
         <div className="p-3.5 rounded-xl bg-black/60 border border-zinc-800/80">
           <span className="text-zinc-400 block text-[11px]">Arsitektur Model</span>
-          <span className="text-xs font-semibold text-sky-400 truncate block mt-1">
+          <span className="text-xs font-semibold text-white truncate block mt-1 font-mono">
             STgram-MFN v3
           </span>
         </div>
@@ -97,6 +97,19 @@ export function OperatorWidget({
 
       {/* 2D Mel-Spectrogram & Linear STFT Visualizer */}
       <SpectrogramCanvas sample={sample} condition={result.operator_view.condition} />
+
+      {/* Audio Preview Player */}
+      {sample.audioUrl && (
+        <div className="mt-3 p-3 rounded-xl bg-black/60 border border-[#1F1F23]">
+          <span className="text-[10px] font-mono text-zinc-600 block mb-1.5 uppercase tracking-wider">Audio Preview — {sample.machineId}</span>
+          <audio
+            controls
+            src={sample.audioUrl}
+            className="w-full h-8"
+            style={{ colorScheme: "dark", filter: "invert(0.85) hue-rotate(180deg)" }}
+          />
+        </div>
+      )}
     </div>
   );
 }

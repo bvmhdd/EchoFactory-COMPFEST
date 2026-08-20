@@ -12,12 +12,12 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
   const strokeDashoffset = circumference - (health / 100) * circumference;
 
   return (
-    <div className="p-5 rounded-2xl border border-[#27272A] bg-[#09090B] flex flex-col justify-between space-y-4 shadow-xl">
+    <div className="p-5 rounded-2xl border border-[#1F1F23] bg-[#050508] flex flex-col justify-between space-y-4 shadow-xl">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#27272A] pb-3 mb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-zinc-800/80 text-zinc-400 flex items-center justify-center">
               <Gauge className="w-4 h-4" />
             </div>
             <div>
@@ -63,7 +63,7 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
                   cx="50"
                   cy="50"
                   r={radius}
-                  stroke={health > 80 ? "#10b981" : health > 50 ? "#f59e0b" : "#f43f5e"}
+                  stroke={health > 80 ? "#ffffff" : health > 50 ? "#f59e0b" : "#f43f5e"}
                   strokeWidth="8"
                   strokeDasharray={circumference}
                   strokeDashoffset={strokeDashoffset}
@@ -102,9 +102,9 @@ export function ManagerWidget({ result }: { result: DetectionResult }) {
         </div>
       </div>
 
-      <div className="pt-3 border-t border-[#27272A] text-[11px] text-zinc-400 flex items-center justify-between">
-        <span>Ketersediaan Armada:</span>
-        <span className="text-emerald-400 font-semibold font-mono">99.98% Availability</span>
+      <div className="pt-2 border-t border-[#1F1F23] text-[10px] font-mono text-zinc-600 flex items-center justify-between">
+        <span>STgram-MFN v3 · 1.2M params · ONNX FP32</span>
+        <span className="text-zinc-700">Input: 313×64 Mel</span>
       </div>
     </div>
   );

@@ -16,12 +16,12 @@ export function AuditorWidget({ result }: { result: DetectionResult }) {
   };
 
   return (
-    <div className="p-5 rounded-2xl border border-[#27272A] bg-[#09090B] flex flex-col justify-between space-y-4 shadow-xl">
+    <div className="p-5 rounded-2xl border border-[#1F1F23] bg-[#050508] flex flex-col justify-between space-y-4 shadow-xl">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[#27272A] pb-3 mb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-zinc-800/80 text-zinc-400 flex items-center justify-center">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
@@ -31,7 +31,7 @@ export function AuditorWidget({ result }: { result: DetectionResult }) {
             </div>
           </div>
 
-          <Badge variant="mono" className="text-[10px] font-mono border-purple-500/30 bg-purple-500/10 text-purple-300">
+          <Badge variant="mono" className="text-[10px] font-mono border-zinc-800 bg-black text-zinc-500">
             Polygon Amoy
           </Badge>
         </div>
@@ -55,16 +55,26 @@ export function AuditorWidget({ result }: { result: DetectionResult }) {
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <div className="p-2.5 rounded-xl bg-[#111113] border border-[#27272A]">
-              <span className="text-zinc-400 block text-[10px]">Blok Transaksi</span>
+            <div className="p-2.5 rounded-xl bg-black border border-[#1F1F23]">
+              <span className="text-zinc-500 block text-[10px]">Blok Transaksi</span>
               <span className="text-zinc-200 font-semibold font-mono">#{result.auditor_view.block_number}</span>
             </div>
-            <div className="p-2.5 rounded-xl bg-[#111113] border border-[#27272A]">
-              <span className="text-zinc-400 block text-[10px]">Status Ledger</span>
+            <div className="p-2.5 rounded-xl bg-black border border-[#1F1F23]">
+              <span className="text-zinc-500 block text-[10px]">Status Ledger</span>
               <span className="text-emerald-400 font-semibold flex items-center gap-1 font-mono text-[10px]">
                 <Check className="w-3 h-3" /> TERVERIFIKASI
               </span>
             </div>
+          </div>
+
+          {/* Live Contract Block */}
+          <div className="p-2.5 rounded-xl bg-black border border-[#1F1F23] text-[10px] font-mono">
+            <div className="flex items-center justify-between text-zinc-500 mb-1">
+              <span>CONTRACT</span>
+              <span className="text-emerald-400">[LINKED]</span>
+            </div>
+            <span className="text-zinc-400 block truncate">0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864</span>
+            <span className="text-zinc-600">Polygon Amoy · Chain 80002</span>
           </div>
         </div>
       </div>
@@ -75,7 +85,7 @@ export function AuditorWidget({ result }: { result: DetectionResult }) {
           href={result.auditor_view.polygonscan_url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sky-400 hover:text-sky-300 font-medium transition-colors text-xs"
+          className="inline-flex items-center gap-1.5 text-white hover:text-zinc-300 font-medium transition-colors text-xs"
         >
           <span>Lihat di PolygonScan</span>
           <ExternalLink className="w-3.5 h-3.5" />

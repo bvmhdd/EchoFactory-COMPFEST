@@ -2,6 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import { MachineType } from "@/lib/audio-presets";
 import { runInferenceSimulation } from "@/lib/inference-engine";
 
+// ── Health Check ─────────────────────────────────────────────────────────────
+export async function GET() {
+  const hfUrl = process.env.NEXT_PUBLIC_HF_BACKEND_URL ?? "";
+  const geminiConfigured = !!(process.env.GEMINI_API_KEY);
+  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? "0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864";
+
+  let hfStatus = "unconfigured";
+  let latencyMs: number | null = null;
+
+  if (hfUrl) {
+    const t0 = Date.now();
+    try {
+      const r = await fetch(hfUrl, { signal: AbortSignal.timeout(5000) });
+      latencyMs = Date.now() - t0;
+      hfStatus = r.ok ? (latencyMs < 2500 ? "live" : "sleeping") : "offline";
+    } catch {
+      hfStatus = "offline";
+    }
+  }
+
+  return NextResponse.json({
+    hfStatus,
+    geminiConfigured,
+    latencyMs,
+    contractAddress,
+    chainId: process.env.NEXT_PUBLIC_CHAIN_ID ?? "80002",
+  });
+}
+
+// ── Inference Endpoint ────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get("content-type") || "";
