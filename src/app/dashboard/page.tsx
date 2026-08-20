@@ -114,9 +114,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <KineticGrid globalColor="monochrome" className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
-      <div className="flex flex-col min-h-screen">
-        {/* Console Header with Tabbed Navigation Bar */}
+    <KineticGrid globalColor="monochrome" className="h-screen overflow-hidden bg-black text-white selection:bg-white selection:text-black flex flex-col">
+      <div className="flex flex-col h-screen overflow-hidden">
+        {/* Header */}
         <ConsoleHeader
           inferenceLatency={detectionResult?.inference_time_ms}
           status={isLoading ? "running" : detectionResult ? "complete" : "idle"}
@@ -133,12 +133,12 @@ export default function DashboardPage() {
           onRefresh={connectionStatus.refresh}
         />
 
-        {/* Main Layout: Left panel + Right panel */}
-        <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Main Single-Screen Desktop Application Viewport */}
+        <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-5 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full overflow-hidden items-stretch">
 
-            {/* ── LEFT: Input Configuration ── */}
-            <div className="lg:col-span-4 lg:sticky lg:top-20 self-start">
+            {/* ── LEFT: Independent Scrollable Input Panel Column ── */}
+            <div className="lg:col-span-4 h-full overflow-y-auto pr-1 scrollbar-thin">
               <InputPanel
                 selectedMachine={selectedMachine}
                 onSelectMachine={(m) => {
@@ -154,12 +154,12 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* ── RIGHT: Output Column ── */}
-            <div className="lg:col-span-8 flex flex-col space-y-5">
+            {/* ── RIGHT: Independent Scrollable Results Column ── */}
+            <div className="lg:col-span-8 h-full overflow-y-auto pr-2 pb-6 flex flex-col space-y-5 scrollbar-thin">
 
               {/* ─── Loading / Analysis HUD ─── */}
               {isLoading && (
-                <div className="rounded-2xl border border-sky-500/20 bg-[#05080f] p-6 shadow-xl">
+                <div className="rounded-2xl border border-sky-500/20 bg-[#05080f] p-6 shadow-xl shrink-0">
                   {/* HUD Header */}
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
@@ -232,7 +232,7 @@ export default function DashboardPage() {
 
               {/* ─── Empty State ─── */}
               {!isLoading && !detectionResult && (
-                <div className="rounded-2xl border border-zinc-800 bg-[#050508] p-12 flex flex-col items-center justify-center gap-4 text-center">
+                <div className="rounded-2xl border border-zinc-800 bg-[#050508] p-12 flex flex-col items-center justify-center gap-4 text-center my-auto">
                   <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
                     <Activity className="w-7 h-7 text-zinc-500" />
                   </div>
@@ -250,7 +250,7 @@ export default function DashboardPage() {
               {!isLoading && detectionResult && (
                 <>
                   {/* Status Banner */}
-                  <div className={`rounded-xl border px-5 py-4 transition-all duration-500 ${
+                  <div className={`rounded-xl border px-5 py-4 transition-all duration-500 shrink-0 ${
                     detectionResult.operator_view.condition === "ABNORMAL"
                       ? "border-rose-500/30 bg-[#0c0508]"
                       : "border-emerald-500/30 bg-[#050c08]"
@@ -354,7 +354,7 @@ export default function DashboardPage() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-[#1F1F23] bg-[#050507] px-6 py-3 text-[10px] font-mono text-zinc-600 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <footer className="border-t border-[#1F1F23] bg-[#050507] px-6 py-2.5 text-[10px] font-mono text-zinc-600 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
           <div className="flex flex-wrap items-center gap-4">
             <span>STgram-MFN v3 · ONNX FP32</span>
             <span className="text-zinc-800">·</span>
