@@ -83,13 +83,13 @@ export function TeamSection() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-mono mb-4">
             <Users className="w-3.5 h-3.5" />
-            <span>COMPFEST 18 AI INNOVATION CHALLENGE</span>
+            <span>AKU MAU FOKUS HIMA TEAM · COMPFEST 18 AIC</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-2">
-            Tim Pengembang EchoFactory
+            Aku Mau Fokus Hima Team
           </h2>
           <p className="text-base sm:text-lg text-zinc-400 font-normal">
-            Kolaborasi 5 anggota lintas disiplin AI, Full-Stack, Data Pipeline, dan Product Strategy.
+            Tim Pengembang EchoFactory — Kolaborasi 5 anggota lintas disiplin AI, Full-Stack, Data Pipeline, dan Product Strategy.
           </p>
         </div>
       </div>
@@ -121,12 +121,12 @@ function MemberCard({ member }: { member: TeamMember }) {
   const hasPhoto = Boolean(member.avatarUrl && member.avatarUrl.trim().length > 0 && !imgError);
 
   return (
-    <div className="p-5 rounded-2xl bg-[#09090C] border border-[#222226] hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between shadow-lg hover:shadow-xl group hover:bg-[#0D0D12]">
+    <div className="p-6 rounded-2xl bg-[#09090C] border border-[#222226] hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between shadow-lg hover:shadow-xl group hover:bg-[#0D0D12]">
       <div>
-        {/* Card Header: Avatar Photo / Fallback Icon + Role Tag */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Card Header: Prominent Avatar Photo / Fallback Icon + Role Tag */}
+        <div className="flex items-start justify-between mb-4">
           {hasPhoto ? (
-            <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-zinc-700/80 group-hover:border-sky-500/50 shadow-md transition-all">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-zinc-700/80 group-hover:border-sky-500/60 shadow-lg group-hover:shadow-sky-500/10 transition-all">
               <Image
                 src={member.avatarUrl!}
                 alt={member.name}
@@ -137,8 +137,8 @@ function MemberCard({ member }: { member: TeamMember }) {
               />
             </div>
           ) : (
-            <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${member.accentColor}`}>
-              <IconComp className="w-5 h-5" />
+            <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border flex items-center justify-center ${member.accentColor}`}>
+              <IconComp className="w-8 h-8 sm:w-9 sm:h-9" />
             </div>
           )}
 
@@ -148,7 +148,7 @@ function MemberCard({ member }: { member: TeamMember }) {
         </div>
 
         {/* Name & Hackathon Role */}
-        <h3 className="text-base font-bold text-white mb-0.5 group-hover:text-sky-300 transition-colors">
+        <h3 className="text-lg font-bold text-white mb-0.5 group-hover:text-sky-300 transition-colors">
           {member.name}
         </h3>
         <div className="text-xs font-mono font-medium text-sky-400 mb-3">
@@ -163,8 +163,8 @@ function MemberCard({ member }: { member: TeamMember }) {
 
       {/* Social Links Footer */}
       <div className="border-t border-[#1C1C20] pt-3 flex items-center justify-between">
-        <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider">
-          COMPFEST 18
+        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+          Aku Mau Fokus Hima Team
         </span>
         <div className="flex items-center gap-2.5 text-zinc-500">
           {member.github && (
@@ -175,7 +175,7 @@ function MemberCard({ member }: { member: TeamMember }) {
               className="hover:text-white transition-colors"
               title="GitHub Profile"
             >
-              <Github className="w-3.5 h-3.5" />
+              <Github className="w-4 h-4" />
             </a>
           )}
           {member.linkedin && (
@@ -186,7 +186,7 @@ function MemberCard({ member }: { member: TeamMember }) {
               className="hover:text-sky-400 transition-colors"
               title="LinkedIn Profile"
             >
-              <Linkedin className="w-3.5 h-3.5" />
+              <Linkedin className="w-4 h-4" />
             </a>
           )}
         </div>
