@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import Image from "next/image";
 import { Users, Cpu, Code2, Sparkles, Database, FileText, Github, Linkedin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -10,6 +12,7 @@ export interface TeamMember {
   tag: string;
   icon: typeof Cpu;
   accentColor: string;
+  avatarUrl?: string; // Path ke foto, contoh: "/team/lead.jpg" atau URL
   github?: string;
   linkedin?: string;
 }
@@ -21,6 +24,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Lead AI & Web3",
     icon: Cpu,
     accentColor: "text-sky-400 bg-sky-500/10 border-sky-500/30",
+    avatarUrl: "", // Isi dengan path foto, contoh: "/team/lead.jpg"
     focus: "Merancang arsitektur model deep metric STgram-MFN v3, kuantisasi ONNX, dan smart contract paspor kesehatan mesin di Polygon Amoy.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -31,6 +35,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Frontend & WebAudio",
     icon: Code2,
     accentColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+    avatarUrl: "", // Isi dengan path foto, contoh: "/team/fullstack.jpg"
     focus: "Membangun antarmuka Next.js 15 konsol industri 4-persona, streaming audio WebAudio API 16 kHz, dan visualisasi spektrogram real-time.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -41,6 +46,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "LLM & MLOps",
     icon: Sparkles,
     accentColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+    avatarUrl: "", // Isi dengan path foto, contoh: "/team/ai-rag.jpg"
     focus: "Mengembangkan Cognitive Diagnostic Core berbasis Gemini 2.0 Flash RAG untuk rekomendasi SOP preskriptif standar ISO 10816-3.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -51,6 +57,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Product & Strategy",
     icon: FileText,
     accentColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+    avatarUrl: "", // Isi dengan path foto, contoh: "/team/product.jpg"
     focus: "Menyusun proposal teknis, memimpin strategi kepatuhan booklet lomba COMPFEST 18 AIC, serta mengelola koordinasi dan roadmap proyek.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -61,6 +68,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Data Pipeline",
     icon: Database,
     accentColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+    avatarUrl: "", // Isi dengan path foto, contoh: "/team/data-engineer.jpg"
     focus: "Mengkurasi dan memproses dataset audio industri Hitachi MIMII, augmentasi sinyal multi-SNR, dan validasi spektrum akustik.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -108,15 +116,32 @@ export function TeamSection() {
 
 function MemberCard({ member }: { member: TeamMember }) {
   const IconComp = member.icon;
+  const [imgError, setImgError] = useState(false);
+
+  const hasPhoto = Boolean(member.avatarUrl && member.avatarUrl.trim().length > 0 && !imgError);
 
   return (
     <div className="p-5 rounded-2xl bg-[#09090C] border border-[#222226] hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between shadow-lg hover:shadow-xl group hover:bg-[#0D0D12]">
       <div>
-        {/* Card Header: Icon + Role Tag */}
+        {/* Card Header: Avatar Photo / Fallback Icon + Role Tag */}
         <div className="flex items-center justify-between mb-4">
-          <div className={`w-9 h-9 rounded-xl border flex items-center justify-center ${member.accentColor}`}>
-            <IconComp className="w-4.5 h-4.5" />
-          </div>
+          {hasPhoto ? (
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden border-2 border-zinc-700/80 group-hover:border-sky-500/50 shadow-md transition-all">
+              <Image
+                src={member.avatarUrl!}
+                alt={member.name}
+                fill
+                className="object-cover"
+                onError={() => setImgError(true)}
+                unoptimized
+              />
+            </div>
+          ) : (
+            <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${member.accentColor}`}>
+              <IconComp className="w-5 h-5" />
+            </div>
+          )}
+
           <Badge variant="mono" className="text-[10px] font-mono border-zinc-800 bg-zinc-900/80 text-zinc-400">
             {member.tag}
           </Badge>
