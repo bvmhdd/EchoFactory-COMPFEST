@@ -24,7 +24,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Lead AI & Web3",
     icon: Cpu,
     accentColor: "text-sky-400 bg-sky-500/10 border-sky-500/30",
-    avatarUrl: "", // Isi dengan path foto, contoh: "/team/lead.jpg"
+    avatarUrl: "/team/muhibin.jpg",
     focus: "Merancang arsitektur model deep metric STgram-MFN v3, kuantisasi ONNX, dan smart contract paspor kesehatan mesin di Polygon Amoy.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -131,7 +131,7 @@ function MemberCard({ member }: { member: TeamMember }) {
                 src={member.avatarUrl!}
                 alt={member.name}
                 fill
-                className="object-cover"
+                className="object-cover object-[center_22%]"
                 onError={() => setImgError(true)}
                 unoptimized
               />
