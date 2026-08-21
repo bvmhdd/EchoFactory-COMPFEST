@@ -126,10 +126,10 @@ export function InputPanel({
   };
 
   return (
-    <div className="p-6 bg-[#050508] border border-[#1F1F23] rounded-2xl flex flex-col justify-between space-y-6 h-full shadow-2xl">
-      <div className="space-y-6">
+    <div className="p-5 sm:p-6 bg-[#050508] border border-[#1F1F23] rounded-2xl flex flex-col justify-between space-y-4.5 h-full shadow-2xl">
+      <div className="space-y-4.5">
         {/* Panel Header */}
-        <div className="border-b border-[#1F1F23] pb-3 flex items-center justify-between">
+        <div className="border-b border-[#1F1F23] pb-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-zinc-400" />
             <span className="text-xs font-semibold tracking-wide text-white">
@@ -143,10 +143,10 @@ export function InputPanel({
 
         {/* 1. Pilih Unit Mesin */}
         <div>
-          <label className="block text-xs font-medium text-zinc-400 mb-2.5">
+          <label className="block text-xs font-medium text-zinc-400 mb-2">
             Mesin Target
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {machines.map((m) => {
               const IconComp = m.icon;
               const isSelected = selectedMachine === m.type;
@@ -155,7 +155,7 @@ export function InputPanel({
                   key={m.type}
                   type="button"
                   onClick={() => handleMachineChange(m.type)}
-                   className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                  className={`p-2.5 rounded-xl border text-left transition-all flex items-center justify-between ${
                     isSelected
                       ? "bg-[#18181B] border-white/40 text-white shadow-[0_0_20px_rgba(255,255,255,0.1)] ring-1 ring-white/20"
                       : "bg-[#0d0d10] border-[#1F1F23] text-zinc-400 hover:text-zinc-200 hover:border-zinc-600"
@@ -232,7 +232,7 @@ export function InputPanel({
 
           {/* Mode A: Quick Presets */}
           {ingestionTab === "preset" && (
-            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1 font-sans scrollbar-thin">
+            <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1 font-sans scrollbar-thin">
               {presetsForCurrentMachine.map((preset) => {
                 const isAbnormal = preset.condition === "ABNORMAL";
                 const isSelected = selectedPreset.id === preset.id;
@@ -242,7 +242,7 @@ export function InputPanel({
                     key={preset.id}
                     type="button"
                     onClick={() => onSelectPreset(preset)}
-                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between group ${
+                    className={`w-full p-2.5 sm:p-3 rounded-xl border text-left transition-all flex items-center justify-between group ${
                       isSelected
                         ? isAbnormal
                           ? "bg-rose-500/8 border-rose-500/40 text-white animate-glow-abnormal"
@@ -263,11 +263,11 @@ export function InputPanel({
                             </span>
                           )}
                         </Badge>
-                        <span className="text-xs font-medium text-white truncate">
+                        <span className="text-xs font-semibold text-white truncate">
                           {preset.machineId}: {preset.name.split("(")[1]?.replace(")", "") || preset.name}
                         </span>
                       </div>
-                      <span className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5 font-mono">
+                      <span className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5 font-mono">
                         {preset.description}
                       </span>
                     </div>
