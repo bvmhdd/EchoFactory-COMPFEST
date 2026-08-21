@@ -39,12 +39,12 @@ export function QueryAssistantWidget({ result }: QueryAssistantProps) {
         setAssistantOutput(data.answer);
       } else {
         setAssistantOutput(
-          "[Gemini 1.5 Flash AI Assistant]\nGagal terhubung ke layanan Gemini API. Pastikan koneksi internet stabil."
+          "[Gemini 2.0 Flash AI Assistant]\nGagal terhubung ke layanan Gemini API. Pastikan koneksi internet stabil."
         );
       }
     } catch {
       setAssistantOutput(
-        "[Gemini 1.5 Flash AI Assistant]\nTerjadi kesalahan jaringan saat mengirim query."
+        "[Gemini 2.0 Flash AI Assistant]\nTerjadi kesalahan jaringan saat mengirim query."
       );
     } finally {
       setIsAsking(false);
