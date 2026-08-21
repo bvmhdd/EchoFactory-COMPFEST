@@ -29,7 +29,7 @@ const ECHOFACTORY_KNOWLEDGE_BASE = `
    - Manager Console: Analisis ROI finansial, indeks kesehatan mesin (%), estimasi Remaining Useful Life (RUL) dalam hari/jam, mitigasi kerugian downtime pabrik ($ USD).
    - Auditor Console: Integritas data tamper-proof terverifikasi on-chain di Polygon Amoy Testnet (Chain ID 80002, Contract 0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864), SHA-256 Proof Hash, dan klaim garansi OEM otomatis.
 
-3. Karakteristik Akustik 4 Mesin Target (Dataset MIMII / ToyADMOS):
+3. Karakteristik Akustik 4 Mesin Target (Dataset Hitachi MIMII):
    - Industrial Fan: Rotasi normal 1800 RPM (30 Hz) + blade pass frequency 120 Hz. Kerusakan: Unbalance, misalignment, Bearing BPFI/BPFO defect (118.5 Hz shock pulse), blade rubbing shroud. Suku cadang: SKF-6204-2RSH.
    - Centrifugal Pump: Motor 3000 RPM (50 Hz) + impeller vane pass 300 Hz. Kerusakan: Kavitasi fluida (cavitation popping 3-6 kHz), mechanical seal failure, impeller erosion. Suku cadang: Grundfos CR15 seal & impeller kit.
    - Linear Slider Rail: Siklus translasi 0.5 Hz. Kerusakan: Dry friction screech (1800 & 3200 Hz squeal), ball screw galling, pelumasan kering. Suku cadang: THK HSR25R guide block.
@@ -191,7 +191,7 @@ function solveUserQuery(query: string, result: DetectionResult | null): string {
 
 - **Model Neural**: **STgram-MFN v3** (*Spectro-Temporal Graph Memory Fusion Network*).
 - **Dual-Branch Pipeline**: Mengintegrasikan cabang *Short-Time Fourier Transform (STFT)* untuk resolusi temporal-frekuensi tinggi dan cabang *Mel-Filterbank* untuk karakteristik psikoakustik mesin.
-- **Dataset Benchmark**: Dilatih pada dataset industri global **MIMII** & **ToyADMOS 2** pada kondisi noise ekstrim (SNR -6 dB, 0 dB, 6 dB).
+- **Dataset Benchmark**: Dilatih pada dataset industri global **Hitachi MIMII** pada kondisi noise ekstrim (SNR -6 dB, 0 dB, 6 dB).
 - **Edge Deployment**: Dioptimasi menggunakan **ONNX Runtime FP32** dengan latensi inferensi ultra-cepat **< 25 ms**.`;
   }
 
