@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Activity, ChevronRight, Menu, X } from "lucide-react";
+import { ChevronRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EchoFactoryLogo } from "@/components/brand/logo";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -27,21 +28,7 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-200 to-zinc-600 p-[1px] shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:shadow-[0_0_25px_rgba(255,255,255,0.3)] transition-all">
-            <div className="w-full h-full bg-[#0A0A0B] rounded-[11px] flex items-center justify-center">
-              <Activity className="w-5 h-5 text-white stroke-[2.2]" />
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-lg tracking-wider text-white flex items-center gap-1.5">
-              ECHOFACTORY
-            </span>
-            <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-mono">
-              Smart Manufacturing
-            </span>
-          </div>
-        </Link>
+        <EchoFactoryLogo size="md" subtitle="Smart Manufacturing" />
 
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-8 text-sm text-zinc-400 font-medium">

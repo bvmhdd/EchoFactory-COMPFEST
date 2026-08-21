@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Activity, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
+import { EchoFactoryLogo } from "@/components/brand/logo";
 
 export function Footer() {
   return (
@@ -7,12 +8,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
         {/* Brand Col */}
         <div className="md:col-span-2 space-y-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-              <Activity className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-base tracking-wider text-white">ECHOFACTORY</span>
-          </div>
+          <EchoFactoryLogo size="sm" subtitle="" />
           <p className="text-xs text-zinc-400 leading-relaxed max-w-sm">
             Industrial Acoustic AI & Tamper-Proof Health Ledger. Sub-50ms edge inference for smart manufacturing predictive maintenance.
           </p>

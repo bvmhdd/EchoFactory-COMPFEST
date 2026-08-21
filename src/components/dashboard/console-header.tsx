@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, ArrowLeft, Zap, Layers } from "lucide-react";
+import { ArrowLeft, Zap, Layers } from "lucide-react";
+import { EchoFactoryLogoIcon } from "@/components/brand/logo";
 
 export type ConsoleTab = "01" | "02" | "03" | "04" | "all";
 
@@ -41,19 +42,17 @@ export function ConsoleHeader({
             <span className="font-mono">Kembali</span>
           </Link>
 
-          {/* White Square Icon matching user screenshot */}
+          {/* High-Tech Industrial EchoFactory Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)] group-hover:scale-105 transition-all">
-              <Activity className="w-5 h-5 text-black stroke-[2.5]" />
-            </div>
+            <EchoFactoryLogoIcon size="md" glow={true} />
 
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-base tracking-wider text-white">
-                  ECHOFACTORY
+                <span className="font-extrabold text-base tracking-wider text-white group-hover:text-zinc-100 transition-colors">
+                  ECHO<span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">FACTORY</span>
                 </span>
-                {/* Green Amoy Node Badge matching user screenshot */}
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 font-semibold">
+                {/* Green Amoy Node Badge */}
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono text-emerald-400 font-semibold shadow-[0_0_12px_rgba(16,185,129,0.2)]">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Amoy Testnet Node
                 </span>
