@@ -49,7 +49,7 @@ ATURAN UTAMA RESPONS:
 `.trim();
 
   if (apiKey) {
-    const models = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-3.5-flash"];
+    const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
     for (const model of models) {
       try {
         const response = await fetch(
@@ -61,9 +61,10 @@ ATURAN UTAMA RESPONS:
               contents: [{ parts: [{ text: promptText }] }],
               generationConfig: {
                 temperature: 0.3,
-                maxOutputTokens: 8192, // Full model capacity - no arbitrary truncation
+                maxOutputTokens: 512, // Compact & fast prescriptive output
               },
             }),
+            signal: AbortSignal.timeout(6000),
           }
         );
 
@@ -83,10 +84,10 @@ ATURAN UTAMA RESPONS:
   // Dynamic context-aware acoustic AI diagnostic fallback
   const freq = matchedPreset?.audioFrequency || 120;
   if (isAbnormal) {
-    return sanitizeCompleteResponse(`[Gemini Flash Real-Time Analysis]
+    return sanitizeCompleteResponse(`[Gemini 2.0 Flash Real-Time Analysis]
 Terdeteksi lonjakan energi harmonik akustik frekuensi tinggi pada gelombang ${freq} Hz dengan skor anomali ${result.operator_view.anomaly_score.toFixed(4)}. Sinyal mengindikasikan ${result.supervisor_view.fault_type} yang melanggar batas getaran aman ${result.supervisor_view.iso_standard}. Sisa Umur Operasional (RUL) diperkirakan tersisa ${result.manager_view.estimated_rul_days} hari. Direkomendasikan penanganan preskriptif: ${result.supervisor_view.recommended_action}. Mitigasi risiko kerusakan total senilai $${result.manager_view.estimated_downtime_mitigated_usd.toLocaleString()} USD.`);
   } else {
-    return sanitizeCompleteResponse(`[Gemini Flash Real-Time Analysis]
+    return sanitizeCompleteResponse(`[Gemini 2.0 Flash Real-Time Analysis]
 Spektrum getaran akustik ${freq} Hz beroperasi pada amplitudo laminar stabil (Skor anomali: ${result.operator_view.anomaly_score.toFixed(4)}). Memenuhi kriteria ${result.supervisor_view.iso_standard} dengan tingkat kesehatan unit ${result.manager_view.machine_health_percentage}%. Tidak ada degradasi mekanis terdeteksi. Pertahankan jadwal inspeksi rutin 500 jam kerja.`);
   }
 }

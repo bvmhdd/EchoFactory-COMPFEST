@@ -61,10 +61,8 @@ ATURAN UTAMA RESPONS:
 `.trim();
 
       const geminiModels = [
-        "gemini-3.6-flash",
-        "gemini-flash-latest",
-        "gemini-3.5-flash",
-        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
       ];
 
       for (const modelName of geminiModels) {
@@ -78,9 +76,10 @@ ATURAN UTAMA RESPONS:
                 contents: [{ parts: [{ text: systemPrompt }] }],
                 generationConfig: {
                   temperature: 0.3,
-                  maxOutputTokens: 8192, // Full model capacity - no arbitrary truncation
+                  maxOutputTokens: 600, // Compact & fast responses
                 },
               }),
+              signal: AbortSignal.timeout(6000),
             }
           );
 

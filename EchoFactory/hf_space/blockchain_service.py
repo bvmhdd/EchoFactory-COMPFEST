@@ -67,14 +67,14 @@ class HFBlockchainService:
         candidates = [primary_url] + [r for r in DEFAULT_RPCS if r != primary_url]
         for rpc in candidates:
             try:
-                provider = Web3.HTTPProvider(rpc, request_kwargs={"timeout": 4})
+                provider = Web3.HTTPProvider(rpc, request_kwargs={"timeout": 1.5})
                 w = Web3(provider)
                 if w.is_connected():
                     self.rpc_url = rpc
                     return w
             except Exception:
                 continue
-        return Web3(Web3.HTTPProvider(primary_url, request_kwargs={"timeout": 4}))
+        return Web3(Web3.HTTPProvider(primary_url, request_kwargs={"timeout": 1.5}))
 
     def is_connected(self) -> bool:
         try:

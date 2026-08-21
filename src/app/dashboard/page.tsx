@@ -19,7 +19,7 @@ import { Cpu, Activity, ShieldCheck } from "lucide-react";
 const PIPELINE_STEPS = [
   { step: 1, label: "1/4  Ingesting 10s PCM Audio Stream (16 kHz / 0 dB SNR)...", pct: 15 },
   { step: 2, label: "2/4  STgram-MFN v3 ONNX Neural Inference (Dual STFT + Mel Branch)...", pct: 45 },
-  { step: 3, label: "3/4  ISO 10816-3 Severity Evaluation & Gemini 3.6 Flash LLM RAG...", pct: 75 },
+  { step: 3, label: "3/4  ISO 10816-3 Severity Evaluation & Gemini 2.0 Flash LLM RAG...", pct: 75 },
   { step: 4, label: "4/4  Generating Blockchain Proof Hash & Polygon Smart Contract...", pct: 95 },
 ];
 const STEP_TIMINGS = [0, 550, 1150, 1750]; // ms offsets

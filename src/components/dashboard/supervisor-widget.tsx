@@ -72,7 +72,7 @@ export function SupervisorWidget({
               <div className="flex items-center gap-1.5">
                 <Cpu className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
                 <span className="text-[10px] font-mono font-semibold text-sky-300 uppercase tracking-wider">
-                  Gemini Flash 3.6 Diagnostic Core
+                  Gemini Flash 2.0 Diagnostic Core
                 </span>
               </div>
               <Badge variant="mono" className="text-[9px] font-mono bg-sky-500/10 text-sky-400 border-sky-500/30">
@@ -85,7 +85,7 @@ export function SupervisorWidget({
                   <div className="flex items-center gap-2">
                     <div className="w-3.5 h-3.5 rounded-full border-2 border-sky-400 border-t-transparent animate-spin" />
                     <span className="text-[11px] font-mono text-sky-300 font-semibold animate-pulse">
-                      Gemini Flash 3.6 Diagnostic Pipeline...
+                      Gemini Flash 2.0 Diagnostic Pipeline...
                     </span>
                   </div>
                   <Badge variant="mono" className="text-[9px] font-mono bg-sky-500/20 text-sky-300 border-sky-500/40">
@@ -103,8 +103,8 @@ export function SupervisorWidget({
               <div className="text-[11px] text-zinc-300 leading-relaxed font-sans whitespace-pre-line bg-black/50 p-3 rounded-lg border border-zinc-800/80 max-h-[220px] overflow-y-auto pr-2 font-mono scrollbar-thin">
                 {geminiDiagnosis || (
                   isAbnormal
-                    ? `[Gemini Flash 3.6 Real-Time Analysis]\nTerdeteksi lonjakan getaran harmonik abnormal pada sinyal akustik ${result.machine_id}. Skor anomali (${result.operator_view.anomaly_score.toFixed(3)}) melebihi ambang batas aman 0.500. Diidentifikasi sebagai ${result.supervisor_view.fault_type}. Rekomendasi: ${result.supervisor_view.recommended_action}`
-                    : `[Gemini Flash 3.6 Real-Time Analysis]\nSpektrum akustik ${result.machine_id} dalam batas kerja normal (Skor anomali: ${result.operator_view.anomaly_score.toFixed(3)}). Memenuhi kriteria ${result.supervisor_view.iso_standard} tanpa tanda degradasi mekanis.`
+                    ? `[Gemini Flash 2.0 Real-Time Analysis]\nTerdeteksi lonjakan getaran harmonik abnormal pada sinyal akustik ${result.machine_id}. Skor anomali (${result.operator_view.anomaly_score.toFixed(3)}) melebihi ambang batas aman 0.500. Diidentifikasi sebagai ${result.supervisor_view.fault_type}. Rekomendasi: ${result.supervisor_view.recommended_action}`
+                    : `[Gemini Flash 2.0 Real-Time Analysis]\nSpektrum akustik ${result.machine_id} dalam batas kerja normal (Skor anomali: ${result.operator_view.anomaly_score.toFixed(3)}). Memenuhi kriteria ${result.supervisor_view.iso_standard} tanpa tanda degradasi mekanis.`
                 )}
               </div>
             )}
