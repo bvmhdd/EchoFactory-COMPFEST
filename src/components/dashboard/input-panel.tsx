@@ -126,8 +126,8 @@ export function InputPanel({
   };
 
   return (
-    <div className="p-5 sm:p-6 bg-[#050508] border border-[#1F1F23] rounded-2xl flex flex-col justify-between space-y-4.5 h-full shadow-2xl">
-      <div className="space-y-4.5">
+    <div className="p-5 sm:p-6 bg-[#050508] border border-[#1F1F23] rounded-2xl flex flex-col justify-between space-y-5 min-h-full shadow-2xl">
+      <div className="space-y-4.5 flex-1">
         {/* Panel Header */}
         <div className="border-b border-[#1F1F23] pb-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">

@@ -138,7 +138,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full overflow-hidden items-stretch">
 
             {/* ── LEFT: Independent Scrollable Input Panel Column ── */}
-            <div className="lg:col-span-4 h-full overflow-y-auto pr-1 scrollbar-thin">
+            <div className="lg:col-span-4 h-full overflow-y-auto pr-1 pb-6 scrollbar-thin">
               <InputPanel
                 selectedMachine={selectedMachine}
                 onSelectMachine={(m) => {
