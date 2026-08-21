@@ -26,8 +26,8 @@ export const TEAM_MEMBERS: TeamMember[] = [
     accentColor: "text-sky-400 bg-sky-500/10 border-sky-500/30",
     avatarUrl: "/team/muhibin.jpg",
     focus: "Merancang arsitektur model deep metric STgram-MFN v3, kuantisasi ONNX, dan smart contract paspor kesehatan mesin di Polygon Amoy.",
-    github: "https://github.com",
-    linkedin: "https://linkedin.com",
+    github: "https://github.com/bvmhdd",
+    linkedin: "https://www.linkedin.com/in/bvmhd/",
   },
   {
     name: "Eko Muhammad Rizki",
