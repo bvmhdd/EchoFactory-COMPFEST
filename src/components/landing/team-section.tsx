@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Cpu, ShieldCheck, Code2, Sparkles, Github, Linkedin, ExternalLink } from "lucide-react";
+import { Users, Cpu, Code2, Sparkles, Database, FileText, Github, Linkedin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export interface TeamMember {
@@ -61,6 +61,36 @@ export const TEAM_MEMBERS: TeamMember[] = [
     github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
+  {
+    name: "[Nama Rekan 3 - Administrasi]",
+    role: "Competition Administration & Strategic Affairs Officer",
+    division: "Proposal & Compliance Management",
+    icon: FileText,
+    bio: "Mengelola seluruh administrasi kompetisi COMPFEST 18 AIC, mulai dari penyusunan proposal teknis, dokumen kepatuhan booklet lomba, manajemen timeline pengumpulan, hingga koordinasi komunikasi antar divisi tim.",
+    contributions: [
+      "Penyusunan dan finalisasi proposal teknis EchoFactory untuk COMPFEST 18 AIC",
+      "Manajemen kepatuhan dokumen terhadap persyaratan booklet & rubrik penjurian",
+      "Koordinasi timeline antar divisi dan komunikasi resmi dengan panitia COMPFEST",
+    ],
+    skills: ["Technical Writing", "Project Management", "Documentation", "COMPFEST 18", "Compliance"],
+    github: "https://github.com",
+    linkedin: "https://linkedin.com",
+  },
+  {
+    name: "[Nama Rekan 4 - Dataset ML]",
+    role: "ML Dataset Engineer & Data Pipeline Specialist",
+    division: "Data Acquisition & Model Validation",
+    icon: Database,
+    bio: "Membangun dan mengkurasi pipeline dataset akustik mesin industri dari benchmark MIMII & ToyADMOS 2, termasuk pra-pemrosesan sinyal multi-SNR, augmentasi data, dan validasi kualitas distribusi frekuensi untuk pelatihan model STgram-MFN v3.",
+    contributions: [
+      "Kurasi & preprocessing dataset MIMII (Fan, Pump, Slider, Valve) pada kondisi noise SNR -6 dB s/d +6 dB",
+      "Augmentasi data spektral dan segmentasi frame 10 detik 16 kHz untuk training pipeline",
+      "Validasi distribusi fitur Mel-Spectrogram & FFT antar kelas normal/anomali untuk akurasi model",
+    ],
+    skills: ["MIMII Dataset", "Signal Processing", "librosa", "Python", "Data Augmentation", "FFT"],
+    github: "https://github.com",
+    linkedin: "https://linkedin.com",
+  },
 ];
 
 export function TeamSection() {
@@ -85,96 +115,191 @@ export function TeamSection() {
         </p>
       </div>
 
-      {/* Team Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {TEAM_MEMBERS.map((member, idx) => {
-          const IconComp = member.icon;
-          return (
-            <div
-              key={idx}
-              className="p-6 rounded-2xl bg-[#09090B] border border-[#27272A] hover:border-zinc-500 transition-all duration-300 flex flex-col justify-between shadow-xl group hover:shadow-2xl hover:bg-[#0E0E11]"
-            >
-              <div>
-                {/* Card Top: Icon & Division Badge */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-zinc-800/80 border border-zinc-700/80 flex items-center justify-center text-sky-400 group-hover:bg-sky-500/15 group-hover:border-sky-500/30 transition-all">
-                    <IconComp className="w-5 h-5" />
+      {/* Team Cards Grid — 3 top row + 2 centered bottom row */}
+      <div className="space-y-6">
+        {/* Row 1: first 3 members */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {TEAM_MEMBERS.slice(0, 3).map((member, idx) => {
+            const IconComp = member.icon;
+            return (
+              <div
+                key={idx}
+                className="p-6 rounded-2xl bg-[#09090B] border border-[#27272A] hover:border-zinc-500 transition-all duration-300 flex flex-col justify-between shadow-xl group hover:shadow-2xl hover:bg-[#0E0E11]"
+              >
+                <div>
+                  {/* Card Top: Icon & Division Badge */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-800/80 border border-zinc-700/80 flex items-center justify-center text-sky-400 group-hover:bg-sky-500/15 group-hover:border-sky-500/30 transition-all">
+                      <IconComp className="w-5 h-5" />
+                    </div>
+                    <Badge variant="mono" className="text-[10px] font-mono border-zinc-700 bg-zinc-900 text-zinc-300">
+                      {member.division}
+                    </Badge>
                   </div>
-                  <Badge variant="mono" className="text-[10px] font-mono border-zinc-700 bg-zinc-900 text-zinc-300">
-                    {member.division}
-                  </Badge>
-                </div>
 
-                {/* Name & Role */}
-                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-sky-300 transition-colors">
-                  {member.name}
-                </h3>
-                <div className="text-xs font-mono font-medium text-sky-400 mb-3 leading-snug">
-                  {member.role}
-                </div>
+                  {/* Name & Role */}
+                  <h3 className="text-lg font-bold text-white mb-1 group-hover:text-sky-300 transition-colors">
+                    {member.name}
+                  </h3>
+                  <div className="text-xs font-mono font-medium text-sky-400 mb-3 leading-snug">
+                    {member.role}
+                  </div>
 
-                {/* Bio */}
-                <p className="text-xs text-zinc-400 leading-relaxed mb-4 font-sans">
-                  {member.bio}
-                </p>
+                  {/* Bio */}
+                  <p className="text-xs text-zinc-400 leading-relaxed mb-4 font-sans">
+                    {member.bio}
+                  </p>
 
-                {/* Key Contributions */}
-                <div className="border-t border-[#27272A] pt-3 mb-4 space-y-2">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block font-semibold">
-                    Kontribusi Utama:
-                  </span>
-                  <ul className="space-y-1.5 text-[11px] text-zinc-300 font-sans">
-                    {member.contributions.map((c, cIdx) => (
-                      <li key={cIdx} className="flex items-start gap-1.5">
-                        <span className="text-sky-400 font-mono text-xs">•</span>
-                        <span>{c}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Skills Tags & Social Links */}
-              <div className="border-t border-[#27272A] pt-4 space-y-3">
-                <div className="flex flex-wrap gap-1.5">
-                  {member.skills.map((skill, sIdx) => (
-                    <span
-                      key={sIdx}
-                      className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-300"
-                    >
-                      {skill}
+                  {/* Key Contributions */}
+                  <div className="border-t border-[#27272A] pt-3 mb-4 space-y-2">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block font-semibold">
+                      Kontribusi Utama:
                     </span>
-                  ))}
+                    <ul className="space-y-1.5 text-[11px] text-zinc-300 font-sans">
+                      {member.contributions.map((c, cIdx) => (
+                        <li key={cIdx} className="flex items-start gap-1.5">
+                          <span className="text-sky-400 font-mono text-xs">•</span>
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-1 text-zinc-400">
-                  {member.github && (
-                    <a
-                      href={member.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-white transition-colors"
-                      title="GitHub Profile"
-                    >
-                      <Github className="w-4 h-4" />
-                    </a>
-                  )}
-                  {member.linkedin && (
-                    <a
-                      href={member.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-sky-400 transition-colors"
-                      title="LinkedIn Profile"
-                    >
-                      <Linkedin className="w-4 h-4" />
-                    </a>
-                  )}
+                {/* Skills Tags & Social Links */}
+                <div className="border-t border-[#27272A] pt-4 space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {member.skills.map((skill, sIdx) => (
+                      <span
+                        key={sIdx}
+                        className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-300"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-1 text-zinc-400">
+                    {member.github && (
+                      <a
+                        href={member.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-white transition-colors"
+                        title="GitHub Profile"
+                      >
+                        <Github className="w-4 h-4" />
+                      </a>
+                    )}
+                    {member.linkedin && (
+                      <a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-sky-400 transition-colors"
+                        title="LinkedIn Profile"
+                      >
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {/* Row 2: last 2 members — centered */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:w-2/3 md:mx-auto">
+          {TEAM_MEMBERS.slice(3).map((member, idx) => {
+            const IconComp = member.icon;
+            return (
+              <div
+                key={idx}
+                className="p-6 rounded-2xl bg-[#09090B] border border-[#27272A] hover:border-zinc-500 transition-all duration-300 flex flex-col justify-between shadow-xl group hover:shadow-2xl hover:bg-[#0E0E11]"
+              >
+                <div>
+                  {/* Card Top: Icon & Division Badge */}
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-800/80 border border-zinc-700/80 flex items-center justify-center text-sky-400 group-hover:bg-sky-500/15 group-hover:border-sky-500/30 transition-all">
+                      <IconComp className="w-5 h-5" />
+                    </div>
+                    <Badge variant="mono" className="text-[10px] font-mono border-zinc-700 bg-zinc-900 text-zinc-300">
+                      {member.division}
+                    </Badge>
+                  </div>
+
+                  {/* Name & Role */}
+                  <h3 className="text-lg font-bold text-white mb-1 group-hover:text-sky-300 transition-colors">
+                    {member.name}
+                  </h3>
+                  <div className="text-xs font-mono font-medium text-sky-400 mb-3 leading-snug">
+                    {member.role}
+                  </div>
+
+                  {/* Bio */}
+                  <p className="text-xs text-zinc-400 leading-relaxed mb-4 font-sans">
+                    {member.bio}
+                  </p>
+
+                  {/* Key Contributions */}
+                  <div className="border-t border-[#27272A] pt-3 mb-4 space-y-2">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 block font-semibold">
+                      Kontribusi Utama:
+                    </span>
+                    <ul className="space-y-1.5 text-[11px] text-zinc-300 font-sans">
+                      {member.contributions.map((c, cIdx) => (
+                        <li key={cIdx} className="flex items-start gap-1.5">
+                          <span className="text-sky-400 font-mono text-xs">•</span>
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Skills Tags & Social Links */}
+                <div className="border-t border-[#27272A] pt-4 space-y-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {member.skills.map((skill, sIdx) => (
+                      <span
+                        key={sIdx}
+                        className="px-2 py-0.5 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-300"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-1 text-zinc-400">
+                    {member.github && (
+                      <a
+                        href={member.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-white transition-colors"
+                        title="GitHub Profile"
+                      >
+                        <Github className="w-4 h-4" />
+                      </a>
+                    )}
+                    {member.linkedin && (
+                      <a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-sky-400 transition-colors"
+                        title="LinkedIn Profile"
+                      >
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
