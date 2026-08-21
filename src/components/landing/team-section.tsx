@@ -19,7 +19,7 @@ export interface TeamMember {
 
 export const TEAM_MEMBERS: TeamMember[] = [
   {
-    name: "[Nama Tim - Lead AI]",
+    name: "Muhammad Muhibin",
     role: "Team Lead & AI Architect",
     tag: "Lead AI & Web3",
     icon: Cpu,
@@ -30,7 +30,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     linkedin: "https://linkedin.com",
   },
   {
-    name: "[Nama Rekan 1 - Full-Stack]",
+    name: "Eko Muhammad Rizki",
     role: "Full-Stack Developer",
     tag: "Frontend & WebAudio",
     icon: Code2,
@@ -41,7 +41,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     linkedin: "https://linkedin.com",
   },
   {
-    name: "[Nama Rekan 2 - Cognitive AI]",
+    name: "Muhammad Ihya Abdillah",
     role: "AI & RAG Engineer",
     tag: "LLM & MLOps",
     icon: Sparkles,
@@ -52,7 +52,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     linkedin: "https://linkedin.com",
   },
   {
-    name: "[Nama Rekan 3 - Administrasi]",
+    name: "Yasmin Tia Nizarini",
     role: "Product & Proposal Lead",
     tag: "Product & Strategy",
     icon: FileText,
@@ -63,7 +63,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     linkedin: "https://linkedin.com",
   },
   {
-    name: "[Nama Rekan 4 - Dataset ML]",
+    name: "Zaskia Azzahra",
     role: "Data & ML Pipeline Engineer",
     tag: "Data Pipeline",
     icon: Database,
