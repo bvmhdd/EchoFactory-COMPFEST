@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/logo produk/EchoFactoryLogo.png", type: "image/png" },
     ],
-    shortcut: ["/icon.svg"],
+    shortcut: ["/logo produk/EchoFactoryLogo.png"],
     apple: [
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/logo produk/EchoFactoryLogo.png", type: "image/png" },
     ],
   },
 };

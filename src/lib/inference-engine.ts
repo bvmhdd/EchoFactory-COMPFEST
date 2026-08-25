@@ -6,6 +6,7 @@ export interface DetectionResult {
   inference_time_ms: number;
   machine_id: string;
   machine_type: MachineType;
+  preset_id?: string;
   timestamp: string;
   operator_view: {
     condition: "NORMAL" | "ABNORMAL";
@@ -221,6 +222,7 @@ export function runInferenceSimulation(
     inference_time_ms,
     machine_id: mid,
     machine_type: machineType,
+    preset_id: matchedPreset?.id || presetId,
     timestamp,
     operator_view: {
       condition: isAbnormal ? "ABNORMAL" : "NORMAL",

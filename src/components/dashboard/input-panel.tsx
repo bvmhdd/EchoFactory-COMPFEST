@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { MachineType, PRESET_SAMPLES, PresetSample, playSyntheticIndustrialSound } from "@/lib/audio-presets";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { MachineType, PRESET_SAMPLES, PresetSample } from "@/lib/audio-presets";
 import {
   Mic,
   MicOff,
@@ -17,6 +17,8 @@ import {
   Sliders,
   Play,
   Square,
+  RotateCcw,
+  Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,13 +43,33 @@ export function InputPanel({
   useLiveBackend = false,
 }: InputPanelProps) {
   const [ingestionTab, setIngestionTab] = useState<"preset" | "mic" | "upload">("preset");
+  
+  // Microphone recording state
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [micFrequencyBars, setMicFrequencyBars] = useState<number[]>(new Array(16).fill(10));
+  const [micVolumeLevel, setMicVolumeLevel] = useState<number>(0);
+  const [micError, setMicError] = useState<string | null>(null);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
+  const [isPlayingRecordedAudio, setIsPlayingRecordedAudio] = useState(false);
+  
+  // Upload state
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  
+  // Preset playback & live waveform state
   const [playingPresetId, setPlayingPresetId] = useState<string | null>(null);
+  const [presetFrequencyBars, setPresetFrequencyBars] = useState<number[]>(new Array(8).fill(15));
+  
+  // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recordIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const audioStopRef = useRef<(() => void) | null>(null);
+  const presetAudioStopRef = useRef<(() => void) | null>(null);
+  const presetRafRef = useRef<number | null>(null);
+  const micRafRef = useRef<number | null>(null);
+  const micStreamRef = useRef<MediaStream | null>(null);
+  const micAudioCtxRef = useRef<AudioContext | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedAudioElRef = useRef<HTMLAudioElement | null>(null);
 
   const machines = [
     { type: "fan" as MachineType, id: "FAN-LINE-01", label: "Industrial Fan", icon: Wind },
@@ -60,63 +82,355 @@ export function InputPanel({
     (p) => p.machineType === selectedMachine
   );
 
-  const handleMachineChange = (mType: MachineType) => {
-    // Stop any playing audio when switching machine
-    if (audioStopRef.current) { audioStopRef.current(); audioStopRef.current = null; }
+  // ── Stop all active audio sessions ──────────────────────────────────────────
+  const stopPresetAudio = useCallback(() => {
+    if (presetRafRef.current) {
+      cancelAnimationFrame(presetRafRef.current);
+      presetRafRef.current = null;
+    }
+    if (presetAudioStopRef.current) {
+      presetAudioStopRef.current();
+      presetAudioStopRef.current = null;
+    }
     setPlayingPresetId(null);
+    setPresetFrequencyBars(new Array(8).fill(15));
+  }, []);
+
+  const stopMicrophoneSession = useCallback(() => {
+    if (recordIntervalRef.current) {
+      clearInterval(recordIntervalRef.current);
+      recordIntervalRef.current = null;
+    }
+    if (micRafRef.current) {
+      cancelAnimationFrame(micRafRef.current);
+      micRafRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // ignore
+      }
+    }
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach((track) => track.stop());
+      micStreamRef.current = null;
+    }
+    if (micAudioCtxRef.current) {
+      try {
+        micAudioCtxRef.current.close();
+      } catch {
+        // ignore
+      }
+      micAudioCtxRef.current = null;
+    }
+    setIsRecording(false);
+    setMicFrequencyBars(new Array(16).fill(10));
+    setMicVolumeLevel(0);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopPresetAudio();
+      stopMicrophoneSession();
+      if (recordedAudioElRef.current) {
+        recordedAudioElRef.current.pause();
+      }
+    };
+  }, [stopPresetAudio, stopMicrophoneSession]);
+
+  const handleMachineChange = (mType: MachineType) => {
+    stopPresetAudio();
     onSelectMachine(mType);
     const firstPreset = PRESET_SAMPLES.find((p) => p.machineType === mType);
     if (firstPreset) onSelectPreset(firstPreset);
   };
 
-  const handlePlayPreset = (e: React.MouseEvent, preset: PresetSample) => {
+  // ── Real-time Audio Playback with AnalyserNode for Presets ───────────────────
+  const handlePlayPreset = async (e: React.MouseEvent, preset: PresetSample) => {
     e.stopPropagation();
-    // Stop currently playing audio
-    if (audioStopRef.current) { audioStopRef.current(); audioStopRef.current = null; }
+
+    // If currently playing the same preset, toggle stop
     if (playingPresetId === preset.id) {
-      // Toggle off
-      setPlayingPresetId(null);
+      stopPresetAudio();
       return;
     }
+
+    // Stop any other currently playing preset
+    stopPresetAudio();
     setPlayingPresetId(preset.id);
-    const { stop } = playSyntheticIndustrialSound(preset);
-    audioStopRef.current = () => {
-      stop();
-      setPlayingPresetId(null);
-    };
-    // Auto-stop after ~10s
-    setTimeout(() => {
-      if (audioStopRef.current) { audioStopRef.current(); audioStopRef.current = null; }
-    }, 10000);
+
+    try {
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioContextClass();
+
+      if (ctx.state === "suspended") {
+        await ctx.resume();
+      }
+
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 128;
+      analyser.smoothingTimeConstant = 0.68;
+
+      let cleanupFn = () => {};
+
+      // Try playing real decoded audio file
+      let usedRealFile = false;
+      if (preset.audioUrl) {
+        try {
+          const resp = await fetch(preset.audioUrl);
+          if (resp.ok) {
+            const arrayBuffer = await resp.arrayBuffer();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.loop = true;
+
+            source.connect(analyser);
+            analyser.connect(ctx.destination);
+            source.start(0);
+            usedRealFile = true;
+
+            cleanupFn = () => {
+              try {
+                source.stop();
+                source.disconnect();
+                analyser.disconnect();
+                ctx.close();
+              } catch {
+                // ignore
+              }
+            };
+          }
+        } catch {
+          usedRealFile = false;
+        }
+      }
+
+      // Fallback: Real-time Web Audio Synthesizer routed into AnalyserNode
+      if (!usedRealFile) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const bufferSize = ctx.sampleRate * 4;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+        const whiteNoise = ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        const noiseFilter = ctx.createBiquadFilter();
+        noiseFilter.type = preset.condition === "ABNORMAL" ? "bandpass" : "lowpass";
+        noiseFilter.frequency.value = preset.condition === "ABNORMAL" ? 3500 : 450;
+        noiseFilter.Q.value = preset.condition === "ABNORMAL" ? 4.0 : 1.0;
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.value = preset.noiseLevel * 0.15;
+
+        osc.type = preset.condition === "ABNORMAL" ? "sawtooth" : "sine";
+        osc.frequency.setValueAtTime(preset.audioFrequency, ctx.currentTime);
+
+        if (preset.condition === "ABNORMAL") {
+          const lfo = ctx.createOscillator();
+          const lfoGain = ctx.createGain();
+          lfo.frequency.value = preset.modulationSpeed;
+          lfoGain.gain.value = 40;
+          lfo.connect(osc.frequency);
+          lfo.start();
+        }
+
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+
+        osc.connect(gain);
+        whiteNoise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(gain);
+        gain.connect(analyser);
+        analyser.connect(ctx.destination);
+
+        osc.start();
+        whiteNoise.start();
+
+        cleanupFn = () => {
+          try {
+            osc.stop();
+            whiteNoise.stop();
+            gain.disconnect();
+            analyser.disconnect();
+            ctx.close();
+          } catch {
+            // ignore
+          }
+        };
+      }
+
+      presetAudioStopRef.current = cleanupFn;
+
+      // Start Real-Time Frequency Animation Loop (8 frequency bins)
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const binIndices = [1, 3, 6, 11, 18, 28, 40, 54];
+
+      const renderPresetWaveform = () => {
+        analyser.getByteFrequencyData(dataArray);
+
+        const bars = binIndices.map((bin) => {
+          const val = dataArray[bin] || 0;
+          // Scale 0..255 to percentage 15..100
+          return Math.max(15, Math.min(100, Math.round((val / 255) * 85 + 15)));
+        });
+
+        setPresetFrequencyBars(bars);
+        presetRafRef.current = requestAnimationFrame(renderPresetWaveform);
+      };
+
+      presetRafRef.current = requestAnimationFrame(renderPresetWaveform);
+
+      // Auto-stop after 10s
+      setTimeout(() => {
+        if (playingPresetId === preset.id) {
+          stopPresetAudio();
+        }
+      }, 10000);
+    } catch {
+      stopPresetAudio();
+    }
   };
 
-  const handleToggleRecord = () => {
-    if (isRecording) {
-      if (recordIntervalRef.current) clearInterval(recordIntervalRef.current);
-      setIsRecording(false);
-    } else {
+  // ── Real-time Microphone Recording with Live Voice & Frequency Reaction ─────
+  const startRecording = async () => {
+    setMicError(null);
+    setRecordedAudioUrl(null);
+    setIsPlayingRecordedAudio(false);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
+      });
+      micStreamRef.current = stream;
+
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      if (ctx.state === "suspended") {
+        await ctx.resume();
+      }
+      micAudioCtxRef.current = ctx;
+
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.65;
+      source.connect(analyser);
+
+      // MediaRecorder for capturing the 10s audio
+      const chunks: Blob[] = [];
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/ogg;codecs=opus")
+        ? "audio/ogg;codecs=opus"
+        : "";
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/wav" });
+        const url = URL.createObjectURL(blob);
+        setRecordedAudioUrl(url);
+      };
+
+      recorder.start(200);
+      mediaRecorderRef.current = recorder;
+
       setIsRecording(true);
       setRecordingSeconds(0);
 
+      // 10s Timer
       const interval = setInterval(() => {
         setRecordingSeconds((prev) => {
           if (prev >= 9) {
             clearInterval(interval);
-            setIsRecording(false);
+            stopMicrophoneSession();
             return 10;
           }
           return prev + 1;
         });
       }, 1000);
       recordIntervalRef.current = interval;
+
+      // Real-Time Frequency Animation Loop (16 frequency bands across speech/audio spectrum)
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+      const binIndices = [2, 4, 7, 10, 14, 19, 25, 32, 40, 50, 62, 75, 89, 103, 116, 126];
+
+      const renderMicVisualizer = () => {
+        analyser.getByteFrequencyData(dataArray);
+
+        let sum = 0;
+        const bars = binIndices.map((bin) => {
+          const val = dataArray[bin] || 0;
+          sum += val;
+          // Scale 0..255 to percentage 8..100
+          return Math.max(8, Math.min(100, Math.round((val / 255) * 92 + 8)));
+        });
+
+        const avg = sum / binIndices.length;
+        setMicVolumeLevel(Math.min(100, Math.round((avg / 255) * 100)));
+        setMicFrequencyBars(bars);
+
+        micRafRef.current = requestAnimationFrame(renderMicVisualizer);
+      };
+
+      micRafRef.current = requestAnimationFrame(renderMicVisualizer);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Tidak dapat mengakses mikrofon";
+      setMicError("Izin mikrofon diperlukan. Pastikan browser mengizinkan akses mikrofon (" + errorMsg + ")");
+      setIsRecording(false);
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (recordIntervalRef.current) clearInterval(recordIntervalRef.current);
-    };
-  }, []);
+  const handleToggleRecord = () => {
+    if (isRecording) {
+      stopMicrophoneSession();
+    } else {
+      startRecording();
+    }
+  };
+
+  const handleTogglePlayRecordedAudio = () => {
+    if (!recordedAudioUrl) return;
+
+    if (!recordedAudioElRef.current) {
+      const audio = new Audio(recordedAudioUrl);
+      audio.onended = () => setIsPlayingRecordedAudio(false);
+      recordedAudioElRef.current = audio;
+    }
+
+    if (isPlayingRecordedAudio) {
+      recordedAudioElRef.current.pause();
+      setIsPlayingRecordedAudio(false);
+    } else {
+      recordedAudioElRef.current.src = recordedAudioUrl;
+      recordedAudioElRef.current.play().then(() => {
+        setIsPlayingRecordedAudio(true);
+      }).catch(() => {});
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -196,7 +510,11 @@ export function InputPanel({
           {/* Ingestion Mode Tabs */}
           <div className="grid grid-cols-3 gap-1 p-1 bg-black rounded-xl border border-[#1F1F23] mb-3">
             <button
-              onClick={() => setIngestionTab("preset")}
+              onClick={() => {
+                stopPresetAudio();
+                stopMicrophoneSession();
+                setIngestionTab("preset");
+              }}
               className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "preset"
                   ? "bg-[#1a1a1e] text-white font-medium shadow border border-white/10"
@@ -207,7 +525,10 @@ export function InputPanel({
               <span>Sampel Preset</span>
             </button>
             <button
-              onClick={() => setIngestionTab("mic")}
+              onClick={() => {
+                stopPresetAudio();
+                setIngestionTab("mic");
+              }}
               className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "mic"
                   ? "bg-[#1a1a1e] text-white font-medium shadow border border-white/10"
@@ -218,7 +539,11 @@ export function InputPanel({
               <span>Mikrofon</span>
             </button>
             <button
-              onClick={() => setIngestionTab("upload")}
+              onClick={() => {
+                stopPresetAudio();
+                stopMicrophoneSession();
+                setIngestionTab("upload");
+              }}
               className={`py-1.5 text-xs rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 ingestionTab === "upload"
                   ? "bg-[#1a1a1e] text-white font-medium shadow border border-white/10"
@@ -238,11 +563,18 @@ export function InputPanel({
                 const isSelected = selectedPreset.id === preset.id;
                 const isPlaying = playingPresetId === preset.id;
                 return (
-                  <button
+                  <div
                     key={preset.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => onSelectPreset(preset)}
-                    className={`w-full p-2.5 sm:p-3 rounded-xl border text-left transition-all flex items-center justify-between group ${
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onSelectPreset(preset);
+                      }
+                    }}
+                    className={`w-full p-2.5 sm:p-3 rounded-xl border text-left transition-all flex items-center justify-between group cursor-pointer select-none ${
                       isSelected
                         ? isAbnormal
                           ? "bg-rose-500/8 border-rose-500/40 text-white animate-glow-abnormal"
@@ -272,80 +604,180 @@ export function InputPanel({
                       </span>
                     </div>
 
-                    {/* Play button + Waveform */}
-                    <div className="flex items-center gap-2 ml-3 shrink-0">
+                    {/* Real-time Frequency Waveform Visualizer & Play Button */}
+                    <div className="flex items-center gap-2.5 ml-3 shrink-0">
                       {isPlaying && (
-                        <div className="flex items-end gap-[2px] h-5">
-                          {Array.from({ length: 8 }).map((_, i) => (
+                        <div className="flex items-end gap-[2px] h-6 px-1.5 py-0.5 rounded-lg bg-black/40 border border-white/10">
+                          {presetFrequencyBars.map((height, i) => (
                             <div
                               key={i}
-                              className="w-[2px] bg-white rounded-full animate-waveform-bar"
+                              className={`w-[2.5px] rounded-full transition-all duration-75 ${
+                                isAbnormal
+                                  ? "bg-gradient-to-t from-rose-500 to-amber-400"
+                                  : "bg-gradient-to-t from-cyan-500 to-emerald-400"
+                              }`}
                               style={{
-                                animationDelay: `${i * 0.1}s`,
-                                animationDuration: `${0.55 + i * 0.07}s`,
+                                height: `${height}%`,
+                                minHeight: "15%",
                               }}
                             />
                           ))}
                         </div>
                       )}
                       <button
+                        type="button"
                         onClick={(e) => handlePlayPreset(e, preset)}
+                        aria-label={isPlaying ? "Hentikan audio" : "Putar audio sampel"}
                         className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
                           isPlaying
-                            ? "bg-white text-black"
+                            ? "bg-white text-black shadow-[0_0_12px_rgba(255,255,255,0.4)]"
                             : "bg-white/8 hover:bg-white/18 text-zinc-400 hover:text-white"
                         }`}
                       >
                         {isPlaying
-                          ? <Square className="w-3 h-3" />
-                          : <Play className="w-3 h-3" />}
+                          ? <Square className="w-3 h-3 fill-black" />
+                          : <Play className="w-3 h-3 fill-current ml-0.5" />}
                       </button>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           )}
 
-          {/* Mode B: Mic Recording */}
+          {/* Mode B: Mic Recording with Live Voice & Noise Reaction */}
           {ingestionTab === "mic" && (
-            <div className="p-4 rounded-xl bg-[#111113] border border-[#27272A] text-center space-y-3">
-              <div className="w-12 h-12 rounded-full bg-black border border-zinc-700 mx-auto flex items-center justify-center">
+            <div className="p-4 rounded-xl bg-[#09090d] border border-[#27272A] text-center space-y-3.5">
+              {/* Mic Icon Status */}
+              <div
+                className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center transition-all ${
+                  isRecording
+                    ? "bg-rose-500/20 border-2 border-rose-500 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.4)] scale-105"
+                    : "bg-black border border-zinc-700 text-zinc-400"
+                }`}
+              >
                 {isRecording ? (
-                  <Mic className="w-6 h-6 text-rose-400 animate-pulse" />
+                  <Mic className="w-6 h-6 animate-pulse" />
                 ) : (
-                  <MicOff className="w-6 h-6 text-zinc-400" />
+                  <MicOff className="w-6 h-6" />
                 )}
               </div>
-              <div className="text-xs text-white">
-                {isRecording
-                  ? `Merekam: ${recordingSeconds} / 10s`
-                  : recordingSeconds === 10
-                  ? "Rekaman 10 detik siap diproses"
-                  : "Arahkan mikrofon ke mesin selama 10 detik"}
+
+              {/* Status Text & Dynamic Sensitivity Meter */}
+              <div className="space-y-1">
+                <div className="text-xs font-semibold text-white">
+                  {isRecording
+                    ? `Merekam Suara: ${recordingSeconds} / 10s`
+                    : recordedAudioUrl
+                    ? "Rekaman 10 Detik Berhasil Ditangkap"
+                    : "Siap Merekam Suara Mesin / Suara Langsung"}
+                </div>
+                <p className="text-[11px] text-zinc-400 font-mono">
+                  {isRecording
+                    ? micVolumeLevel > 3
+                      ? `Sinyal Terdeteksi · Sensitivitas Suara: ${micVolumeLevel}%`
+                      : "Bicara atau ketuk benda untuk menguji respons gelombang suara"
+                    : recordedAudioUrl
+                    ? "Audio siap diproses oleh model STgram-MFN v3"
+                    : "Arahkan mikrofon ke mesin selama 10 detik"}
+                </p>
               </div>
 
-              {/* Volume Meter Wave */}
-              {isRecording && (
-                <div className="flex items-center justify-center gap-1 h-8">
-                  {Array.from({ length: 16 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-1 bg-rose-400 rounded-full animate-waveform"
-                      style={{ animationDelay: `${i * 0.08}s` }}
-                    />
-                  ))}
+              {/* Error Message if Mic Access Fails */}
+              {micError && (
+                <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[11px] text-left">
+                  {micError}
                 </div>
               )}
 
+              {/* Real-time 16-Band Responsive Soundwave Spectrum */}
+              {isRecording && (
+                <div className="p-3 rounded-xl bg-black/60 border border-zinc-800/80 shadow-inner">
+                  <div className="flex items-end justify-center gap-1 h-12 px-2">
+                    {micFrequencyBars.map((height, i) => (
+                      <div
+                        key={i}
+                        className={`w-1.5 rounded-full transition-all duration-75 ${
+                          micVolumeLevel > 50
+                            ? "bg-gradient-to-t from-cyan-400 via-emerald-400 to-rose-500"
+                            : micVolumeLevel > 20
+                            ? "bg-gradient-to-t from-cyan-500 to-emerald-400"
+                            : "bg-gradient-to-t from-zinc-600 to-cyan-500"
+                        }`}
+                        style={{
+                          height: `${height}%`,
+                          minHeight: "8%",
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between text-[9px] font-mono text-zinc-500 mt-2 px-1">
+                    <span>80 Hz (Bass/Rumble)</span>
+                    <span className="text-cyan-400 font-semibold">Real-Time FFT</span>
+                    <span>6.0 kHz (Treble)</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Recorded Audio Preview Bar */}
+              {recordedAudioUrl && !isRecording && (
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3 text-left">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center shrink-0">
+                      <Volume2 className="w-3.5 h-3.5 text-emerald-400" />
+                    </div>
+                    <div className="truncate">
+                      <div className="text-[11px] font-medium text-emerald-300">Hasil Rekaman Suara</div>
+                      <div className="text-[9px] font-mono text-zinc-400">16 kHz PCM · 10.0 Detik</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={handleTogglePlayRecordedAudio}
+                      className="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[11px] font-medium transition-all flex items-center gap-1 border border-emerald-500/30"
+                    >
+                      {isPlayingRecordedAudio ? <Square className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                      <span>{isPlayingRecordedAudio ? "Stop" : "Dengarkan"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      title="Rekam Ulang"
+                      className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Mic Action Button */}
               <Button
                 type="button"
-                variant={isRecording ? "danger" : "outline"}
+                variant={isRecording ? "danger" : recordedAudioUrl ? "outline" : "outline"}
                 size="sm"
                 onClick={handleToggleRecord}
-                className="w-full justify-center text-xs"
+                className="w-full justify-center text-xs gap-1.5 py-2 font-medium"
               >
-                {isRecording ? "Hentikan Rekaman" : "Mulai Rekam (10s)"}
+                {isRecording ? (
+                  <>
+                    <Square className="w-3 h-3 fill-current" />
+                    <span>Hentikan Rekaman</span>
+                  </>
+                ) : recordedAudioUrl ? (
+                  <>
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Rekam Ulang Audio</span>
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Mulai Rekam (10s)</span>
+                  </>
+                )}
               </Button>
             </div>
           )}

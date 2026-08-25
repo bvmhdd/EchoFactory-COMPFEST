@@ -1,9 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Wrench, CheckCircle2, FileText, AlertTriangle, Check, Cpu, ShieldAlert, BarChart3, Package, Leaf } from "lucide-react";
+import {
+  Wrench,
+  CheckCircle2,
+  FileText,
+  AlertTriangle,
+  Check,
+  Cpu,
+  ShieldAlert,
+  Package,
+  Leaf,
+  Download,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DetectionResult } from "@/lib/inference-engine";
+import { generateWorkOrderPDF, WorkOrderTabType } from "@/lib/work-order-pdf";
 
 export function SupervisorWidget({
   result,
@@ -16,11 +28,38 @@ export function SupervisorWidget({
   isLoading?: boolean;
   analysisStepText?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<"sop" | "fmea" | "supply_chain" | "esg">("sop");
+  const [activeTab, setActiveTab] = useState<WorkOrderTabType>("sop");
   const [woCreated, setWoCreated] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
   const isAbnormal = result.operator_view.condition === "ABNORMAL";
   const { prescriptive_sop, fmea_matrix, supply_chain_derating } = result.supervisor_view;
   const { esg_forensics } = result.manager_view;
+
+  const handleExportPDF = () => {
+    setIsExporting(true);
+    try {
+      generateWorkOrderPDF(result, activeTab, geminiDiagnosis);
+      setWoCreated(true);
+    } catch {
+      // ignore
+    } finally {
+      setTimeout(() => setIsExporting(false), 800);
+    }
+  };
+
+  const getTabBadgeLabel = (tab: WorkOrderTabType) => {
+    switch (tab) {
+      case "sop":
+        return "SOP & LOTO";
+      case "fmea":
+        return "FMEA (RPN)";
+      case "supply_chain":
+        return "Derating";
+      case "esg":
+        return "ESG Eco";
+    }
+  };
 
   return (
     <div className="p-5 rounded-2xl border border-[#1F1F23] bg-[#050508] flex flex-col justify-between space-y-4 shadow-xl">
@@ -250,30 +289,41 @@ export function SupervisorWidget({
         )}
       </div>
 
-      {/* Automated Work Order Action */}
-      <div className="pt-3 border-t border-[#27272A] flex items-center justify-between text-xs">
-        <div className="text-zinc-400 font-mono text-[11px]">
+      {/* Automated Work Order Action & Modular Multi-Tab PDF Export */}
+      <div className="pt-3 border-t border-[#27272A] flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 text-zinc-400 font-mono text-[11px]">
           <span>Tiket: </span>
           <span className="text-zinc-200 font-semibold">{result.supervisor_view.work_order_draft.wo_id}</span>
+          <span className="text-zinc-600">·</span>
+          <span className="text-sky-400 text-[10px]">
+            Modul: {getTabBadgeLabel(activeTab)}
+          </span>
         </div>
 
         <button
-          onClick={() => setWoCreated(!woCreated)}
+          type="button"
+          onClick={handleExportPDF}
+          disabled={isExporting}
           className={`px-3 py-1.5 rounded-lg border text-xs transition-all flex items-center gap-1.5 ${
             woCreated
-              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 font-medium"
-              : "bg-[#18181B] hover:bg-[#27272A] border-zinc-700 text-zinc-300 hover:text-white"
+              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 font-medium shadow-[0_0_12px_rgba(16,185,129,0.2)] hover:bg-emerald-500/30"
+              : "bg-gradient-to-r from-sky-600/30 to-emerald-600/30 hover:from-sky-600/50 hover:to-emerald-600/50 border-sky-500/40 text-white shadow-md hover:shadow-sky-500/20"
           }`}
         >
-          {woCreated ? (
+          {isExporting ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
+              <span>Membuat Dokumen PDF...</span>
+            </>
+          ) : woCreated ? (
             <>
               <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Work Order Diterbitkan</span>
+              <span>Unduh Ulang PDF ({getTabBadgeLabel(activeTab)})</span>
             </>
           ) : (
             <>
-              <FileText className="w-3.5 h-3.5" />
-              <span>Buat Work Order</span>
+              <Download className="w-3.5 h-3.5 text-sky-300" />
+              <span>Buat Work Order (PDF: {getTabBadgeLabel(activeTab)})</span>
             </>
           )}
         </button>
@@ -281,4 +331,3 @@ export function SupervisorWidget({
     </div>
   );
 }
-

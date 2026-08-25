@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MachineType, PRESET_SAMPLES, PresetSample } from "@/lib/audio-presets";
 import { DetectionResult, runInferenceSimulation } from "@/lib/inference-engine";
 import { useConnectionStatus } from "@/hooks/useConnectionStatus";
@@ -24,6 +24,13 @@ const PIPELINE_STEPS = [
 ];
 const STEP_TIMINGS = [0, 550, 1150, 1750]; // ms offsets
 
+const STORAGE_KEYS = {
+  RESULT: "echofactory_detection_result",
+  DIAGNOSIS: "echofactory_gemini_diagnosis",
+  PRESET_ID: "echofactory_selected_preset_id",
+  MACHINE: "echofactory_selected_machine",
+};
+
 export default function DashboardPage() {
   const [selectedMachine, setSelectedMachine] = useState<MachineType>("fan");
   const [selectedPreset, setSelectedPreset] = useState<PresetSample>(
@@ -42,19 +49,67 @@ export default function DashboardPage() {
 
   const connectionStatus = useConnectionStatus();
 
+  // ── Load persisted state on mount so hard reset / refresh does not lose results ──
+  useEffect(() => {
+    try {
+      const savedResult = localStorage.getItem(STORAGE_KEYS.RESULT);
+      const savedDiagnosis = localStorage.getItem(STORAGE_KEYS.DIAGNOSIS);
+      const savedPresetId = localStorage.getItem(STORAGE_KEYS.PRESET_ID);
+      const savedMachine = localStorage.getItem(STORAGE_KEYS.MACHINE) as MachineType | null;
+
+      if (savedPresetId) {
+        const found = PRESET_SAMPLES.find((p) => p.id === savedPresetId);
+        if (found) setSelectedPreset(found);
+      }
+      if (savedMachine) {
+        setSelectedMachine(savedMachine);
+      }
+
+      if (savedResult) {
+        setDetectionResult(JSON.parse(savedResult));
+      } else {
+        // Fallback default: baseline analysis of the selected preset so dashboard is never empty
+        const initial = runInferenceSimulation("fan", "FAN-ID-00", "fan-normal-01");
+        setDetectionResult(initial);
+        localStorage.setItem(STORAGE_KEYS.RESULT, JSON.stringify(initial));
+      }
+
+      if (savedDiagnosis) {
+        setGeminiDiagnosis(savedDiagnosis);
+      }
+    } catch {
+      const initial = runInferenceSimulation("fan", "FAN-ID-00", "fan-normal-01");
+      setDetectionResult(initial);
+    }
+  }, []);
+
+  // Helper to persist result
+  const persistResult = (data: DetectionResult, diagnosis?: string | null) => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.RESULT, JSON.stringify(data));
+      if (diagnosis) {
+        localStorage.setItem(STORAGE_KEYS.DIAGNOSIS, diagnosis);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  // When selecting a preset from input configuration:
+  // ONLY update the chosen preset in input configuration. DO NOT CLEAR the active analysis result!
   const handleSelectPreset = (p: PresetSample) => {
     setSelectedPreset(p);
-    setDetectionResult(null);
-    setGeminiDiagnosis(null);
-    setAnalysisStep(0);
-    setAnalysisStepText("");
-    setAnalysisProgress(0);
+    setSelectedMachine(p.machineType);
+    try {
+      localStorage.setItem(STORAGE_KEYS.PRESET_ID, p.id);
+      localStorage.setItem(STORAGE_KEYS.MACHINE, p.machineType);
+    } catch {
+      // ignore
+    }
   };
 
   const handleRunDiagnosis = async (preset: PresetSample) => {
     setIsLoading(true);
-    setDetectionResult(null);
-    setGeminiDiagnosis(null);
 
     setAnalysisStep(1);
     setAnalysisStepText(PIPELINE_STEPS[0].label);
@@ -93,7 +148,10 @@ export default function DashboardPage() {
         setAnalysisProgress(100);
         setTimeout(() => {
           setDetectionResult(data);
-          if (data.gemini_diagnosis) setGeminiDiagnosis(data.gemini_diagnosis);
+          if (data.gemini_diagnosis) {
+            setGeminiDiagnosis(data.gemini_diagnosis);
+          }
+          persistResult(data, data.gemini_diagnosis || null);
           setIsLoading(false);
           setAnalysisStep(0);
           setAnalysisStepText("");
@@ -105,6 +163,7 @@ export default function DashboardPage() {
       setTimeout(() => {
         timers.forEach(clearTimeout);
         setDetectionResult(fallback);
+        persistResult(fallback, null);
         setIsLoading(false);
         setAnalysisStep(0);
         setAnalysisStepText("");
@@ -112,6 +171,11 @@ export default function DashboardPage() {
       }, 2300);
     }
   };
+
+  // The sample corresponding to the active analysis result
+  const analyzedSample =
+    (detectionResult && PRESET_SAMPLES.find((p) => p.id === detectionResult.preset_id)) ||
+    selectedPreset;
 
   return (
     <KineticGrid globalColor="monochrome" className="h-screen overflow-hidden bg-black text-white selection:bg-white selection:text-black flex flex-col">
@@ -143,6 +207,11 @@ export default function DashboardPage() {
                 selectedMachine={selectedMachine}
                 onSelectMachine={(m) => {
                   setSelectedMachine(m);
+                  try {
+                    localStorage.setItem(STORAGE_KEYS.MACHINE, m);
+                  } catch {
+                    // ignore
+                  }
                   const first = PRESET_SAMPLES.find((p) => p.machineType === m);
                   if (first) handleSelectPreset(first);
                 }}
@@ -230,7 +299,7 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              {/* ─── Empty State ─── */}
+              {/* ─── Empty State (Only if neither loading nor result is available) ─── */}
               {!isLoading && !detectionResult && (
                 <div className="rounded-2xl border border-zinc-800 bg-[#050508] p-12 flex flex-col items-center justify-center gap-4 text-center my-auto">
                   <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
@@ -289,7 +358,7 @@ export default function DashboardPage() {
                   {(activeTab === "01" || activeTab === "all") && (
                     <OperatorWidget
                       result={detectionResult}
-                      sample={selectedPreset}
+                      sample={analyzedSample}
                       isLoading={false}
                       analysisStep={0}
                     />
