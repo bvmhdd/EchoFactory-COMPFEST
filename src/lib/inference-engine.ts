@@ -24,12 +24,43 @@ export interface DetectionResult {
       assigned_to: string;
       target_completion_hours: number;
     };
+    prescriptive_sop: {
+      loto_protocol: string;
+      tooling_matrix: string[];
+      lubricant_spec: string;
+      steps: string[];
+    };
+    fmea_matrix: {
+      failure_mode: string;
+      potential_effect: string;
+      severity_s: number;
+      occurrence_o: number;
+      detection_d: number;
+      rpn_score: number;
+      risk_category: string;
+    };
+    supply_chain_derating: {
+      part_name: string;
+      part_sku: string;
+      in_stock: number;
+      lead_time_days: number;
+      is_bottleneck: boolean;
+      derating_advice: string;
+      extended_rul_days: number;
+    };
+    radio_voice_dispatch: string;
   };
   manager_view: {
     machine_health_percentage: number;
     risk_level: "LOW_NORMAL" | "MEDIUM_WARNING" | "HIGH_CRITICAL";
     estimated_downtime_mitigated_usd: number;
     estimated_rul_days: number;
+    esg_forensics: {
+      excess_kwh_per_day: number;
+      excess_co2_kg_per_day: number;
+      excess_cost_idr_per_month: number;
+      motor_efficiency_pct: number;
+    };
   };
   auditor_view: {
     proof_hash: string;
@@ -40,6 +71,11 @@ export interface DetectionResult {
     polygonscan_url: string;
     verification_status: "VERIFIED_ON_CHAIN" | "COMMITTED_LOCAL";
   };
+  xai_harmonics: {
+    freq_hz: number;
+    name: string;
+    is_anomaly_source: boolean;
+  }[];
 }
 
 export const SMART_CONTRACT_ADDRESS = "0xFEc1FcFfF8E1C4B3470a677387F95bC3f1fD6864";
@@ -109,6 +145,76 @@ export function runInferenceSimulation(
 
   const proof_hash = generateProofHash(mid, timestamp, anomaly_score);
   const block_number = 15894230 + Math.floor(Math.random() * 500);
+  const wo_id = `WO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  // XAI Harmonics
+  const xai_harmonics = machineType === "fan"
+    ? [
+        { freq_hz: 118.5, name: "BPFI (Inner Race Spall)", is_anomaly_source: isAbnormal },
+        { freq_hz: 240.0, name: "BPF (Blade Pass Harmonic)", is_anomaly_source: false },
+        { freq_hz: 30.0, name: "1X 1800 RPM Rotational", is_anomaly_source: false },
+      ]
+    : machineType === "pump"
+    ? [
+        { freq_hz: 3200.0, name: "Broadband Cavitation Burst", is_anomaly_source: isAbnormal },
+        { freq_hz: 360.0, name: "Impeller Vane Pass 1X", is_anomaly_source: false },
+      ]
+    : machineType === "slider"
+    ? [
+        { freq_hz: 1650.0, name: "Guide Rail Stick-Slip Galling", is_anomaly_source: isAbnormal },
+        { freq_hz: 0.8, name: "Stroke Reciprocating Cycle", is_anomaly_source: false },
+      ]
+    : [
+        { freq_hz: 4500.0, name: "High-Pressure Seal Orifice Hiss", is_anomaly_source: isAbnormal },
+        { freq_hz: 100.0, name: "Solenoid Coil 2X Hum", is_anomaly_source: false },
+      ];
+
+  // Prescriptive SOP
+  const prescriptive_sop = {
+    loto_protocol: "Isolasi Breaker Panel MCC (400V 3-Phase). Pasang Safety Padlock & Tagout. Pastikan motor benar-benar nol energi (Zero Energy State).",
+    tooling_matrix: ["Hydraulic Bearing Puller 5-Ton", "Induction Bearing Heater (110°C)", "Torque Wrench 48 Nm", "Dial Gauge Alignment Kit"],
+    lubricant_spec: "SKF LGHP 2 High Performance Polyurea Synthetic Grease (15g fill)",
+    steps: [
+      "1. [LOTO & ISOLASI]: Matikan power drive, pasang lock out, dan lepas coupling shaft motor-blower.",
+      "2. [DISASSEMBLY]: Gunakan Hydraulic Puller untuk menarik bearing lama tanpa merusak shaft journal.",
+      "3. [CLEANING & INSPEKSI]: Bersihkan housing dengan solvent non-chlorinated. Ukur toleransi shaft runout (< 0.02 mm).",
+      "4. [ASSEMBLY]: Panaskan bearing baru hingga 110°C dengan induction heater, lalu pasang presisi ke dudukan shaft.",
+      "5. [POST-REPAIR AUDIT]: Nyalakan mesin pada idle 600 RPM, lalu jalankan re-scan akustik EchoFactory (Target Zone A)."
+    ]
+  };
+
+  // FMEA Matrix
+  const s_val = isAbnormal ? 8 : 1;
+  const o_val = isAbnormal ? 6 : 1;
+  const d_val = isAbnormal ? 2 : 1;
+  const fmea_matrix = {
+    failure_mode: isAbnormal ? fault.faultType : "Normal Operation (Zero Defect)",
+    potential_effect: isAbnormal ? "Rotor locking, motor coil burn, catastrophic line stoppage" : "Optimal line throughput",
+    severity_s: s_val,
+    occurrence_o: o_val,
+    detection_d: d_val,
+    rpn_score: s_val * o_val * d_val,
+    risk_category: isAbnormal ? "HIGH RISK (P1 MANDATE)" : "LOW (ACCEPTABLE)"
+  };
+
+  // Supply Chain & Derating
+  const supply_chain_derating = {
+    part_name: machineType === "fan" ? "Deep Groove Bearing SKF-6204-2RSH" : (machineType === "pump" ? "Mechanical Seal Grundfos CR15" : "Linear Rail THK-HSR25R"),
+    part_sku: `SKU-${machineType.toUpperCase()}-PARTS`,
+    in_stock: isAbnormal ? 2 : 8,
+    lead_time_days: isAbnormal ? 7 : 2,
+    is_bottleneck: isAbnormal,
+    derating_advice: "Turunkan kecepatan inverter motor sebesar 30% (dari 1800 ke 1250 RPM) untuk mengurangi beban sentrifugal 51%, memperpanjang RUL hingga suku cadang tiba.",
+    extended_rul_days: isAbnormal ? 32 : 180
+  };
+
+  // ESG Forensics
+  const esg_forensics = {
+    excess_kwh_per_day: isAbnormal ? 14.2 : 0,
+    excess_co2_kg_per_day: isAbnormal ? 12.1 : 0,
+    excess_cost_idr_per_month: isAbnormal ? 615000 : 0,
+    motor_efficiency_pct: isAbnormal ? 78.4 : 94.5
+  };
 
   return {
     status: "success",
@@ -128,17 +234,22 @@ export function runInferenceSimulation(
       iso_standard: fault.isoStandard,
       recommended_action: fault.recommendedAction,
       work_order_draft: {
-        wo_id: `WO-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        wo_id,
         priority: isAbnormal ? (fault.riskLevel === "HIGH_CRITICAL" ? "P1_URGENT" : "P2_ELEVATED") : "P3_ROUTINE",
         assigned_to: "Shift A Maintenance Crew (Vibration Specialist)",
         target_completion_hours: isAbnormal ? 24 : 720,
       },
+      prescriptive_sop,
+      fmea_matrix,
+      supply_chain_derating,
+      radio_voice_dispatch: `Perhatian Shift Maintenance Alpha, anomali terdeteksi pada ${mid}. Sisa RUL ${isAbnormal ? 14 : 180} hari. Tiket ${wo_id} telah aktif. Over.`
     },
     manager_view: {
       machine_health_percentage: fault.healthScore,
       risk_level: fault.riskLevel,
       estimated_downtime_mitigated_usd: fault.estimatedDowntimeMitigatedUsd,
       estimated_rul_days: isAbnormal ? Math.floor(12 + Math.random() * 18) : Math.floor(180 + Math.random() * 90),
+      esg_forensics
     },
     auditor_view: {
       proof_hash,
@@ -149,5 +260,7 @@ export function runInferenceSimulation(
       polygonscan_url: `https://amoy.polygonscan.com/address/${SMART_CONTRACT_ADDRESS}`,
       verification_status: "VERIFIED_ON_CHAIN",
     },
+    xai_harmonics
   };
 }
+

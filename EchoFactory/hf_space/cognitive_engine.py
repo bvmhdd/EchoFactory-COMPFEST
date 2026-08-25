@@ -55,35 +55,43 @@ ISO_10816_ZONES = {
     }
 }
 
-# Database Mock Suku Cadang Gudang ERP/SAP
+# Database Mock Suku Cadang Gudang ERP/SAP dengan Lead Time
 ERP_INVENTORY = {
     "FAN_ID_00": {
         "part_name": "Deep Groove Ball Bearing #SKF-6204-2RSH",
         "sku": "SKU-BEAR-6204",
         "stock": 8,
         "location": "Gudang B - Rak 04",
-        "unit_price_idr": 185000
+        "unit_price_idr": 185000,
+        "lead_time_days": 2,
+        "supplier": "SKF Industrial Distribution Asia"
     },
     "PUMP_ID_01": {
         "part_name": "Mechanical Seal & Impeller Kit #GRUNDFOS-CR15",
         "sku": "SKU-SEAL-CR15",
-        "stock": 3,
+        "stock": 1,
         "location": "Gudang A - Rak 12",
-        "unit_price_idr": 1250000
+        "unit_price_idr": 1250000,
+        "lead_time_days": 12, # Bottleneck lead time
+        "supplier": "Grundfos Direct Spares Global"
     },
     "SLIDER_ID_02": {
         "part_name": "Linear Guide Rail Block #THK-HSR25R",
         "sku": "SKU-RAIL-THK25",
         "stock": 5,
         "location": "Gudang C - Rak 02",
-        "unit_price_idr": 650000
+        "unit_price_idr": 650000,
+        "lead_time_days": 4,
+        "supplier": "THK Motion Systems Jakarta"
     },
     "VALVE_ID_03": {
         "part_name": "High-Pressure Solenoid Diaphragm #FESTO-VZWD",
         "sku": "SKU-VALV-FESTO",
         "stock": 12,
         "location": "Gudang B - Rak 09",
-        "unit_price_idr": 420000
+        "unit_price_idr": 420000,
+        "lead_time_days": 3,
+        "supplier": "Festo Automation Indonesia"
     }
 }
 
@@ -91,6 +99,181 @@ ERP_INVENTORY = {
 class CognitiveDiagnosticEngine:
     def __init__(self):
         self.model = gemini_model
+
+    def generate_fmea_matrix(self, machine_id: str, anomaly_score: float, is_anomaly: bool, defect_type: str, zone: str) -> Dict[str, Any]:
+        """
+        Menghasilkan Analisis Mode Kegagalan dan Efeknya (FMEA Matrix) berstandar IATF 16949:
+        - Severity (S): Dampak terhadap lini produksi (1-10)
+        - Occurrence (O): Kemungkinan terjadinya kegagalan (1-10)
+        - Detection (D): Kemampuan deteksi akustik dini (1-10)
+        - RPN = S * O * D (Risk Priority Number)
+        """
+        if not is_anomaly:
+            return {
+                "failure_mode": "Normal Operation (Zero Incipient Defect)",
+                "potential_effect": "Optimal throughput, no unplanned downtime risk",
+                "severity_s": 1,
+                "occurrence_o": 1,
+                "detection_d": 1,
+                "rpn_score": 1,
+                "risk_category": "LOW (ACCEPTABLE)",
+                "recommended_control": "Lanjutkan monitoring akustik pasif edge-AI STgram-MFN."
+            }
+
+        s_val = 8 if zone == "Zone D" else (6 if zone == "Zone C" else 4)
+        o_val = min(9, max(3, int(anomaly_score * 10)))
+        d_val = 2 # Deteksi akustik dini sangat andal (skor deteksi rendah = kemampuan deteksi tinggi)
+        rpn = s_val * o_val * d_val
+
+        fmea_data = {
+            "FAN_ID_00": {
+                "failure_mode": "Bearing Raceway Pitting & Inner Ring Spall (BPFI 118.5 Hz)",
+                "potential_effect": "Rotor locking, motor coil burn, total airflow stoppage in furnace line",
+                "potential_cause": "Lubrication contamination & micro-fretting corrosion",
+                "current_controls": "EchoFactory STgram-MFN Continuous Acoustic Monitoring",
+            },
+            "PUMP_ID_01": {
+                "failure_mode": "Centrifugal Impeller Erosion & Cavitation Shock Pitting",
+                "potential_effect": "Suction pressure loss, mechanical seal rupture, coolant overflow",
+                "potential_cause": "NPSH starvation & fluid vapor bubble collapse",
+                "current_controls": "Suction Acoustic Sensor & Pressure Guard",
+            },
+            "SLIDER_ID_02": {
+                "failure_mode": "Guide Rail Stick-Slip Galling & Ball Block Starvation",
+                "potential_effect": "CNC positioning jitter, dimensional reject on machined parts",
+                "potential_cause": "Automatic lubrication channel blockage",
+                "current_controls": "Stroke Reciprocating Envelope Anomaly Profiler",
+            },
+            "VALVE_ID_03": {
+                "failure_mode": "High-Pressure Solenoid Diaphragm Micro-Rupture",
+                "potential_effect": "Continuous pneumatic/hydraulic pressure leak, compressor overloading",
+                "potential_cause": "Thermal cycling fatigue & elastomer degradation",
+                "current_controls": "Ultrasonic Orifice Acoustic Signature Guard",
+            }
+        }.get(machine_id, {
+            "failure_mode": defect_type,
+            "potential_effect": "Unplanned machine stoppage and production bottleneck",
+            "potential_cause": "Mechanical wear and cyclical fatigue",
+            "current_controls": "Acoustic AI Vibration Inspection",
+        })
+
+        fmea_data.update({
+            "severity_s": s_val,
+            "occurrence_o": o_val,
+            "detection_d": d_val,
+            "rpn_score": rpn,
+            "risk_category": "CRITICAL RISK (P1)" if rpn > 90 else ("MODERATE RISK (P2)" if rpn > 40 else "LOW RISK"),
+            "recommended_control": f"Lakukan isolasi LOTO, ganti komponen sebelum RPN melampaui batas kritis 100."
+        })
+        return fmea_data
+
+    def evaluate_supply_chain_and_derating(self, machine_id: str, rul_hours: int, part: dict) -> Dict[str, Any]:
+        """
+        Menganalisis risiko rantai pasok suku cadang (Lead Time vs RUL)
+        dan memberikan rekomendasi Derating (penurunan beban/kecepatan operasi) untuk memperpanjang RUL.
+        """
+        lead_time_hours = part["lead_time_days"] * 24
+        stock_available = part["stock"] > 0
+        is_bottleneck = (not stock_available or part["stock"] <= 1) and (lead_time_hours > rul_hours)
+
+        if "FAN" in machine_id:
+            derating_advice = "Turunkan kecepatan inverter motor dari 1800 RPM ke 1250 RPM (-30%). Hal ini mengurangi gaya sentrifugal bantalan sebesar ~51%, memperpanjang RUL dari saat ini hingga suku cadang tiba."
+        elif "PUMP" in machine_id:
+            derating_advice = "Turunkan laju aliran debit sebesar 25% dan tingkatkan tekanan suction minimal +0.8 bar untuk meredam pembentukan gelembung kavitasi impeler."
+        elif "SLIDER" in machine_id:
+            derating_advice = "Kurangi kecepatan feed rate CNC sebesar 35% dan lakukan manual spray lubrication grease ISO VG 220 setiap 4 jam kerja."
+        else:
+            derating_advice = "Turunkan siklus switching solenoid valve sebesar 20% untuk mengurangi frekuensi lonjakan tekanan pada membran seal."
+
+        extended_rul_hours = int(rul_hours * 2.8) if is_bottleneck else rul_hours
+
+        return {
+            "part_stock": part["stock"],
+            "part_lead_time_days": part["lead_time_days"],
+            "part_lead_time_hours": lead_time_hours,
+            "rul_hours": rul_hours,
+            "is_supply_chain_bottleneck": is_bottleneck,
+            "bottleneck_severity": "CRITICAL ALERT (Lead Time > RUL)" if is_bottleneck else "NORMAL (In-Stock / Adequate Lead Time)",
+            "prescriptive_derating_action": derating_advice,
+            "extended_rul_under_derating_hours": extended_rul_hours
+        }
+
+    def generate_prescriptive_sop(self, machine_id: str, defect_type: str, zone: str, part: dict) -> Dict[str, Any]:
+        """
+        Menghasilkan SOP Pemeliharaan Preskriptif 5-Langkah lengkap dengan protokol K3 LOTO & Tooling Matrix.
+        """
+        clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
+        
+        sop_templates = {
+            "FAN_ID_00": {
+                "loto_protocol": "Isolasi Breaker Panel MCC-B02 (400V 3-Phase). Pasang Safety Padlock & Tagout. Pastikan motor benar-benar nol energi (Zero Energy State).",
+                "tooling_matrix": ["Hydraulic Bearing Puller 5-Ton", "Induction Bearing Heater (110°C target)", "Torque Wrench (Torsi 48 Nm)", "Dial Gauge Alignment Kit"],
+                "lubricant_spec": "SKF LGHP 2 High Performance Polyurea Synthetic Grease (15 gram initial fill)",
+                "step_1": "1. [LOTO & ISOLASI]: Matikan power drive, pasang lock out, dan lepas coupling shaft motor-blower.",
+                "step_2": "2. [DISASSEMBLY]: Gunakan Hydraulic Puller untuk menarik bearing lama SKF-6204 tanpa merusak shaft journal.",
+                "step_3": "3. [CLEANING & INSPEKSI]: Bersihkan housing menggunakan solvent non-chlorinated. Ukur toleransi shaft runout (maks < 0.02 mm).",
+                "step_4": "4. [ASSEMBLY]: Panaskan bearing baru SKF-6204 hingga 110°C dengan induction heater, lalu pasang presisi ke dudukan shaft.",
+                "step_5": "5. [POST-REPAIR ACOUSTIC AUDIT]: Nyalakan mesin pada idle 600 RPM, lalu jalankan re-scan akustik EchoFactory. Target skor anomali < 0.035."
+            },
+            "PUMP_ID_01": {
+                "loto_protocol": "Tutup Suction & Discharge Valve. Kunci Handle Valve dengan Cable Lockout. Buka drain plug untuk de-pressurisasi fluida ruang impeler.",
+                "tooling_matrix": ["Impeller Spanner Wrench", "Mechanical Seal Press Tool", "Torque Wrench 65 Nm", "Pressure Barometer 0-10 Bar"],
+                "lubricant_spec": "Food-Grade Silicone Sealant & Synthetic ISO VG 46 Barrier Fluid",
+                "step_1": "1. [LOTO & DRAIN]: Isolasi elektrikal MCC-P01 dan kuras seluruh fluida dari casing pompa.",
+                "step_2": "2. [CASING REMOVAL]: Buka baut casing menggunakan cross-pattern torque wrench.",
+                "step_3": "3. [SEAL REPLACEMENT]: Lepas cartridge mechanical seal Grundfos CR15 dan ganti O-Ring baru.",
+                "step_4": "4. [IMPELLER CLEARANCE]: Pasang impeler kit dan atur clearance vane 0.35 mm.",
+                "step_5": "5. [HYDRO-TEST & SCAN]: Lakukan uji priming dan jalankan verifikasi akustik EchoFactory (Target Zone A)."
+            },
+            "SLIDER_ID_02": {
+                "loto_protocol": "Aktifkan E-STOP CNC Console. Putuskan pasokan pneumatik/hidrolik sumbu gerak. Ganjal meja sumbu menggunakan Mechanical Safety Block.",
+                "tooling_matrix": ["Hex Key Set Chrome Vanadium", "Precision Dial Indicator 0.001 mm", "Grease Gun High Pressure", "Linear Guide Alignment Jig"],
+                "lubricant_spec": "THK AFB-LF Extreme Pressure Lithium Soap Grease (No. 2 consistency)",
+                "step_1": "1. [LOTO & SECURE]: Kunci controller dan amankan sumbu linier dari risiko jatuh gravitasi.",
+                "step_2": "2. [RAIL STRIPPING]: Lepas end-cap wiper dan geser block THK-HSR25 lama keluar dari rail.",
+                "step_3": "3. [SURFACE POLISHING]: Bersihkan micro-burr pada permukaan guide rail menggunakan abrasive stone #1000.",
+                "step_4": "4. [BLOCK INSTALLATION]: Pasang ball block baru dan kencangkan fixing bolt dengan torsi 12 Nm.",
+                "step_5": "5. [TRAVEL ACOUSTIC TEST]: Jalankan siklus stroke 10x dan catat skor anomali akustik EchoFactory."
+            },
+            "VALVE_ID_03": {
+                "loto_protocol": "Tutup Main Air Header Supply (6 Bar). Buang tekanan manifold via relief valve. Cabut konektor solenoid 24V DC.",
+                "tooling_matrix": ["Pneumatic Fitting Wrench", "Circlip Plier Internal", "Multimeter Coil Resistance Tester", "Ultrasonic Leak Detector"],
+                "lubricant_spec": "Klüber Syntheso Glep 1 O-Ring Special Lubricant Grease",
+                "step_1": "1. [DE-ENERGIZE]: Putuskan pasokan udara kompresor dan cabut kabel sinyal solenoid.",
+                "step_2": "2. [BONNET DISASSEMBLY]: Buka coil retaining nut dan lepas plunger spring assembly.",
+                "step_3": "3. [DIAPHRAGM RENEWAL]: Pasang membran Festo VZWD baru, pastikan orientasi lubang equalizing port tepat.",
+                "step_4": "4. [TORQUE & SEAL CHECK]: Kencangkan solenoid housing dan lakukan uji tahanan koil (~32 Ohm).",
+                "step_5": "5. [ULTRASONIC AUDIT]: Beri tekanan 6 bar dan jalankan scan akustik frekuensi tinggi untuk memastikan 0% kebocoran."
+            }
+        }.get(clean_mid, {
+            "loto_protocol": "Lakukan isolasi sumber energi primer dan pasang Lockout/Tagout sebelum intervensi mekanis.",
+            "tooling_matrix": ["Standard Mechanical Maintenance Tool Set", "Torque Wrench", "Alignment Gauge"],
+            "lubricant_spec": "Standard Industrial Machine Grease ISO VG 460",
+            "step_1": "1. [LOTO]: Matikan mesin dan isolasi sumber daya.",
+            "step_2": "2. [DISASSEMBLY]: Buka komponen yang mengalami anomali.",
+            "step_3": "3. [REPLACEMENT]: Ganti komponen aus dengan suku cadang baru.",
+            "step_4": "4. [CALIBRATION]: Kalibrasi clearance dan torsi baut pengikat.",
+            "step_5": "5. [ACOUSTIC VALIDATION]: Uji ulang kondisi akustik mesin."
+        })
+        sop_data = dict(sop_templates)
+        sop_data["steps"] = [
+            sop_data.get("step_1", ""),
+            sop_data.get("step_2", ""),
+            sop_data.get("step_3", ""),
+            sop_data.get("step_4", ""),
+            sop_data.get("step_5", "")
+        ]
+        return sop_data
+
+    def generate_radio_voice_dispatch(self, machine_id: str, defect_type: str, zone: str, rul_hours: int, wo_id: str) -> str:
+        """
+        Menghasilkan teks siaran suara walkie-talkie HT radio industri (Text-To-Speech / Dispatch Audio).
+        """
+        return (
+            f"Perhatian Tim Maintenance Alpha! Peringatan otomatis EchoFactory diterbitkan untuk {machine_id}. "
+            f"Klasifikasi {zone}. Indikasi {defect_type}. Sisa waktu operasional diperkirakan {rul_hours} jam. "
+            f"Tiket Work Order #{wo_id} telah aktif. Segera lakukan prosedur LOTO dan ambil suku cadang di gudang. Ganti dan lapor kembali, over."
+        )
 
     def diagnose_anomaly(
         self,
@@ -102,7 +285,7 @@ class CognitiveDiagnosticEngine:
     ) -> Dict[str, Any]:
         """
         Mendiagnosis akar masalah komponen, zona ISO 10816, estimasi RUL,
-        dan rekomendasi suku cadang ERP dengan memperhitungkan profil SNR.
+        FMEA Matrix, Rantai Pasok Derating, Prescriptive SOP, dan Radio Dispatch.
         """
         clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
 
@@ -130,13 +313,14 @@ class CognitiveDiagnosticEngine:
 
         iso_info = ISO_10816_ZONES[zone]
         erp_part = ERP_INVENTORY.get(clean_mid, ERP_INVENTORY["FAN_ID_00"])
+        wo_id = f"WO-2026-{random.randint(1000, 9999)}"
 
         # 2. Panggil Gemini Flash jika API Key tersedia
         gemini_explanation = None
         if self.model and is_anomaly:
             try:
                 prompt = (
-                    f"Sebagai AI Predictive Maintenance Engineer standar ISO 10816, analisis anomali suara mesin berikut:\n"
+                    f"Sebagai AI Predictive Maintenance Engineer standar ISO 10816 & IATF 16949, analisis anomali suara mesin berikut:\n"
                     f"- Machine ID: {clean_mid}\n"
                     f"- Noise SNR Profile: {snr_label}\n"
                     f"- Anomaly Score: {anomaly_score:.4f} (Threshold: 0.050)\n"
@@ -157,6 +341,12 @@ class CognitiveDiagnosticEngine:
                 clean_mid, defect_type, zone, rul_hours, erp_part, snr_label
             )
 
+        # 3. Hitung FMEA, Supply Chain Derating, Prescriptive SOP, dan Radio Voice
+        fmea = self.generate_fmea_matrix(clean_mid, anomaly_score, is_anomaly, defect_type, zone)
+        supply_chain = self.evaluate_supply_chain_and_derating(clean_mid, rul_hours, erp_part)
+        sop = self.generate_prescriptive_sop(clean_mid, defect_type, zone, erp_part)
+        radio_dispatch = self.generate_radio_voice_dispatch(clean_mid, defect_type, zone, rul_hours, wo_id)
+
         return {
             "machine_id": clean_mid,
             "snr_label": snr_label,
@@ -170,7 +360,12 @@ class CognitiveDiagnosticEngine:
             "iso_action": iso_info["action"],
             "estimated_rul_hours": rul_hours,
             "recommended_part": erp_part,
-            "diagnostic_summary": gemini_explanation
+            "diagnostic_summary": gemini_explanation,
+            "work_order_id": wo_id,
+            "fmea_matrix": fmea,
+            "supply_chain": supply_chain,
+            "prescriptive_sop": sop,
+            "radio_voice_dispatch": radio_dispatch
         }
 
     def _get_default_defect(self, machine_id: str) -> str:
@@ -235,6 +430,10 @@ class CognitiveDiagnosticEngine:
             return "Solenoid Valve 03 memiliki siklus switching normal pada tekanan 6 bar. Tidak ada kebocoran fluida yang terdeteksi."
         elif "iso" in q or "standar" in q:
             return "Sistem mengacu pada ISO 10816-3. Getaran di bawah 1.8 mm/s adalah Zona A (Baik), sedangkan di atas 11.2 mm/s adalah Zona D (Bahaya Kritis)."
+        elif "fmea" in q or "rpn" in q:
+            return "Matriks FMEA menghitung skor RPN = Severity x Occurrence x Detection. RPN di atas 90 memerlukan intervensi maintenance P1."
+        elif "esg" in q or "karbon" in q or "energi" in q:
+            return "Anomali getaran mekanis meningkatkan konsumsi daya motor hingga +22% dan emisi karbon ~10 kg CO2/hari akibat hilangnya efisiensi energi."
         elif "wo" in q or "work order" in q or "perbaikan" in q:
             return "Tiket Work Order dapat diterbitkan langsung dari Tab 2 setelah supervisor memverifikasi anomali dan alokasi suku cadang."
         else:
@@ -242,7 +441,7 @@ class CognitiveDiagnosticEngine:
 
     def generate_work_order(self, diagnosis: dict) -> dict:
         """Menerbitkan tiket Work Order resmi simulasi ERP/SAP."""
-        wo_id = f"WO-2026-{random.randint(1000, 9999)}"
+        wo_id = diagnosis.get("work_order_id", f"WO-2026-{random.randint(1000, 9999)}")
         part = diagnosis.get("recommended_part", ERP_INVENTORY["FAN_ID_00"])
         return {
             "work_order_id": wo_id,
@@ -261,3 +460,4 @@ class CognitiveDiagnosticEngine:
 
 # Singleton Instance
 cognitive_engine = CognitiveDiagnosticEngine()
+

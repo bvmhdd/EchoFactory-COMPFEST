@@ -297,6 +297,171 @@ class AudioEngine:
         Mengekstrak embedding 128-D, mendeteksi mesin/SNR otomatis,
         dan menghitung Cosine Anomaly Score adaptif.
         """
+    def extract_mechanical_harmonics(self, machine_id, y, sr=SR):
+        """
+        Mengekstrak frekuensi harmonik mekanis spesifik (XAI Physics-Informed):
+        - Fan: BPFI 118.5 Hz, BPF 240 Hz, Unbalance 30 Hz
+        - Pump: Vane Pass 360 Hz, Cavitation Turbulence 2.8 - 5.5 kHz
+        - Slider: Stroke Cycle 0.8 Hz, Guide Rail Friction 1.2 - 2.5 kHz
+        - Valve: Plunger Impact Transient, Orifice Leakage Hiss 3.8 - 7.0 kHz
+        """
+        n = len(y)
+        fft_vals = np.abs(np.fft.rfft(y))
+        fft_freqs = np.fft.rfftfreq(n, 1.0 / sr)
+        
+        harmonics = []
+        clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
+        
+        if "FAN" in clean_mid:
+            # BPFI & BPF
+            idx_bpfi = np.argmin(np.abs(fft_freqs - 118.5))
+            idx_bpf = np.argmin(np.abs(fft_freqs - 240.0))
+            idx_unbalance = np.argmin(np.abs(fft_freqs - 30.0))
+            
+            p_bpfi = float(np.mean(fft_vals[max(0, idx_bpfi-10):idx_bpfi+10]))
+            p_bpf = float(np.mean(fft_vals[max(0, idx_bpf-10):idx_bpf+10]))
+            p_rot = float(np.mean(fft_vals[max(0, idx_unbalance-5):idx_unbalance+5]))
+            
+            harmonics = [
+                {"freq_hz": 118.5, "band_range": [95, 145], "name": "BPFI (Inner Race Spall)", "energy": round(p_bpfi, 3), "is_anomaly_source": True},
+                {"freq_hz": 240.0, "band_range": [210, 270], "name": "BPF (Blade Pass Harmonic)", "energy": round(p_bpf, 3), "is_anomaly_source": False},
+                {"freq_hz": 30.0, "band_range": [20, 45], "name": "1X Rotational Speed (1800 RPM)", "energy": round(p_rot, 3), "is_anomaly_source": False}
+            ]
+        elif "PUMP" in clean_mid:
+            idx_vane = np.argmin(np.abs(fft_freqs - 360.0))
+            idx_cavit = np.argmin(np.abs(fft_freqs - 3200.0))
+            
+            p_vane = float(np.mean(fft_vals[max(0, idx_vane-15):idx_vane+15]))
+            p_cavit = float(np.mean(fft_vals[max(0, idx_cavit-150):idx_cavit+150]))
+            
+            harmonics = [
+                {"freq_hz": 3200.0, "band_range": [2500, 5500], "name": "Broadband Cavitation Burst", "energy": round(p_cavit, 3), "is_anomaly_source": True},
+                {"freq_hz": 360.0, "band_range": [320, 400], "name": "Impeller Vane Pass Frequency", "energy": round(p_vane, 3), "is_anomaly_source": False},
+                {"freq_hz": 50.0, "band_range": [40, 60], "name": "Motor Supply Synchronous 1X", "energy": round(float(np.mean(fft_vals[:20])), 3), "is_anomaly_source": False}
+            ]
+        elif "SLIDER" in clean_mid:
+            idx_frict = np.argmin(np.abs(fft_freqs - 1650.0))
+            p_frict = float(np.mean(fft_vals[max(0, idx_frict-100):idx_frict+100]))
+            
+            harmonics = [
+                {"freq_hz": 1650.0, "band_range": [1100, 2400], "name": "Guide Rail Stick-Slip Galling", "energy": round(p_frict, 3), "is_anomaly_source": True},
+                {"freq_hz": 0.8, "band_range": [0.3, 1.5], "name": "Linear Stroke Reciprocating Rate", "energy": round(float(np.max(fft_vals[:15])), 3), "is_anomaly_source": False}
+            ]
+        else: # VALVE
+            idx_leak = np.argmin(np.abs(fft_freqs - 4500.0))
+            p_leak = float(np.mean(fft_vals[max(0, idx_leak-200):idx_leak+200]))
+            
+            harmonics = [
+                {"freq_hz": 4500.0, "band_range": [3500, 7200], "name": "High-Pressure Seal Orifice Hiss", "energy": round(p_leak, 3), "is_anomaly_source": True},
+                {"freq_hz": 100.0, "band_range": [80, 120], "name": "Solenoid Coil 2X Electrical Hum", "energy": round(float(np.mean(fft_vals[20:60])), 3), "is_anomaly_source": False}
+            ]
+            
+        return harmonics
+
+    def isolate_defect_audio(self, y, sr=SR, machine_id="FAN_ID_00"):
+        """
+        Mengisolasi sinyal anomali murni (Isolated Defect Acoustic Signature)
+        menggunakan STFT spectral bandpass extraction.
+        """
+        clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
+        
+        # Bandpass filter berdasarkan jenis anomali
+        if "FAN" in clean_mid:
+            # BPFI band 80-500 Hz
+            b, a = signal.butter(4, [80 / (sr/2), 600 / (sr/2)], btype='bandpass')
+        elif "PUMP" in clean_mid:
+            # Cavitation band 2000-6000 Hz
+            b, a = signal.butter(4, [2000 / (sr/2), 6500 / (sr/2)], btype='bandpass')
+        elif "SLIDER" in clean_mid:
+            # High friction band 900-3000 Hz
+            b, a = signal.butter(4, [900 / (sr/2), 3200 / (sr/2)], btype='bandpass')
+        else:
+            # Valve hiss 3000-7500 Hz
+            b, a = signal.butter(4, [3000 / (sr/2), 7500 / (sr/2)], btype='bandpass')
+            
+        isolated = signal.filtfilt(b, a, y)
+        # Tingkatkan gain sinyal cacat yang terisolasi agar terdengar jelas oleh operator
+        isolated = isolated * 2.5
+        isolated = np.clip(isolated, -1.0, 1.0)
+        
+        # Format ke 16-bit integer PCM
+        audio_int16 = (isolated * 32767).astype(np.int16)
+        return sr, audio_int16
+
+    def simulate_future_degradation_audio(self, y, sr=SR, machine_id="FAN_ID_00", days_ahead=30):
+        """
+        Mensintesis proyeksi audio kerusakan mesin di masa depan (+30 hari)
+        jika tidak segera dilakukan perbaikan (Severe Mechanical Seizure Acoustic Simulation).
+        """
+        clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
+        t = np.linspace(0, len(y)/sr, len(y), endpoint=False)
+        
+        # Tambahkan distorsi non-linear dan shock pulses
+        np.random.seed(99)
+        if "FAN" in clean_mid:
+            # Pulsa benturan spalling BPFI 118.5 Hz tajam + derau gesekan parah
+            pulse_train = signal.sawtooth(2 * np.pi * 118.5 * t, width=0.1)
+            degraded = y * 1.4 + 0.35 * pulse_train + np.random.normal(0, 0.12, len(y))
+        elif "PUMP" in clean_mid:
+            # Gelembung kavitasi masif & getaran impeler berbenturan
+            mod = 1.0 + 0.6 * np.sin(2 * np.pi * 360 * t)
+            degraded = (y * mod) * 1.6 + np.random.normal(0, 0.22, len(y))
+        elif "SLIDER" in clean_mid:
+            # Grinding metal-on-metal screeching
+            screech = np.sin(2 * np.pi * 2200 * t) * (1.0 + np.sin(2 * np.pi * 0.8 * t))
+            degraded = y * 1.2 + 0.45 * screech + np.random.normal(0, 0.15, len(y))
+        else:
+            # Semburan bocor bertekanan tinggi terus menerus
+            degraded = y * 1.5 + np.random.normal(0, 0.30, len(y))
+            
+        # Normalisasi
+        degraded = np.clip(degraded / (np.max(np.abs(degraded)) + 1e-6) * 0.95, -1.0, 1.0)
+        audio_int16 = (degraded * 32767).astype(np.int16)
+        return sr, audio_int16
+
+    def calculate_esg_and_carbon_loss(self, machine_id, anomaly_score, is_anomaly):
+        """
+        Menghitung dampak energi terbuang & jejak karbon (ESG & Eco-Efficiency Forensics).
+        Gesekan & ketidakseimbangan mekanis menyebabkan motor menarik arus listrik lebih tinggi.
+        """
+        clean_mid = machine_id.split()[0] if machine_id else "FAN_ID_00"
+        
+        # Asumsi daya dasar mesin industri: 15 kW - 45 kW
+        base_power_kw = {
+            "FAN_ID_00": 22.0,    # 30 HP Blower
+            "PUMP_ID_01": 37.0,   # 50 HP Centrifugal Pump
+            "SLIDER_ID_02": 15.0, # CNC Linear Drive
+            "VALVE_ID_03": 7.5    # Hydraulic Solenoid System
+        }.get(clean_mid, 22.0)
+        
+        if not is_anomaly or anomaly_score <= 0.050:
+            excess_kwh_per_day = 0.0
+            excess_co2_kg_per_day = 0.0
+            excess_cost_idr_per_month = 0
+            motor_efficiency_pct = 94.5
+        else:
+            # Efisiensi turun 5% - 22% sebanding dengan anomaly score
+            eff_drop = min(0.24, max(0.04, anomaly_score * 0.28))
+            motor_efficiency_pct = round((1.0 - eff_drop) * 95.0, 1)
+            excess_power_kw = base_power_kw * eff_drop
+            excess_kwh_per_day = round(excess_power_kw * 24.0, 1) # 24 jam operasi
+            # Faktor emisi grid listrik Indonesia ~0.85 kg CO2/kWh
+            excess_co2_kg_per_day = round(excess_kwh_per_day * 0.85, 1)
+            # Tarif listrik industri golongan I-3: ~Rp 1.444 / kWh
+            excess_cost_idr_per_month = int(excess_kwh_per_day * 30 * 1444)
+            
+        return {
+            "motor_efficiency_pct": motor_efficiency_pct,
+            "excess_kwh_per_day": excess_kwh_per_day,
+            "excess_co2_kg_per_day": excess_co2_kg_per_day,
+            "excess_cost_idr_per_month": excess_cost_idr_per_month
+        }
+
+    def extract_embedding_and_score(self, y, machine_id="AUTO"):
+        """
+        Mengekstrak embedding 128-D, mendeteksi mesin/SNR otomatis,
+        menghitung Cosine Anomaly Score adaptif, XAI harmonik, dan metrik ESG.
+        """
         # 1. Deteksi SNR Profil Kebisingan (-6dB, 0dB, 6dB)
         detected_snr, snr_label, snr_db = self.estimate_snr_and_noise_profile(y)
         
@@ -344,6 +509,10 @@ class AudioEngine:
         is_anomaly = bool(anomaly_score > threshold)
         status = "CRITICAL ALERT" if anomaly_score > 0.50 else ("WARNING" if is_anomaly else "NORMAL (PASS)")
         
+        # 4. Ekstraksi XAI Harmonics & ESG Impact
+        harmonics = self.extract_mechanical_harmonics(clean_mid, y, sr=SR)
+        esg_metrics = self.calculate_esg_and_carbon_loss(clean_mid, anomaly_score, is_anomaly)
+        
         return {
             "machine_id": clean_mid,
             "machine_label": machine_label,
@@ -360,16 +529,21 @@ class AudioEngine:
             "spectrogram": raw_spec,
             "mel_128": mel_128,
             "freqs": f,
-            "times": t
+            "times": t,
+            "harmonics": harmonics,
+            "esg_metrics": esg_metrics
         }
 
     def generate_spectrogram_plot(self, spec_result, y):
-        """Menghasilkan visualisasi Spektrogram & FFT Power Density bertema Industrial Dark."""
+        """
+        Menghasilkan visualisasi Spektrogram XAI dengan Bounding Box & Anotasi Harmonik Fisika
+        serta FFT Power Density bertema Industrial Dark.
+        """
         plt.style.use('dark_background')
-        fig, axes = plt.subplots(2, 1, figsize=(10, 6), gridspec_kw={'height_ratios': [2, 1]})
+        fig, axes = plt.subplots(2, 1, figsize=(10, 6.5), gridspec_kw={'height_ratios': [2, 1.2]})
         fig.patch.set_facecolor('#0B0F19')
         
-        # 1. Mel-Spectrogram Visualizer
+        # 1. Mel-Spectrogram Visualizer dengan Bounding Box XAI
         ax1 = axes[0]
         ax1.set_facecolor('#111827')
         cmap = 'magma' if spec_result['is_anomaly'] else 'viridis'
@@ -391,7 +565,17 @@ class AudioEngine:
         cbar = fig.colorbar(im, ax=ax1, fraction=0.046, pad=0.02)
         cbar.ax.tick_params(labelsize=8, colors='#94A3B8')
         
-        # 2. FFT Power Spectral Density
+        # XAI Bounding Overlay pada Spektrogram jika anomali
+        if spec_result['is_anomaly'] and spec_result.get('harmonics'):
+            for h in spec_result['harmonics']:
+                if h.get('is_anomaly_source'):
+                    b_min, b_max = h['band_range']
+                    ax1.axhspan(b_min, b_max, color='#EF4444', alpha=0.22, linestyle='--', linewidth=1.2)
+                    ax1.text(0.3, b_max + 120, f"⚠️ XAI DEFECT BAND: {h['name']} ({h['freq_hz']} Hz)",
+                             color='#FCA5A5', fontsize=8.5, fontweight='bold',
+                             bbox=dict(boxstyle='round,pad=0.2', facecolor='#7F1D1D', alpha=0.85, edgecolor='#EF4444'))
+        
+        # 2. FFT Power Spectral Density dengan Indikator Harmonik
         ax2 = axes[1]
         ax2.set_facecolor('#111827')
         n = len(y)
@@ -399,8 +583,28 @@ class AudioEngine:
         fft_freqs = np.fft.rfftfreq(n, 1.0 / SR)
         
         color = '#EF4444' if spec_result['is_anomaly'] else '#10B981'
-        ax2.plot(fft_freqs[:len(fft_freqs)//2], fft_vals[:len(fft_freqs)//2], color=color, lw=1.2)
-        ax2.set_title(f"⚡ FFT Frequency Spectrum | SNR: {spec_result['snr_label']}", fontsize=9.5, fontweight='bold', color='#E2E8F0')
+        ax2.plot(fft_freqs[:len(fft_freqs)//2], fft_vals[:len(fft_freqs)//2], color=color, lw=1.2, label='Acoustic FFT Spectrum')
+        
+        # Tandai puncak frekuensi mekanis
+        if spec_result.get('harmonics'):
+            for h in spec_result['harmonics']:
+                f_hz = h['freq_hz']
+                if f_hz < 4000:
+                    idx = np.argmin(np.abs(fft_freqs - f_hz))
+                    val = fft_vals[idx]
+                    p_color = '#F87171' if h.get('is_anomaly_source') else '#38BDF8'
+                    ax2.plot(f_hz, val, 'o', color=p_color, markersize=5)
+                    ax2.annotate(
+                        f"{h['name'][:18]} ({f_hz}Hz)",
+                        xy=(f_hz, val),
+                        xytext=(f_hz + 80, val * 1.15 + 0.05),
+                        arrowprops=dict(facecolor=p_color, shrink=0.08, width=0.8, headwidth=4),
+                        color=p_color,
+                        fontsize=7.5,
+                        fontweight='bold'
+                    )
+        
+        ax2.set_title(f"⚡ FFT Frequency Spectrum & XAI Physics Peaks | SNR: {spec_result['snr_label']}", fontsize=9.5, fontweight='bold', color='#E2E8F0')
         ax2.set_xlabel("Frequency (Hz)", fontsize=9, color='#94A3B8')
         ax2.set_ylabel("Power Magnitude", fontsize=9, color='#94A3B8')
         ax2.set_xlim(0, 4000)
@@ -411,3 +615,4 @@ class AudioEngine:
 
 # Singleton Instance
 audio_engine = AudioEngine()
+

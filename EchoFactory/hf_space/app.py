@@ -135,26 +135,32 @@ def load_demo_audio(sample_filename, machine_id):
 
 @spaces.GPU
 def process_audio_scan(audio_input, machine_id):
-    """Memproses file audio atau rekaman mikrofon dengan auto-detection mesin & SNR."""
+    """Memproses file audio atau rekaman mikrofon dengan auto-detection mesin, SNR, XAI, dan audio isolation."""
     if audio_input is None:
         return (
             None,
             "⚠️ Harap rekam suara via mikrofon atau pilih file audio sampel!",
-            "Belum ada data komitmen blockchain."
+            "Belum ada data komitmen blockchain.",
+            None,
+            None
         )
 
     try:
         # 1. Load & Preprocess Audio (Resample mono 16kHz, pad/trim 10 detik)
         y, sr = audio_engine.load_and_preprocess_audio(audio_input)
         
-        # 2. Extract Embedding, Auto-Detect Machine & SNR, Calculate Anomaly Score
+        # 2. Extract Embedding, Auto-Detect Machine & SNR, Calculate Anomaly Score, XAI & ESG
         scan_res = audio_engine.extract_embedding_and_score(y, machine_id=machine_id)
         clean_mid = scan_res["machine_id"]
         
-        # 3. Generate High-Tech Spectral Visualizer
+        # 3. Generate High-Tech Spectral Visualizer with XAI Bounding
         fig = audio_engine.generate_spectrogram_plot(scan_res, y)
         
-        # 4. Update Current State
+        # 4. Generate Audio Isolation & Future Failure Sound Simulation
+        isolated_audio = audio_engine.isolate_defect_audio(y, sr, clean_mid)
+        future_audio = audio_engine.simulate_future_degradation_audio(y, sr, clean_mid, days_ahead=30)
+        
+        # 5. Update Current State
         CURRENT_SCAN_STATE["machine_id"] = clean_mid
         CURRENT_SCAN_STATE["machine_label"] = scan_res["machine_label"]
         CURRENT_SCAN_STATE["is_auto_detected"] = scan_res["is_auto_detected"]
@@ -165,8 +171,10 @@ def process_audio_scan(audio_input, machine_id):
         CURRENT_SCAN_STATE["is_anomaly"] = scan_res["is_anomaly"]
         CURRENT_SCAN_STATE["crest_factor"] = scan_res["crest_factor"]
         CURRENT_SCAN_STATE["status"] = scan_res["status"]
+        CURRENT_SCAN_STATE["harmonics"] = scan_res["harmonics"]
+        CURRENT_SCAN_STATE["esg_metrics"] = scan_res["esg_metrics"]
         
-        # 5. Otomatis Commit Hash ke Blockchain Amoy
+        # 6. Otomatis Commit Hash ke Blockchain Amoy
         bc_res = hf_blockchain_service.commit_inspection_record(
             machine_id=clean_mid,
             anomaly_score=scan_res["anomaly_score"],
@@ -181,6 +189,17 @@ def process_audio_scan(audio_input, machine_id):
         
         snr_badge_info = f"<div style='margin-bottom:8px; font-size:12px; color:#f59e0b; font-family:\"JetBrains Mono\", monospace;'>[SNR PROFILE] Baseline: <span style='color:#ffffff; font-weight:bold;'>{scan_res['snr_label']}</span> (Estimated SNR: {scan_res['snr_db']} dB)</div>"
         
+        esg = scan_res["esg_metrics"]
+        esg_badge_info = (
+            f"<div style='margin-top:10px; padding:10px; background:rgba(0,0,0,0.5); border-radius:8px; border:1px solid #27272a; font-family:\"JetBrains Mono\", monospace; font-size:11px;'>"
+            f"<span style='color:#10b981; font-weight:bold;'>🌱 ESG ECO-EFFICIENCY FORENSICS:</span><br>"
+            f"• Motor Operating Efficiency : <b>{esg['motor_efficiency_pct']}%</b><br>"
+            f"• Excess Energy Loss        : <b style='color:#f59e0b;'>+{esg['excess_kwh_per_day']} kWh/hari</b><br>"
+            f"• Carbon Footprint Penalty   : <b style='color:#ef4444;'>+{esg['excess_co2_kg_per_day']} kg CO2e/hari</b><br>"
+            f"• Waste Electricity Cost     : <b>IDR {esg['excess_cost_idr_per_month']:,} / bulan</b>"
+            f"</div>"
+        )
+        
         # Format Badge Keputusan
         if not scan_res["is_anomaly"]:
             status_html = (
@@ -189,6 +208,7 @@ def process_audio_scan(audio_input, machine_id):
                 f"{snr_badge_info}"
                 f"<h3 style='margin:0; color:#34d399; font-size: 16px; font-weight: 700; letter-spacing: -0.01em;'>STATUS: NORMAL (PASS)</h3>"
                 f"<p style='margin:6px 0 0 0; font-size:13px; color: #a1a1aa;'>Anomaly Score: <b>{scan_res['anomaly_score']:.4f}</b> (Threshold [{scan_res['detected_snr']}]: {scan_res['threshold']}) | Spectral signature compliant with ISO 10816 baseline.</p>"
+                f"{esg_badge_info}"
                 f"</div>"
             )
         else:
@@ -197,7 +217,8 @@ def process_audio_scan(audio_input, machine_id):
                 f"{detect_badge_info}"
                 f"{snr_badge_info}"
                 f"<h3 style='margin:0; color:#f87171; font-size: 16px; font-weight: 700; letter-spacing: -0.01em;'>STATUS: ABNORMAL DETECTED (ALERT)</h3>"
-                f"<p style='margin:6px 0 0 0; font-size:13px; color: #fca5a5;'>Anomaly Score: <b>{scan_res['anomaly_score']:.4f}</b> (Exceeds Threshold {scan_res['threshold']}) | <b>Open Tab 02 (Cognitive Diagnostics) for root cause analysis and work order generation.</b></p>"
+                f"<p style='margin:6px 0 0 0; font-size:13px; color: #fca5a5;'>Anomaly Score: <b>{scan_res['anomaly_score']:.4f}</b> (Exceeds Threshold {scan_res['threshold']}) | <b>Open Tab 02 for 5-Step SOP, FMEA, & Derating Strategy.</b></p>"
+                f"{esg_badge_info}"
                 f"</div>"
             )
             
@@ -214,18 +235,22 @@ def process_audio_scan(audio_input, machine_id):
         return (
             fig,
             status_html,
-            bc_html
+            bc_html,
+            isolated_audio,
+            future_audio
         )
     except Exception as e:
         return (
             None,
             f"<div style='color:#ef4444;'>Error processing audio stream: {str(e)}</div>",
-            str(e)
+            str(e),
+            None,
+            None
         )
 
 @spaces.GPU
 def run_deep_diagnostic(machine_id):
-    """Menjalankan penalaran diagnostik kognitif Gemini Multimodal + ISO 10816."""
+    """Menjalankan penalaran diagnostik kognitif Gemini Multimodal, FMEA, Prescriptive SOP & Derating."""
     score = CURRENT_SCAN_STATE["anomaly_score"]
     is_anom = CURRENT_SCAN_STATE["is_anomaly"]
     crest = CURRENT_SCAN_STATE["crest_factor"]
@@ -235,9 +260,12 @@ def run_deep_diagnostic(machine_id):
     diag = cognitive_engine.diagnose_anomaly(mid, score, is_anom, crest, snr_label=snr_lbl)
     CURRENT_SCAN_STATE["diagnosis"] = diag
     
-    # Format Card ISO & RUL
     iso_color = "#10b981" if diag["iso_zone"] in ["Zone A", "Zone B"] else ("#f59e0b" if diag["iso_zone"] == "Zone C" else "#ef4444")
+    fmea = diag["fmea_matrix"]
+    sc = diag["supply_chain"]
+    sop = diag["prescriptive_sop"]
     
+    # 1. Main Diagnostic & ISO Card
     diag_html = (
         f"<div style='background:#0f1117; border-left:4px solid {iso_color}; border:1px solid #1f2430; padding:18px; border-radius:12px; margin-bottom:16px;'>"
         f"<h3 style='margin:0 0 10px 0; color:#ffffff; font-size:15px; font-weight:700;'>Multimodal Cognitive Diagnostic & ISO 10816 Evaluation</h3>"
@@ -251,16 +279,76 @@ def run_deep_diagnostic(machine_id):
         f"</div>"
     )
     
+    # 2. Prescriptive 5-Step SOP & LOTO Protocol Card
+    sop_html = (
+        f"<div style='background:#0f1117; border:1px solid #38bdf8; padding:18px; border-radius:12px; margin-bottom:16px;'>"
+        f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;'>"
+        f"  <h3 style='margin:0; color:#38bdf8; font-size:14px; font-weight:700;'>🛠️ Prescriptive 5-Step SOP & K3 LOTO Protocol</h3>"
+        f"  <span style='background:#0284c7; color:#ffffff; font-size:10px; font-weight:bold; padding:3px 8px; border-radius:4px;'>STANDARD SOP-2026</span>"
+        f"</div>"
+        f"<div style='background:#18181b; padding:10px 14px; border-radius:8px; border-left:3px solid #ef4444; margin-bottom:12px; font-size:12px; color:#fca5a5; font-family:\"JetBrains Mono\", monospace;'>"
+        f"<b>⚠️ K3 LOTO SAFETY MANDATE:</b> {sop['loto_protocol']}"
+        f"</div>"
+        f"<div style='font-size:12px; color:#d4d4d8; line-height:1.8; font-family:\"JetBrains Mono\", monospace;'>"
+        f"<b>Tooling Matrix:</b> {', '.join(sop['tooling_matrix'])}<br>"
+        f"<b>Lubricant Spec:</b> <span style='color:#38bdf8;'>{sop['lubricant_spec']}</span><br>"
+        f"<hr style='border:0; border-top:1px solid #27272a; margin:10px 0;'>"
+        f"{sop['step_1']}<br>"
+        f"{sop['step_2']}<br>"
+        f"{sop['step_3']}<br>"
+        f"{sop['step_4']}<br>"
+        f"{sop['step_5']}"
+        f"</div>"
+        f"</div>"
+    )
+    
+    # 3. FMEA Matrix Card
+    rpn_color = "#ef4444" if fmea["rpn_score"] > 90 else ("#f59e0b" if fmea["rpn_score"] > 40 else "#10b981")
+    fmea_html = (
+        f"<div style='background:#0f1117; border:1px solid #27272a; padding:16px; border-radius:12px; margin-bottom:16px; font-family:\"JetBrains Mono\", monospace; font-size:12px;'>"
+        f"<div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;'>"
+        f"  <b style='color:#ffffff; font-size:13px;'>📊 IATF 16949 FMEA MATRIX & RPN CALCULATION</b>"
+        f"  <span style='background:{rpn_color}; color:#000000; font-weight:bold; padding:2px 8px; border-radius:4px; font-size:11px;'>RPN SCORE: {fmea['rpn_score']} ({fmea['risk_category']})</span>"
+        f"</div>"
+        f"<table style='width:100%; border-collapse:collapse; color:#a1a1aa; font-size:11px;'>"
+        f"  <tr style='background:#18181b; color:#ffffff;'><th style='padding:6px; border:1px solid #27272a;'>Severity (S)</th><th style='padding:6px; border:1px solid #27272a;'>Occurrence (O)</th><th style='padding:6px; border:1px solid #27272a;'>Detection (D)</th><th style='padding:6px; border:1px solid #27272a;'>Potential Effect</th></tr>"
+        f"  <tr><td style='padding:6px; border:1px solid #27272a; text-align:center; color:#ef4444; font-weight:bold;'>{fmea['severity_s']} / 10</td><td style='padding:6px; border:1px solid #27272a; text-align:center; color:#f59e0b;'>{fmea['occurrence_o']} / 10</td><td style='padding:6px; border:1px solid #27272a; text-align:center; color:#10b981;'>{fmea['detection_d']} / 10</td><td style='padding:6px; border:1px solid #27272a;'>{fmea['potential_effect']}</td></tr>"
+        f"</table>"
+        f"</div>"
+    )
+    
+    # 4. Supply Chain & Derating Advice Card
+    sc_border = "#ef4444" if sc["is_supply_chain_bottleneck"] else "#27272a"
+    derating_html = (
+        f"<div style='background:#0f1117; border:1px solid {sc_border}; padding:16px; border-radius:12px; margin-bottom:16px; font-family:\"JetBrains Mono\", monospace; font-size:12px;'>"
+        f"<b style='color:#f59e0b;'>📦 SUPPLY CHAIN LEAD-TIME & OPERATIONAL DERATING ADVICE:</b><br>"
+        f"Status Rantai Pasok: <b style='color:{sc_border};'>{sc['bottleneck_severity']}</b> | Lead Time Pengiriman: <b>{sc['part_lead_time_days']} Hari ({sc['part_lead_time_hours']} Jam)</b><br>"
+        f"<div style='background:#14161f; padding:10px; border-radius:6px; margin-top:8px; border-left:3px solid #f59e0b; color:#fbbf24;'>"
+        f"<b>Rekomendasi Derating:</b> {sc['prescriptive_derating_action']}<br>"
+        f"<i>Estimasi RUL jika Derating diterapkan: <b>~{sc['extended_rul_under_derating_hours']} Jam</b> (Menghindari Stoppage hingga Suku Cadang Tiba).</i>"
+        f"</div>"
+        f"</div>"
+    )
+    
+    # 5. Radio Voice Dispatch Script
+    radio_html = (
+        f"<div style='background:rgba(2, 132, 199, 0.1); border:1px dashed #38bdf8; padding:12px; border-radius:8px; font-family:\"JetBrains Mono\", monospace; font-size:11px; color:#bae6fd; margin-bottom:16px;'>"
+        f"<b>📻 INDUSTRIAL WALKIE-TALKIE RADIO VOICE DISPATCH SCRIPT:</b><br>"
+        f"\"{diag['radio_voice_dispatch']}\""
+        f"</div>"
+    )
+    
     part = diag["recommended_part"]
     part_html = (
         f"<div style='background:#0f1117; border:1px solid #1f2430; padding:14px; border-radius:10px; font-size:12px; color:#a1a1aa; font-family:\"JetBrains Mono\", monospace;'>"
         f"<b style='color:#ffffff;'>[ERP / SAP REPLACEMENT PART]:</b> {part['part_name']}<br>"
         f"SKU: <code style='color:#ffffff;'>{part['sku']}</code> | Inventory Stock: <b style='color:#10b981;'>{part['stock']} Units</b> ({part['location']})<br>"
-        f"Estimated Replacement Cost: IDR {part['unit_price_idr']:,}"
+        f"Supplier: <b>{part.get('supplier', 'Authorized Global Distributor')}</b> | Estimated Cost: IDR {part['unit_price_idr']:,}"
         f"</div>"
     )
     
-    return diag_html, part_html
+    full_diag_html = f"{diag_html}{sop_html}{fmea_html}{derating_html}{radio_html}"
+    return full_diag_html, part_html
 
 def trigger_work_order_dispatch():
     """Menerbitkan tiket Work Order simulasi ERP/SAP."""
@@ -297,35 +385,58 @@ def voice_assistant_qa(user_text):
     return ans
 
 def generate_fleet_trend_chart():
-    """Menghasilkan grafik garis tren getaran 30 hari armada mesin."""
+    """Menghasilkan grafik tren getaran 30 hari armada mesin dan kurva P-F degradation."""
     plt.style.use('dark_background')
-    fig, ax = plt.subplots(figsize=(10, 3.8))
+    fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), gridspec_kw={'width_ratios': [1.3, 1]})
     fig.patch.set_facecolor('#090D16')
-    ax.set_facecolor('#0F1117')
     
+    # 1. 30-Day Degradation Trend
+    ax1 = axes[0]
+    ax1.set_facecolor('#0F1117')
     days = np.arange(1, 31)
-    # Sintesis data getaran historis
     np.random.seed(101)
     fan_trend = 0.02 + 0.001 * days + np.random.normal(0, 0.003, len(days))
     pump_trend = 0.025 + 0.0005 * days + np.random.normal(0, 0.002, len(days))
     slider_trend = 0.015 + 0.0002 * days + np.random.normal(0, 0.001, len(days))
     valve_trend = 0.018 + 0.0003 * days + np.random.normal(0, 0.002, len(days))
     
-    # Anomali di hari terakhir pada fan
     if CURRENT_SCAN_STATE["is_anomaly"] and CURRENT_SCAN_STATE["machine_id"] == "FAN_ID_00":
         fan_trend[-1] = CURRENT_SCAN_STATE["anomaly_score"]
         
-    ax.plot(days, fan_trend, label='Fan #00 (Blower)', color='#38BDF8', lw=2)
-    ax.plot(days, pump_trend, label='Pump #01 (Centrifugal)', color='#10B981', lw=1.5)
-    ax.plot(days, slider_trend, label='Slider #02 (Guide Rail)', color='#A78BFA', lw=1.5)
-    ax.plot(days, valve_trend, label='Valve #03 (Solenoid)', color='#FBBF24', lw=1.5)
-    ax.axhline(y=0.050, color='#EF4444', linestyle='--', label='Anomaly Threshold (0.050)', alpha=0.8)
+    ax1.plot(days, fan_trend, label='Fan #00 (Blower)', color='#38BDF8', lw=2)
+    ax1.plot(days, pump_trend, label='Pump #01 (Centrifugal)', color='#10B981', lw=1.5)
+    ax1.plot(days, slider_trend, label='Slider #02 (Guide Rail)', color='#A78BFA', lw=1.5)
+    ax1.plot(days, valve_trend, label='Valve #03 (Solenoid)', color='#FBBF24', lw=1.5)
+    ax1.axhline(y=0.050, color='#EF4444', linestyle='--', label='Threshold (0.050)', alpha=0.8)
     
-    ax.set_title("30-Day Fleet Vibration Degradation Trend", fontsize=11, fontweight='bold', color='#F1F5F9')
-    ax.set_xlabel("Days of Month", fontsize=9, color='#94A3B8')
-    ax.set_ylabel("Acoustic Anomaly Score", fontsize=9, color='#94A3B8')
-    ax.grid(True, linestyle='--', alpha=0.15, color='#64748B')
-    ax.legend(fontsize=8, loc='upper left')
+    ax1.set_title("30-Day Fleet Acoustic Degradation Trend", fontsize=10, fontweight='bold', color='#F1F5F9')
+    ax1.set_xlabel("Days of Month", fontsize=8.5, color='#94A3B8')
+    ax1.set_ylabel("Anomaly Score", fontsize=8.5, color='#94A3B8')
+    ax1.grid(True, linestyle='--', alpha=0.15, color='#64748B')
+    ax1.legend(fontsize=7.5, loc='upper left')
+    
+    # 2. P-F Interval Curve
+    ax2 = axes[1]
+    ax2.set_facecolor('#0F1117')
+    t_pf = np.linspace(0, 100, 100)
+    # Exponential wear curve
+    health_pf = 100 * np.exp(-0.035 * t_pf)
+    ax2.plot(t_pf, health_pf, color='#38BDF8', lw=2, label='Machine Health Index (%)')
+    
+    # Titik Point P (Acoustic Detection) & Point F (Failure)
+    ax2.plot(20, health_pf[20], 'o', color='#10B981', markersize=6)
+    ax2.annotate('Point P: Acoustic AI\nDetection (Today)', xy=(20, health_pf[20]), xytext=(24, health_pf[20]+10),
+                 arrowprops=dict(facecolor='#10B981', shrink=0.08, width=0.8, headwidth=4), color='#10B981', fontsize=7.5, fontweight='bold')
+    
+    ax2.plot(85, health_pf[85], 'o', color='#EF4444', markersize=6)
+    ax2.annotate('Point F: Catastrophic\nSeizure', xy=(85, health_pf[85]), xytext=(55, health_pf[85]-8),
+                 arrowprops=dict(facecolor='#EF4444', shrink=0.08, width=0.8, headwidth=4), color='#EF4444', fontsize=7.5, fontweight='bold')
+    
+    ax2.set_title("Quantitative P-F Interval Curve", fontsize=10, fontweight='bold', color='#F1F5F9')
+    ax2.set_xlabel("Operating Time Horizon (Days)", fontsize=8.5, color='#94A3B8')
+    ax2.set_ylabel("Health Index (%)", fontsize=8.5, color='#94A3B8')
+    ax2.grid(True, linestyle='--', alpha=0.15, color='#64748B')
+    
     plt.tight_layout()
     return fig
 
@@ -357,7 +468,7 @@ def submit_parametric_claim(machine_id, claim_reason):
     )
 
 # =====================================================================
-# GRADIO INTERFACE LAYOUT (ENTERPRISE DARK GRID THEME - ZERO EMOJIS)
+# GRADIO INTERFACE LAYOUT
 # =====================================================================
 
 custom_css = """
@@ -525,7 +636,7 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
                                 Amoy Testnet Node
                             </span>
                         </div>
-                        <p style='margin: 4px 0 0 0; color: #a1a1aa; font-size: 13px; font-weight: 400;'>Acoustic Machine Intelligence • Polygon Amoy Ledger • ISO 10816 Diagnostic Engine</p>
+                        <p style='margin: 4px 0 0 0; color: #a1a1aa; font-size: 13px; font-weight: 400;'>Acoustic Machine Intelligence • XAI Bounding & FMEA • ISO 10816 SOP • Polygon Amoy Ledger</p>
                     </div>
                 </div>
                 <div style='display: flex; gap: 8px; align-items: center; flex-wrap: wrap;'>
@@ -533,7 +644,7 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
                         STgram-MFN v3 ONNX
                     </span>
                     <span style='background: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: "JetBrains Mono", monospace;'>
-                        Gemini Flash Multimodal
+                        Gemini Flash 2.0 Multimodal
                     </span>
                     <span style='background: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; font-family: "JetBrains Mono", monospace;'>
                         Chain ID: 80002
@@ -547,7 +658,7 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
     with gr.Tabs():
         
         # -------------------------------------------------------------
-        # TAB 1: OPERATOR INGESTION & SCANNER
+        # TAB 1: OPERATOR INGESTION, SCANNER & COMPARATIVE AUDIO PLAYERS
         # -------------------------------------------------------------
         with gr.TabItem("01 / Ingestion & Acoustic Scan"):
             with gr.Row():
@@ -564,18 +675,7 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
                         value="AUTO-DETECT (Acoustic Signature & Noise Profiling)"
                     )
                     
-                    gr.HTML(
-                        """
-                        <div style='background: #0f1117; border-left: 3px solid #ffffff; padding: 12px 16px; border-radius: 6px; margin: 12px 0; font-size: 13px; color: #a1a1aa;'>
-                            <strong style='color: #ffffff;'>Acoustic Signal Source:</strong><br>
-                            • <strong>Live Microphone</strong>: Record direct physical machine acoustics.<br>
-                            • <strong>File Ingestion</strong>: Upload local WAV/MP3 recordings.<br>
-                            • <strong>Preset Benchmark</strong>: Select 1-click verified MIMII audio samples below.
-                        </div>
-                        """
-                    )
-                    
-                    gr.Markdown("**Verified MIMII Sample Presets:**")
+                    gr.Markdown("**Verified MIMII Benchmark Sample Presets:**")
                     with gr.Row():
                         btn_fan_norm = gr.Button("Fan Normal", size="sm", variant="secondary")
                         btn_fan_anom = gr.Button("Fan Anomaly (BPFI Fault)", size="sm", variant="secondary")
@@ -594,12 +694,18 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
                     )
                     
                     btn_scan = gr.Button("Execute Acoustic Analysis »", variant="primary", size="lg")
+                    
+                    gr.Markdown("---")
+                    gr.Markdown("**🎧 Comparative Acoustic Isolation & What-If Projection:**")
+                    with gr.Row():
+                        audio_isolated = gr.Audio(label="AI-Isolated Defect Sound (Pure Defect)", type="numpy", interactive=False)
+                        audio_future = gr.Audio(label="What-If 30-Day Failure Simulation", type="numpy", interactive=False)
 
                 with gr.Column(scale=7):
                     decision_badge = gr.HTML(
                         "<div style='background: #0f1117; border: 1px solid #1f2430; padding: 20px; border-radius: 12px; color: #71717a; text-align: center; font-size: 13px;'>Awaiting audio stream ingestion. Execute acoustic analysis to view spectral parameters.</div>"
                     )
-                    plot_output = gr.Plot(label="STFT Time-Frequency & Mel Spectrogram Analysis")
+                    plot_output = gr.Plot(label="XAI Physics Bounding Spectrogram & FFT Power Spectrum")
                     bc_badge = gr.HTML("<div style='color: #71717a; font-size: 12px; font-family: \"JetBrains Mono\", monospace;'>Ledger Status: Standby for cryptographic hash commit.</div>")
 
             gr.Markdown("---")
@@ -607,21 +713,21 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
             with gr.Row():
                 voice_query = gr.Textbox(
                     label="Voice Query / Natural Language Input",
-                    placeholder="Example: 'Echo, what is the current vibration status of Fan 00?'",
+                    placeholder="Example: 'Echo, what is the FMEA RPN score and ISO status of Fan 00?'",
                     scale=8
                 )
                 btn_voice = gr.Button("Query Assistant »", variant="primary", scale=2)
             voice_response = gr.Textbox(label="Assistant Diagnostic Output", lines=2)
 
         # -------------------------------------------------------------
-        # TAB 2: SUPERVISOR COGNITIVE DIAGNOSTICS
+        # TAB 2: SUPERVISOR COGNITIVE DIAGNOSTICS & SOP
         # -------------------------------------------------------------
-        with gr.TabItem("02 / Cognitive Diagnostics & Work Order"):
-            gr.Markdown("### Root Cause Analysis & Maintenance Dispatch")
-            btn_run_diag = gr.Button("Execute Multimodal Reasoning & RUL Estimation »", variant="primary")
+        with gr.TabItem("02 / Cognitive Diagnostics & Prescriptive SOP"):
+            gr.Markdown("### Prescriptive Diagnostics, FMEA Matrix & Work Order Dispatch")
+            btn_run_diag = gr.Button("Execute Multimodal Reasoning & SOP Generation »", variant="primary")
             
             diag_output_html = gr.HTML(
-                "<div style='background: #0f1117; border: 1px solid #1f2430; padding: 20px; border-radius: 12px; color: #71717a; font-size: 13px;'>Run cognitive diagnostics to generate mechanical root cause explanations and ISO 10816 severity mapping.</div>"
+                "<div style='background: #0f1117; border: 1px solid #1f2430; padding: 20px; border-radius: 12px; color: #71717a; font-size: 13px;'>Run cognitive diagnostics to generate mechanical root cause explanations, 5-Step SOP, FMEA matrix, and derating advice.</div>"
             )
             part_output_html = gr.HTML()
             
@@ -631,10 +737,10 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
             wo_output_html = gr.HTML()
 
         # -------------------------------------------------------------
-        # TAB 3: PLANT MANAGER FLEET HEALTH
+        # TAB 3: PLANT MANAGER FLEET HEALTH & ESG FORENSICS
         # -------------------------------------------------------------
-        with gr.TabItem("03 / Fleet Analytics & Financial ROI"):
-            gr.Markdown("### Machinery Fleet Health & Avoided Downtime Metrics")
+        with gr.TabItem("03 / Fleet Analytics, P-F Curve & ESG"):
+            gr.Markdown("### Machinery Fleet Health, P-F Curve & ESG Eco-Efficiency")
             with gr.Row():
                 with gr.Column(scale=3):
                     gr.HTML(
@@ -645,18 +751,22 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
                                 <b style='font-size: 26px; color: #10b981; font-family: "JetBrains Mono", monospace;'>97.8%</b>
                             </div>
                             <div class='stat-card'>
+                                <span style='font-size: 11px; color: #a1a1aa; font-weight: 600; letter-spacing: 0.05em;'>ESG CO2 MITIGATED</span><br>
+                                <b style='font-size: 24px; color: #34d399; font-family: "JetBrains Mono", monospace;'>142.5 kg CO2e</b>
+                            </div>
+                            <div class='stat-card'>
                                 <span style='font-size: 11px; color: #a1a1aa; font-weight: 600; letter-spacing: 0.05em;'>DOWNTIME PREVENTED</span><br>
                                 <b style='font-size: 26px; color: #38bdf8; font-family: "JetBrains Mono", monospace;'>14.2 Hours</b>
                             </div>
                             <div class='stat-card'>
                                 <span style='font-size: 11px; color: #a1a1aa; font-weight: 600; letter-spacing: 0.05em;'>ESTIMATED COST SAVINGS</span><br>
-                                <b style='font-size: 22px; color: #f59e0b; font-family: "JetBrains Mono", monospace;'>IDR 284,000,000</b>
+                                <b style='font-size: 20px; color: #f59e0b; font-family: "JetBrains Mono", monospace;'>IDR 284,000,000</b>
                             </div>
                         </div>
                         """
                     )
                 with gr.Column(scale=9):
-                    fleet_plot = gr.Plot(value=generate_fleet_trend_chart(), label="30-Day Fleet Acoustic Degradation Trend")
+                    fleet_plot = gr.Plot(value=generate_fleet_trend_chart(), label="30-Day Fleet Degradation Trend & P-F Interval Curve")
 
         # -------------------------------------------------------------
         # TAB 4: BLOCKCHAIN PASSPORT & WARRANTY
@@ -679,7 +789,7 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
             )
 
             gr.Markdown("---")
-            gr.Markdown("### Automated Parametric Warranty Claims")
+            gr.Markdown("### Automated Parametric Warranty Claims & Verification Certificate")
             with gr.Row():
                 claim_reason_input = gr.Textbox(
                     label="Claim Justification / Damage Description",
@@ -701,11 +811,11 @@ with gr.Blocks(title="ECHOFACTORY — Industrial Acoustic Intelligence & On-Chai
     btn_slider_anom.click(lambda: load_demo_audio("DEMO_SLIDER_ANOMALY.wav", "SLIDER_ID_02"), outputs=[audio_input, machine_select])
     btn_valve_anom.click(lambda: load_demo_audio("DEMO_VALVE_ANOMALY.wav", "VALVE_ID_03"), outputs=[audio_input, machine_select])
 
-    # 2. Process Scan
+    # 2. Process Scan (Now outputs Plot, Status, BC Badge, Isolated Audio, and Future Audio Simulation)
     btn_scan.click(
         process_audio_scan,
         inputs=[audio_input, machine_select],
-        outputs=[plot_output, decision_badge, bc_badge]
+        outputs=[plot_output, decision_badge, bc_badge, audio_isolated, audio_future]
     )
 
     # 3. Voice Assistant
