@@ -169,9 +169,14 @@ python EchoFactory/blockchain/scripts/test_blockchain.py
 │   │   ├── audio_engine.py                      # STgram-MFN v3 ONNX & XAI Spectrogram Engine
 │   │   └── cognitive_engine.py                  # Gemini Flash 2.0 & FMEA ISO Engine
 │   └── fan/ | pump/ | slider/ | valve/          # Eksperimen Training Kaggle T4 GPU
-├── docs/                                        # Dokumentasi Lengkap & Naskah Storyboard
-│   ├── proposal/                                # Bab Proposal Markdown
-│   └── figures/                                 # Diagram Vektor & Bagan Alur 300 DPI
+├── docs/                                        # Dokumentasi Lengkap, Desain Sistem, & Storyboard
+│   ├── README.md                                # Indeks Utama & Sitemap Dokumentasi
+│   ├── SYSTEM_DESIGN.md                         # Arsitektur 5-Tier, UML & Data Flow
+│   ├── DASHBOARD_WALKTHROUGH.md                 # Panduan Persona Dasbor Terpadu
+│   ├── TECHNICAL_WALKTHROUGH.md                 # Implementasi End-to-End & Uji Sistem
+│   ├── figures/                                 # Aset Gambar Diagram Arsitektur & XAI (300 DPI)
+│   ├── proposal/                                # Naskah Proposal Markdown Lengkap
+│   └── storyboard/                              # Naskah Voiceover Video Presentasi (10 Scene)
 ├── proposal_figures/                            # Aset Gambar & Tangkapan Layar Resolusi Tinggi
 ├── public/                                      # Aset Statis & Logo BUMN/Produk
 │   └── logo produk/EchoFactoryLogoWithText.png  # Logo Resmi EchoFactory
