@@ -41,6 +41,18 @@ venv/
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
+# Stale Training Notebooks & Iteration Artifacts
+EchoFactory/fan/
+EchoFactory/pump/
+EchoFactory/slider/
+EchoFactory/valve/
+EchoFactory/Hasil Train V3/
+EchoFactory/6dbechofac.ipynb
+EchoFactory/train_*.ipynb
+EchoFactory/NB-0*.ipynb
+EchoFactory/hasil train/echofac1.ipynb
+EchoFactory/hasil train/fanechofac[2-8].ipynb
+
 # Binary Audio Assets (Auto-Generated at Runtime)
 demo_samples/
 *.wav
