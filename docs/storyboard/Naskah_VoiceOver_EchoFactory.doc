@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Naskah Video & Storyboard Per-Scene EchoFactory — COMPFEST 18 AIC</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Calibri, Arial, sans-serif;
+        line-height: 1.7;
+        max-width: 960px;
+        margin: auto;
+        padding: 30px 40px;
+        color: #0f172a;
+        background-color: #ffffff;
+    }
+    h1 {
+        color: #0f294a;
+        border-bottom: 3px solid #1d4ed8;
+        padding-bottom: 10px;
+        font-size: 24px;
+        margin-bottom: 6px;
+    }
+    .subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 24px;
+        font-style: italic;
+    }
+    .guide-box {
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-left: 5px solid #2563eb;
+        padding: 16px 20px;
+        margin-bottom: 28px;
+        border-radius: 0 8px 8px 0;
+        font-size: 13.5px;
+        color: #334155;
+    }
+    .scene-card {
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        margin-bottom: 26px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        page-break-inside: avoid;
+    }
+    .scene-header {
+        background: #0f294a;
+        color: #ffffff;
+        padding: 10px 18px;
+        font-size: 15px;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .scene-badge {
+        background: #2563eb;
+        color: #ffffff;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .scene-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+    }
+    .scene-table th {
+        background: #f1f5f9;
+        color: #1e293b;
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #cbd5e1;
+        font-size: 12.5px;
+        width: 25%;
+    }
+    .scene-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: top;
+    }
+    .vo-box {
+        background: #ffffff;
+        border-left: 4px solid #10b981;
+        padding: 12px 16px;
+        font-size: 14.5px;
+        color: #0f172a;
+        line-height: 1.8;
+    }
+    .vo-highlight {
+        font-weight: 700;
+        color: #1e3a8a;
+    }
+    .pause {
+        color: #dc2626;
+        font-weight: bold;
+        font-size: 12px;
+        background: #fee2e2;
+        padding: 1px 6px;
+        border-radius: 4px;
+    }
+    .sfx-tag {
+        color: #d97706;
+        font-family: monospace;
+        font-weight: 600;
+        font-size: 12px;
+    }
+    .ost-tag {
+        color: #7c3aed;
+        font-weight: 600;
+        font-size: 12.5px;
+    }
+    .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0 30px 0;
+        font-size: 13px;
+    }
+    .summary-table th, .summary-table td {
+        border: 1px solid #cbd5e1;
+        padding: 8px 12px;
+        text-align: left;
+    }
+    .summary-table th {
+        background: #0f294a;
+        color: #ffffff;
+    }
+    .summary-table tr:nth-child(even) {
+        background: #f8fafc;
+    }
+    .footer-tag {
+        margin-top: 40px;
+        padding-top: 15px;
+        border-top: 1px solid #cbd5e1;
+        color: #64748b;
+        font-size: 13px;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+
+<h1>🎬 NASKAH VIDEO RESMI &amp; STORYBOARD PER-SCENE</h1>
+<div class="subtitle">EchoFactory: Industrial Acoustic AI &amp; Blockchain Machine Health Passport | COMPFEST 18 AIC (Smart Manufacturing)</div>
+
+<div class="guide-box">
+    <strong>📋 PANDUAN PRODUKSI VIDEO (PRODUCTION &amp; RECORDING GUIDELINES):</strong><br>
+    • <strong>Target Durasi Total:</strong> <strong>04:00 Menit (240 Detik)</strong> (Sesuai batas maksimal video inovasi &lt; 5 menit pada Booklet COMPFEST Halaman 19).<br>
+    • <strong>Format Video:</strong> MP4, Full HD 1080p (1920×1080), 60 FPS, Aspect Ratio 16:9, YouTube Visibility: Public.<br>
+    • <strong>Format Judul Resmi YouTube:</strong> <code>COMPFEST18 AIC: Aku Mau Fokus Hima - EchoFactory</code><br>
+    • <strong>Karakteristik Voiceover:</strong> Artikulasi lugas, percaya diri, intonasi dramatis pada problem $\rightarrow$ heroik dan presisi saat demonstrasi 10 pilar inovasi.<br>
+    • <strong>Keterangan Tanda:</strong> <span class="pause">[JEDA]</span> = Hening 0.5 – 1 detik untuk sound effect / transisi visual.
+</div>
+
+<h2 style="color: #0f294a; font-size: 18px; margin-top: 25px;">📊 Rangkuman Alur &amp; Timecode Storyboard (10 Scene)</h2>
+
+<table class="summary-table">
+    <thead>
+        <tr>
+            <th style="width:8%;">Scene</th>
+            <th style="width:22%;">Judul Scene</th>
+            <th style="width:14%;">Timecode</th>
+            <th style="width:12%;">Durasi</th>
+            <th style="width:44%;">Fokus Visual &amp; Inovasi yang Diangkat</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>01</strong></td>
+            <td><strong>The Golden Ear &amp; Tacit Knowledge</strong></td>
+            <td>00:00 – 00:30</td>
+            <td>30 Detik</td>
+            <td>Cinematic B-Roll pabrik bising, teknisi senior mendengar desisan mesin manual.</td>
+        </tr>
+        <tr>
+            <td><strong>02</strong></td>
+            <td><strong>The Billion-Dollar Crisis</strong></td>
+            <td>00:30 – 01:00</td>
+            <td>30 Detik</td>
+            <td>Mesin mati mendadak, grafik kerugian downtime $260k/jam, mahalnya sensor getaran kabel.</td>
+        </tr>
+        <tr>
+            <td><strong>03</strong></td>
+            <td><strong>Introducing EchoFactory</strong></td>
+            <td>01:00 – 01:25</td>
+            <td>25 Detik</td>
+            <td>Hero Shot UI Dashboard EchoFactory, tagline Acoustic AI + Blockchain Health Passport.</td>
+        </tr>
+        <tr>
+            <td><strong>04</strong></td>
+            <td><strong>Pillar 1–3: Edge Scan, XAI &amp; Defect Audio</strong></td>
+            <td>01:25 – 02:00</td>
+            <td>35 Detik</td>
+            <td>Live audio scan 10s via HP/MEMS, STgram-MFN v3 ONNX &lt;50ms, XAI Bounding Box BPFI 118.5 Hz, Isolasi Audio Cacat Murni.</td>
+        </tr>
+        <tr>
+            <td><strong>05</strong></td>
+            <td><strong>Pillar 4: What-If 30-Day Failure Sim</strong></td>
+            <td>02:00 – 02:25</td>
+            <td>25 Detik</td>
+            <td>Pemutaran audio simulasi suara kerusakan mesin 30 hari ke depan (non-linear seizure sound).</td>
+        </tr>
+        <tr>
+            <td><strong>06</strong></td>
+            <td><strong>Pillar 5–7: FMEA, SOP LOTO &amp; Derating</strong></td>
+            <td>02:25 – 03:00</td>
+            <td>35 Detik</td>
+            <td>Multimodal Gemini Flash, FMEA RPN 128 (IATF 16949), 5-Step SOP K3 LOTO, Rekomendasi Derating RPM -30%.</td>
+        </tr>
+        <tr>
+            <td><strong>07</strong></td>
+            <td><strong>Pillar 8–9: ESG Forensics &amp; Radio Dispatch</strong></td>
+            <td>03:00 – 03:25</td>
+            <td>25 Detik</td>
+            <td>Kalkulasi penalti karbon ESG (+12.1 kg CO2e/hari), kurva P-F Interval, dan siaran suara radio HT walkie-talkie.</td>
+        </tr>
+        <tr>
+            <td><strong>08</strong></td>
+            <td><strong>Pillar 10: Polygon Passport &amp; Warranty</strong></td>
+            <td>03:25 – 03:45</td>
+            <td>20 Detik</td>
+            <td>On-chain hash SHA-256 commit di Polygon Amoy Testnet (Chain ID 80002) dan klaim garansi parametrik.</td>
+        </tr>
+        <tr>
+            <td><strong>09</strong></td>
+            <td><strong>Business Impact &amp; 1-Click Reproducibility</strong></td>
+            <td>03:45 – 04:05</td>
+            <td>20 Detik</td>
+            <td>ROI payback &lt;90 hari, arsitektur 5-tier modular, Docker 1-click execution (<code>docker compose up</code>).</td>
+        </tr>
+        <tr>
+            <td><strong>10</strong></td>
+            <td><strong>Grand Finale &amp; Call-to-Action</strong></td>
+            <td>04:05 – 04:20</td>
+            <td>15 Detik</td>
+            <td>Logo closing tim Aku Mau Fokus Hima, COMPFEST 18 AIC, dan narasi penutup kebangsaan.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2 style="color: #0f294a; font-size: 18px; margin-top: 30px;">🎬 DETAIL NASKAH PER-SCENE (PRODUCTION BREAKDOWN)</h2>
+
+<!-- SCENE 01 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 01: THE GOLDEN EAR &amp; TACIT KNOWLEDGE</span>
+        <span class="scene-badge">00:00 – 00:30 (30s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Cinematic B-Roll: Pabrik manufaktur dengan deru mesin berputar kencang.<br>
+                • Kamera perlahan menyorot Pak Muhibin (teknisi senior) yang sedang menempelkan obeng panjang ke telinga dan mengarahkannya ke bodi motor blower.<br>
+                • Visual gelombang audio mentah yang bising di sekitar.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "Tacit Knowledge: Kepekaan Akustik Teknisi Senior"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Gemuruh mesin berat 100 dB $\rightarrow$ high-pass audio filter $\rightarrow$ suara detak gesekan pelan bantalan baja.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    "Di tengah gemuruh bising seratus desibel… ada satu manusia yang mampu mendengar denyut nadi kematian sebuah mesin. <span class="pause">[JEDA]</span><br>
+                    Pak Muhibin. Tiga puluh lima tahun mendedikasikan hidupnya menjadi 'telinga emas' pabrik manufaktur Jawa Barat. Bagi orang biasa, ini hanya derau berisik. Tapi bagi Pak Muhibin… pergeseran frekuensi nol koma satu desibel adalah pertanda bantalan baja akan meledak."
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 02 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 02: THE BILLION-DOLLAR CRISIS</span>
+        <span class="scene-badge">00:30 – 01:00 (30s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Pak Muhibin melepas topi kerja dan berjalan keluar gerbang pabrik.<br>
+                • Lampu darurat merah pabrik menyala berputar (*Emergency Stoppage*). Mesin tiba-tiba berhenti total.<br>
+                • Infografis statistik: Sensor getaran piezoelektrik berkabel $400 - $2.500/titik (Rp 750 Juta per 50 mesin), logbook kertas basah terciprat oli.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "Unplanned Downtime: Rp 4,1 Miliar / Jam (Vanson Bourne)"</span><br>
+                <span class="ost-tag">[OST]: "4,4 Juta IKM Indonesia Tidak Mampu Membeli Sensor Mahal"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Alarm sirene darurat pabrik melengking $\rightarrow$ bunyi mesin mati mendadak (power down whine) $\rightarrow$ suara kertas robek.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    <span class="vo-highlight">"Namun… bulan depan, Pak Muhibin pensiun.</span> <span class="pause">[JEDA]</span><br>
+                    Dan saat ia melangkah keluar dari gerbang pabrik untuk terakhir kalinya… tiga puluh lima tahun tacit knowledge berharga itu akan lenyap selamanya.<br>
+                    Ketika mesin kritis mati mendadak, malapetaka finansial dimulai. Kerugian downtime industri mencapai empat koma satu miliar rupiah setiap satu jam!<br>
+                    Solusi konvensional menuntut pemasangan sensor getaran berkabel tebal seharga puluhan juta per titik. Mustahil dijangkau empat koma empat juta Industri Kecil dan Menengah di Indonesia. Ditambah lagi, pencatatan servis kertas lokal rentan manipulasi, memicu perang sengketa klaim asuransi!"
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 03 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 03: INTRODUCING ECHOFACTORY</span>
+        <span class="scene-badge">01:00 – 01:25 (25s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Motion Graphic 3D logo **ECHOFACTORY** muncul bersinar dengan aksen dark enterprise grid.<br>
+                • Transisi mulus ke tampilan dashboard web modern `localhost:3000` / Hugging Face Space yang elegan.<br>
+                • Menampilkan integrasi 3 teknologi: STgram-MFN v3 ONNX, Gemini 2.0 Flash Multimodal, dan Polygon Amoy Ledger.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "ECHOFACTORY — Acoustic Machine Intelligence &amp; Polygon Amoy Ledger"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Sub-bass cinematic boom $\rightarrow$ nada futuristik chime digital $\rightarrow$ alunan musik synthwave corporate bertenaga.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    <span class="vo-highlight">"Bagaimana jika kita menanamkan telinga emas Pak Muhibin… ke dalam kecerdasan buatan super-ringan yang hidup di ponsel setiap teknisi di Indonesia?</span> <span class="pause">[JEDA]</span><br>
+                    Inilah EchoFactory. Platform Industrial Predictive Maintenance terdepan yang merevolusi deteksi kerusakan mesin melalui sepuluh pilar inovasi akustik berbasis AI multimodal dan paspor kesehatan terdesentralisasi!"
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 04 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 04: PILLAR 1–3: EDGE SCAN, XAI BOUNDING &amp; DEFECT AUDIO</span>
+        <span class="scene-badge">01:25 – 02:00 (35s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Rekaman layar UI Tab 01: Operator menekan tombol 'Fan Anomaly' (MIMII Dataset preset) atau merekam via mikrofon.<br>
+                • Skor anomali muncul instan: `0.8680 (ALERT)` dalam waktu 38.4 ms.<br>
+                • Spektrogram menampilkan **kotak merah XAI Physics Bounding** pada frekuensi BPFI 118.5 Hz.<br>
+                • Operator menekan tombol **Play pada audio player 'AI-Isolated Defect Sound'**.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "Pillar 1: STgram-MFN v3 ONNX Edge (183.8 KB, Latency &lt;50ms, AUC 94-99%)"</span><br>
+                <span class="ost-tag">[OST]: "Pillar 2: XAI Physics Bounding (BPFI 118.5 Hz) &amp; Butterworth Defect Isolation"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Beep scanning digital $\rightarrow$ pemutaran suara cacat terisolasi (suara ketukan bearing murni tanpa noise latar).</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    "Pertama, cukup sepuluh detik perekaman audio via ponsel atau modul MEMS. Nol kabel. Memangkas sembilan puluh persen biaya sensor!<br>
+                    Kedua, model Edge AI STgram-MFN versi tiga berbobot ultra-ringan seratus delapan puluh tiga kilobyte memproses data secara lokal dalam tiga puluh delapan milidetik dengan akurasi hingga sembilan puluh sembilan persen.<br>
+                    Ketiga, Explainable AI kami tidak hanya mendeteksi anomali, tetapi memetakan kotak pembatas merah pada frekuensi fisik cacat BPFI seratus delapan belas koma lima Hertz dan mengisolasi suara kerusakan murni agar teknisi dapat mendengarkannya langsung!"
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 05 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 05: PILLAR 4: WHAT-IF 30-DAY FAILURE SIMULATION</span>
+        <span class="scene-badge">02:00 – 02:25 (25s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Layar menyorot Audio Player **'What-If 30-Day Failure Simulation'**.<br>
+                • Tombol Play ditekan $\rightarrow$ visualisasi waveform menunjukkan distorsi harmonik non-linear yang agresif.<br>
+                • Perbandingan audio: Suara hari ini vs Suara +30 hari ke depan.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "Pillar 3: What-If Future Degradation Simulation (+30 Days Failure Sound)"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Suara gesekan logam parah berdecit keras (simulasi kegagalan mesin total).</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    "Keempat, fitur What-If Future Failure Simulation mensintesis proyeksi suara kerusakan tiga puluh hari ke depan jika mesin tidak dirawat. <span class="pause">[JEDA + PUTAR SUARA DECITAN]</span><br>
+                    Memberikan demonstrasi pendengaran nyata kepada pimpinan pabrik mengenai bahaya kerusakan fatal sebelum malapetaka terjadi!"
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 06 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 06: PILLAR 5–7: FMEA, 5-STEP SOP LOTO &amp; DERATING</span>
+        <span class="scene-badge">02:25 – 03:00 (35s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Layar beralih ke Tab 02 (Cognitive Diagnostics &amp; SOP).<br>
+                • Gemini 2.0 Flash menghasilkan analisis multimodal berstandar ISO 10816-3 Zone C.<br>
+                • Tab berganti ke **FMEA Matrix (RPN 128 HIGH RISK)** $\rightarrow$ **SOP 5-Langkah K3 LOTO** $\rightarrow$ **Supply Chain Derating (Turunkan RPM 30%)**.<br>
+                • Supervisor menekan tombol **'Approve &amp; Dispatch Work Order'**.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "Pillar 5: IATF 16949 FMEA Risk Matrix (RPN: 128 - HIGH RISK)"</span><br>
+                <span class="ost-tag">[OST]: "Pillar 6: Prescriptive 5-Step SOP &amp; K3 LOTO Mandate"</span><br>
+                <span class="ost-tag">[OST]: "Pillar 7: Supply Chain Derating Optimizer (RPM -30% $\rightarrow$ RUL +32 Hari)"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Suara ketukan mouse klik persetujuan $\rightarrow$ efek receipt printing work order.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    "Kelima, penalaran multimodal Gemini 2.0 Flash otomatis menghitung matriks risiko FMEA standar otomotif IATF 16949 dengan skor RPN seratus dua puluh delapan.<br>
+                    Keenam, sistem menyusun lima langkah SOP preskriptif lengkap dengan mandat keselamatan K3 Lockout/Tagout, matriks perkakas, dan spesifikasi pelumas.<br>
+                    Ketujuh, saat suku cadang mengalami inden di rantai pasok, algoritma derating menyarankan penurunan beban motor tiga puluh persen untuk memangkas gaya sentrifugal lima puluh satu persen, memperpanjang sisa umur mesin hingga suku cadang tiba!"
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 07 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 07: PILLAR 8–9: ESG FORENSICS &amp; RADIO DISPATCH</span>
+        <span class="scene-badge">03:00 – 03:25 (25s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Layar Tab 03: Menampilkan kartu **ESG Eco-Efficiency Forensics** (+14.2 kWh/hari, penalti +12.1 kg CO2e/hari, pemborosan IDR 615.000/bulan).<br>
+                • Grafik interaktif **Quantitative P-F Interval Curve** (Point P vs Point F).<br>
+                • Kotak teks **Industrial Radio Voice Dispatch** berkedip biru.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "Pillar 8: ESG Carbon &amp; Energy Forensics (Scope 2 Decarbonization)"</span><br>
+                <span class="ost-tag">[OST]: "Pillar 9: Quantitative P-F Interval Curve &amp; Industrial Radio HT Dispatch"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Suara statis radio walkie-talkie (roger beep) $\rightarrow$ nada audio TTS radio darurat.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    "Kedelapan, forensik karbon ESG mengkuantifikasi pemborosan listrik dan penalti emisi karbon akibat gesekan mekanis berlebih.<br>
+                    Kesembilan, kurva P-F Interval memetakan jarak waktu menuju kerusakan, sementara siaran suara radio HT otomatis menyiarkan instruksi perbaikan ke walkie-talkie regu teknisi di lapangan!"
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 08 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 08: PILLAR 10: POLYGON PASSPORT &amp; WARRANTY</span>
+        <span class="scene-badge">03:25 – 03:45 (20s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Layar Tab 04 (On-Chain Passport &amp; Warranty).<br>
+                • Menampilkan tabel histori inspeksi on-chain dengan SHA-256 Hash dan Tx Hash Polygon.<br>
+                • Tombol 'Submit Parametric Claim' ditekan $\rightarrow$ Badge hijau **'CLAIM APPROVED: #CLM-901'** terbit instan.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "Pillar 10: Polygon Amoy Testnet (Chain ID: 80002) — Smart Contract Verified"</span><br>
+                <span class="ost-tag">[OST]: "Automated Parametric Warranty Settlement (Zero Dispute)"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Suara konfirmasi blockchain chime sukses $\rightarrow$ cryptographic seal lock sound.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    "Kesepuluh, setiap detik data audit dikunci dalam hash kriptografi SHA-256 pada blockchain Polygon Amoy. Membentuk Machine Health Passport anti-manipulasi yang memproses persetujuan klaim garansi parametrik dan asuransi secara otomatis tanpa sengketa!"
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 09 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 09: BUSINESS IMPACT &amp; 1-CLICK REPRODUCIBILITY</span>
+        <span class="scene-badge">03:45 – 04:05 (20s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Split-screen: Panel metrik finansial ROI (Hemat Rp 675 Juta di muka, Payback &lt;90 hari).<br>
+                • Tampilan terminal Docker menjalankan perintah `docker compose up` yang berjalan mulus 100% reproduktif.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "ROI Payback Period: &lt; 90 Hari | Downtime Prevented: Rp 284 Juta/Bulan"</span><br>
+                <span class="ost-tag">[OST]: "100% Reproducible: 1-Command Local Run ('docker compose up')"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Musik orkestrasi orkestra megah mencapai puncak crescendo.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    "Bagi pabrik dengan lima puluh unit mesin, EchoFactory menghemat enam ratus tujuh puluh lima juta rupiah biaya sensor di muka, menyelamatkan ratusan juta rupiah kerugian downtime, dan mencapai titik impas dalam waktu kurang dari sembilan puluh hari!<br>
+                    Seluruh Minimum Viable Product ini teruji mandiri dan dapat dijalankan secara instan oleh dewan juri hanya dengan satu baris perintah: docker compose up."
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- SCENE 10 -->
+<div class="scene-card">
+    <div class="scene-header">
+        <span>SCENE 10: GRAND FINALE &amp; CALL-TO-ACTION</span>
+        <span class="scene-badge">04:05 – 04:20 (15s)</span>
+    </div>
+    <table class="scene-table">
+        <tr>
+            <th>Visual Action &amp; Screen Capture</th>
+            <td>
+                • Visual Pak Muhibin tersenyum bangga di depan deretan mesin pabrik yang berputar stabil.<br>
+                • Logo besar **ECHOFACTORY**, nama tim **Aku Mau Fokus Hima**, dan logo **COMPFEST 18 AI Innovation Challenge**.<br>
+                • Fade out elegan ke hitam.
+            </td>
+        </tr>
+        <tr>
+            <th>On-Screen Text (OST)</th>
+            <td>
+                <span class="ost-tag">[OST]: "ECHOFACTORY — Menjaga Denyut Nadi Industri Manufaktur Indonesia"</span><br>
+                <span class="ost-tag">[OST]: "Tim Aku Mau Fokus Hima | COMPFEST 18 AIC"</span>
+            </td>
+        </tr>
+        <tr>
+            <th>SFX &amp; Audio Cue</th>
+            <td>
+                <span class="sfx-tag">[SFX]: Final epic musical hit $\rightarrow$ reverberation fade out.</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Naskah Voiceover (VO)</th>
+            <td>
+                <div class="vo-box">
+                    <span class="vo-highlight">"Sebuah mesin selalu berbisik sebelum ia mati. Selama ini kita tidak memiliki telinga untuk mendengarnya. Hari ini, bersama EchoFactory… kita tidak hanya mendengar. Kita menjaga denyut nadi peradaban manufaktur Indonesia!"</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="footer-tag">
+    <strong>EchoFactory — COMPFEST 18 AI Innovation Challenge (Smart Manufacturing Track)</strong><br>
+    Diusulkan oleh: <strong>Tim Aku Mau Fokus Hima</strong> (Universitas Indonesia / Delegasi Resmi)<br>
+    Berkas Sumber Naskah: <code>Naskah_VoiceOver_EchoFactory (1).doc</code>
+</div>
+
+</body>
+</html>

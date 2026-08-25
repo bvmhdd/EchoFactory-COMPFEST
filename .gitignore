@@ -63,9 +63,14 @@ ocr.ps1
 *booklet*.txt
 pdf_extracted.txt
 *.docx
+*.doc
+*_BACKUP.*
 ~$*.docx
+~$*.doc
 scratch_diagrams/
 compfest_space_repo/
+proposal_figures/
+!docs/storyboard/*.doc
 
 # Scratch conversion & generation helper scripts
 convert_*.py
