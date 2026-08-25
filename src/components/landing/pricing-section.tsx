@@ -31,7 +31,7 @@ export function PricingSection() {
       features: [
         "Up to 5 Industrial Lines",
         "Continuous 0 dB SNR Filtering",
-        "ISO 10816 SOP Diagnostics",
+        "ISO 10816-3 SOP Diagnostics",
         "Polygon Amoy On-Chain Passport",
         "Automated Work Order Drafts",
         "Email & SMS Downtime Alerts",

@@ -169,7 +169,7 @@ export function SupervisorWidget({
                   </span>
                 </div>
                 <Badge variant="mono" className="text-[9px] font-mono bg-sky-500/10 text-sky-400 border-sky-500/30">
-                  ISO-10816 + IATF 16949
+                  ISO-10816-3 + IATF 16949
                 </Badge>
               </div>
               {isLoading ? (

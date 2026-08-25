@@ -33,7 +33,7 @@ export function Hero() {
       {/* Subtitle */}
       <p className="max-w-2xl text-base sm:text-lg md:text-xl text-zinc-400 leading-relaxed mb-10 font-normal">
         Deteksi degradasi mekanik mikro di tengah kebisingan lantai pabrik.
-        Inferensi cepat di perangkat lokal, rekomendasi perbaikan berbasis standar ISO 10816, dan paspor kesehatan mesin on-chain.
+        Inferensi cepat di perangkat lokal, rekomendasi perbaikan berbasis standar ISO 10816-3, dan paspor kesehatan mesin on-chain.
       </p>
 
       {/* Dual CTA Buttons */}

@@ -220,11 +220,12 @@ export function MachineShowcase() {
                   {/* Frequency Spectrum Graph Representation */}
                   <div className="h-20 bg-black/80 rounded-xl p-3 border border-[#27272A] flex items-end justify-between gap-1 mb-6 overflow-hidden">
                     {Array.from({ length: 24 }).map((_, idx) => {
-                      const barHeight = isAbnormal
+                      const rawHeight = isAbnormal
                         ? idx % 3 === 0
                           ? 85
                           : 30 + Math.sin(idx) * 20
                         : 15 + Math.sin(idx * 0.5) * 15;
+                      const barHeight = Math.round(rawHeight);
                       return (
                         <div
                           key={idx}

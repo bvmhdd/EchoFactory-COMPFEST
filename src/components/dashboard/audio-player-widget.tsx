@@ -153,9 +153,10 @@ export function AudioPlayerWidget({ sample, onTimeUpdate }: AudioPlayerWidgetPro
           const barProgress = (idx / 42) * 100;
           const isPassed = barProgress <= progressPercent;
           const heightSeed = Math.sin(idx * 0.45 + (isAbnormal ? 1.2 : 0.2));
-          const heightPct = isAbnormal
+          const rawHeightPct = isAbnormal
             ? idx % 4 === 0 ? 95 : 25 + Math.abs(heightSeed) * 55
             : 20 + Math.abs(heightSeed) * 45;
+          const heightPct = Math.round(rawHeightPct);
 
           return (
             <div

@@ -6,7 +6,7 @@ export function Testimonials() {
   const reviews = [
     {
       quote:
-        "EchoFactory detected our line 4 centrifugal pump cavitation 14 days before standard vibration sensors triggered. The ISO 10816 root-cause SOP saved us over $24,000 in emergency downtime.",
+        "EchoFactory detected our line 4 centrifugal pump cavitation 14 days before standard vibration sensors triggered. The ISO 10816-3 root-cause SOP saved us over $24,000 in emergency downtime.",
       author: "Hendra Wijaya, ST",
       role: "Lead Reliability Engineer",
       company: "PT Nusantara Heavy Industries",

@@ -58,7 +58,7 @@ export function ConsoleHeader({
                 </span>
               </div>
               <span className="text-[10px] text-zinc-400 font-mono tracking-tight">
-                Acoustic Machine Intelligence • Polygon Amoy Ledger • ISO 10816 Diagnostic Engine
+                Acoustic Machine Intelligence • Polygon Amoy Ledger • ISO 10816-3 Diagnostic Engine
               </span>
             </div>
           </Link>

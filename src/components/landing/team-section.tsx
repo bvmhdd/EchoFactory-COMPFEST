@@ -24,7 +24,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Lead AI & Web3",
     icon: Cpu,
     accentColor: "text-sky-400 bg-sky-500/10 border-sky-500/30",
-    avatarUrl: "/team/muhibin.jpg",
+    avatarUrl: "/team/ibin k3.jpeg",
     focus: "Merancang arsitektur model deep metric STgram-MFN v3, kuantisasi ONNX, dan smart contract paspor kesehatan mesin di Polygon Amoy.",
     github: "https://github.com/bvmhdd",
     linkedin: "https://www.linkedin.com/in/bvmhd/",
@@ -35,7 +35,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Frontend & WebAudio",
     icon: Code2,
     accentColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-    avatarUrl: "", // Isi dengan path foto, contoh: "/team/fullstack.jpg"
+    avatarUrl: "/team/Eko k3.jpeg",
     focus: "Membangun antarmuka Next.js 15 konsol industri 4-persona, streaming audio WebAudio API 16 kHz, dan visualisasi spektrogram real-time.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -46,7 +46,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "LLM & MLOps",
     icon: Sparkles,
     accentColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
-    avatarUrl: "", // Isi dengan path foto, contoh: "/team/ai-rag.jpg"
+    avatarUrl: "/team/ihya k3.jpeg",
     focus: "Mengembangkan Cognitive Diagnostic Core berbasis Gemini 2.0 Flash RAG untuk rekomendasi SOP preskriptif standar ISO 10816-3.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
@@ -57,18 +57,18 @@ export const TEAM_MEMBERS: TeamMember[] = [
     tag: "Product & Strategy",
     icon: FileText,
     accentColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
-    avatarUrl: "", // Isi dengan path foto, contoh: "/team/product.jpg"
+    avatarUrl: "/team/Yasmin k3.jpeg",
     focus: "Menyusun proposal teknis, memimpin strategi kepatuhan booklet lomba COMPFEST 18 AIC, serta mengelola koordinasi dan roadmap proyek.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",
   },
   {
-    name: "Zaskia Azzahra",
+    name: "Zaskia Az Zahra",
     role: "Data & ML Pipeline Engineer",
     tag: "Data Pipeline",
     icon: Database,
     accentColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
-    avatarUrl: "", // Isi dengan path foto, contoh: "/team/data-engineer.jpg"
+    avatarUrl: "/team/qiya k3.jpeg",
     focus: "Mengkurasi dan memproses dataset audio industri Hitachi MIMII, augmentasi sinyal multi-SNR, dan validasi spektrum akustik.",
     github: "https://github.com",
     linkedin: "https://linkedin.com",

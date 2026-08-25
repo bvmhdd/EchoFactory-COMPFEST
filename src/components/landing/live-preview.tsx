@@ -24,6 +24,15 @@ export function LivePreview() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [anomalyProgress, setAnomalyProgress] = useState(0.887);
   const [selectedMachine, setSelectedMachine] = useState<"fan" | "pump" | "slider" | "valve">("fan");
+  const [wavePhase, setWavePhase] = useState(0);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const interval = setInterval(() => {
+      setWavePhase((prev) => (prev + 1) % 1000);
+    }, 120);
+    return () => clearInterval(interval);
+  }, [isPlaying]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -110,15 +119,16 @@ export function LivePreview() {
               {/* Animated Waveform Visualizer */}
               <div className="h-28 bg-black rounded-lg border border-[#27272A] p-3 flex items-center justify-between gap-1 overflow-hidden relative">
                 {Array.from({ length: 36 }).map((_, i) => {
-                  const height = isPlaying
-                    ? Math.sin(i * 0.4 + Date.now() * 0.002) * 35 + 45
+                  const rawHeight = isPlaying
+                    ? Math.sin(i * 0.4 + wavePhase * 0.3) * 35 + 45
                     : 15;
+                  const height = Math.round(Math.max(8, Math.min(95, rawHeight)));
                   return (
                     <div
                       key={i}
                       className="flex-1 bg-gradient-to-t from-sky-600 via-sky-400 to-white rounded-full transition-all duration-150"
                       style={{
-                        height: `${Math.max(8, Math.min(95, height))}%`,
+                        height: `${height}%`,
                         opacity: i % 2 === 0 ? 0.9 : 0.6,
                       }}
                     />

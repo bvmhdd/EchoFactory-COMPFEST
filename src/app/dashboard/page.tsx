@@ -24,17 +24,10 @@ const PIPELINE_STEPS = [
 ];
 const STEP_TIMINGS = [0, 550, 1150, 1750]; // ms offsets
 
-const STORAGE_KEYS = {
-  RESULT: "echofactory_detection_result",
-  DIAGNOSIS: "echofactory_gemini_diagnosis",
-  PRESET_ID: "echofactory_selected_preset_id",
-  MACHINE: "echofactory_selected_machine",
-};
-
 export default function DashboardPage() {
   const [selectedMachine, setSelectedMachine] = useState<MachineType>("fan");
   const [selectedPreset, setSelectedPreset] = useState<PresetSample>(
-    PRESET_SAMPLES.find((p) => p.id === "fan-abnormal-01") || PRESET_SAMPLES[1]
+    PRESET_SAMPLES.find((p) => p.id === "fan-normal-01") || PRESET_SAMPLES[0]
   );
 
   const [activeTab, setActiveTab] = useState<ConsoleTab>("all");
@@ -49,63 +42,21 @@ export default function DashboardPage() {
 
   const connectionStatus = useConnectionStatus();
 
-  // ── Load persisted state on mount so hard reset / refresh does not lose results ──
+  // Clear any legacy localStorage items on mount to guarantee a fresh empty start
   useEffect(() => {
     try {
-      const savedResult = localStorage.getItem(STORAGE_KEYS.RESULT);
-      const savedDiagnosis = localStorage.getItem(STORAGE_KEYS.DIAGNOSIS);
-      const savedPresetId = localStorage.getItem(STORAGE_KEYS.PRESET_ID);
-      const savedMachine = localStorage.getItem(STORAGE_KEYS.MACHINE) as MachineType | null;
-
-      if (savedPresetId) {
-        const found = PRESET_SAMPLES.find((p) => p.id === savedPresetId);
-        if (found) setSelectedPreset(found);
-      }
-      if (savedMachine) {
-        setSelectedMachine(savedMachine);
-      }
-
-      if (savedResult) {
-        setDetectionResult(JSON.parse(savedResult));
-      } else {
-        // Fallback default: baseline analysis of the selected preset so dashboard is never empty
-        const initial = runInferenceSimulation("fan", "FAN-ID-00", "fan-normal-01");
-        setDetectionResult(initial);
-        localStorage.setItem(STORAGE_KEYS.RESULT, JSON.stringify(initial));
-      }
-
-      if (savedDiagnosis) {
-        setGeminiDiagnosis(savedDiagnosis);
-      }
+      localStorage.removeItem("echofactory_detection_result");
+      localStorage.removeItem("echofactory_gemini_diagnosis");
+      localStorage.removeItem("echofactory_selected_preset_id");
+      localStorage.removeItem("echofactory_selected_machine");
     } catch {
-      const initial = runInferenceSimulation("fan", "FAN-ID-00", "fan-normal-01");
-      setDetectionResult(initial);
+      // ignore
     }
   }, []);
 
-  // Helper to persist result
-  const persistResult = (data: DetectionResult, diagnosis?: string | null) => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.RESULT, JSON.stringify(data));
-      if (diagnosis) {
-        localStorage.setItem(STORAGE_KEYS.DIAGNOSIS, diagnosis);
-      }
-    } catch {
-      // ignore
-    }
-  };
-
-  // When selecting a preset from input configuration:
-  // ONLY update the chosen preset in input configuration. DO NOT CLEAR the active analysis result!
   const handleSelectPreset = (p: PresetSample) => {
     setSelectedPreset(p);
     setSelectedMachine(p.machineType);
-    try {
-      localStorage.setItem(STORAGE_KEYS.PRESET_ID, p.id);
-      localStorage.setItem(STORAGE_KEYS.MACHINE, p.machineType);
-    } catch {
-      // ignore
-    }
   };
 
   const handleRunDiagnosis = async (preset: PresetSample) => {
@@ -151,7 +102,6 @@ export default function DashboardPage() {
           if (data.gemini_diagnosis) {
             setGeminiDiagnosis(data.gemini_diagnosis);
           }
-          persistResult(data, data.gemini_diagnosis || null);
           setIsLoading(false);
           setAnalysisStep(0);
           setAnalysisStepText("");
@@ -163,7 +113,6 @@ export default function DashboardPage() {
       setTimeout(() => {
         timers.forEach(clearTimeout);
         setDetectionResult(fallback);
-        persistResult(fallback, null);
         setIsLoading(false);
         setAnalysisStep(0);
         setAnalysisStepText("");
@@ -207,11 +156,6 @@ export default function DashboardPage() {
                 selectedMachine={selectedMachine}
                 onSelectMachine={(m) => {
                   setSelectedMachine(m);
-                  try {
-                    localStorage.setItem(STORAGE_KEYS.MACHINE, m);
-                  } catch {
-                    // ignore
-                  }
                   const first = PRESET_SAMPLES.find((p) => p.machineType === m);
                   if (first) handleSelectPreset(first);
                 }}
@@ -288,9 +232,9 @@ export default function DashboardPage() {
                           key={i}
                           className="flex-1 rounded-sm bg-sky-500/40"
                           style={{
-                            height: `${20 + Math.abs(Math.sin(i * 0.4 + Date.now() * 0.001)) * 70}%`,
+                            height: `${Math.round(20 + Math.abs(Math.sin(i * 0.4)) * 70)}%`,
                             animation: `pulse ${0.5 + (i % 5) * 0.12}s ease-in-out infinite alternate`,
-                            animationDelay: `${i * 0.025}s`,
+                            animationDelay: `${(i * 0.025).toFixed(3)}s`,
                           }}
                         />
                       ))}
@@ -301,15 +245,35 @@ export default function DashboardPage() {
 
               {/* ─── Empty State (Only if neither loading nor result is available) ─── */}
               {!isLoading && !detectionResult && (
-                <div className="rounded-2xl border border-zinc-800 bg-[#050508] p-12 flex flex-col items-center justify-center gap-4 text-center my-auto">
-                  <div className="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
-                    <Activity className="w-7 h-7 text-zinc-500" />
+                <div className="rounded-2xl border border-zinc-800 bg-[#050508] p-8 sm:p-12 flex flex-col items-center justify-center gap-5 text-center my-auto min-h-[440px] shadow-2xl">
+                  <div className="w-16 h-16 rounded-2xl bg-[#0B101B] border border-cyan-500/30 flex items-center justify-center shadow-[0_0_24px_rgba(56,189,248,0.15)]">
+                    <Activity className="w-8 h-8 text-cyan-400 animate-pulse" />
                   </div>
-                  <div>
-                    <div className="text-sm font-semibold text-zinc-300">Pilih Sampel &amp; Jalankan Analisis</div>
-                    <div className="text-xs text-zinc-600 mt-1 font-mono">
-                      Pilih mesin dan preset di panel kiri, lalu tekan "Jalankan Analisis".<br />
-                      Spektogram dan hasil diagnosa akan muncul setelah proses selesai.
+                  <div className="max-w-md space-y-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-mono text-cyan-300 uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                      Acoustic Engine Standby · Ready for Stream
+                    </div>
+                    <h3 className="text-lg font-bold text-white tracking-tight">
+                      Pilih Sampel &amp; Jalankan Analisis
+                    </h3>
+                    <p className="text-xs text-zinc-400 font-sans leading-relaxed">
+                      Silakan pilih kategori mesin dan salah satu sampel audio di panel kiri, kemudian tekan tombol <b className="text-white font-mono">&ldquo;Jalankan Analisis STgram-MFN&rdquo;</b> untuk memulai diagnosis akustik real-time.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-3 w-full max-w-md pt-4 border-t border-zinc-800/80 text-[10px] font-mono">
+                    <div className="p-2.5 rounded-xl bg-black/60 border border-zinc-800/80 flex flex-col items-center">
+                      <span className="text-zinc-200 font-bold">16,000 Hz</span>
+                      <span className="text-zinc-500 text-[9px]">PCM Audio</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/60 border border-zinc-800/80 flex flex-col items-center">
+                      <span className="text-cyan-400 font-bold">&lt; 50 ms</span>
+                      <span className="text-zinc-500 text-[9px]">Edge Latency</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-black/60 border border-zinc-800/80 flex flex-col items-center">
+                      <span className="text-emerald-400 font-bold">ISO 10816-3</span>
+                      <span className="text-zinc-500 text-[9px]">Class I-IV</span>
                     </div>
                   </div>
                 </div>
@@ -343,7 +307,7 @@ export default function DashboardPage() {
                           <span className={detectionResult.operator_view.condition === "ABNORMAL" ? "text-rose-300 font-semibold" : "text-emerald-300 font-semibold"}>
                             {detectionResult.operator_view.anomaly_score.toFixed(4)}
                           </span>
-                          {" "}(Threshold [-6 dB]: 0.065) | Spectral signature compliant with ISO 10816 baseline.
+                          {" "}(Threshold [-6 dB]: 0.065) | Spectral signature compliant with ISO 10816-3 baseline.
                         </div>
                       </div>
                       <div className={`w-3 h-3 rounded-full animate-pulse ${
@@ -427,7 +391,7 @@ export default function DashboardPage() {
           <div className="flex flex-wrap items-center gap-4">
             <span>STgram-MFN v3 · ONNX FP32</span>
             <span className="text-zinc-800">·</span>
-            <span>ISO 10816 Standard</span>
+            <span>ISO 10816-3 Standard</span>
             <span className="text-zinc-800">·</span>
             <span>Polygon Amoy Testnet</span>
           </div>
